@@ -1,0 +1,67 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : GPIO Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : GPIO.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2021-10-26  1.0.0    mrosiere Created
+#-----------------------------------------------------------------------------
+
+name : asylum:component:GPIO:1.0.0
+description : Clock Divider Cell
+
+filesets:
+
+  #---------------------------------------
+  # Source Files
+  #---------------------------------------
+  files_hdl:
+    files:
+      - src/GPIO.vhd
+    file_type : vhdlSource
+      
+  #---------------------------------------
+  # Testbench Files
+  #---------------------------------------
+  files_sim:
+    files:
+      - sim/tb_GPIO_bidir.vhd
+    file_type : vhdlSource
+
+targets:
+
+  #---------------------------------------
+  # Default Target
+  #---------------------------------------
+  default: &default
+    description     : Default Target
+    filesets        :
+      - files_hdl
+    toplevel        : GPIO
+    default_tool    : ghdl
+
+  sim:
+    << : *default
+    description     : Simulation of all cases
+    filesets_append :
+      - files_sim
+    toplevel        : tb_GPIO_bidir
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        run_options : ["--vcd=dut.vcd"]
+
+provider:
+  name:    github
+  repo:    asylum-component-gpio
+  user:    deuskane
+  version: 1_0_0
