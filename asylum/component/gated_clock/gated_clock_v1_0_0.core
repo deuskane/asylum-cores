@@ -43,6 +43,7 @@ targets:
 
 provider:
   name:    github
-  repo:    asylum-component-gated_clock
   user:    deuskane
-  version: 1_0_0
+  repo:    asylum-component-gated_clock
+ #version: 1_0_0
+  version: 3637d86b2177e3fa7952cdda2a6b9a08a54c2bf5

@@ -41,6 +41,7 @@ targets:
 
 provider:
   name:    github
-  repo:    asylum-package-pbi_pkg
   user:    deuskane
-  version: 1_0_0
+  repo:    asylum-package-pbi_pkg
+ #version: 1_0_0
+  version: 8a5b1469d355db7d9e6d012a0c04691c469f6c13

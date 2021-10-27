@@ -41,6 +41,7 @@ targets:
 
 provider:
   name:    github
-  repo:    asylum-package-math_pkg
   user:    deuskane
-  version: 1_0_0
+  repo:    asylum-package-math_pkg
+ #version: 1_0_0
+  version: bd179f5dfeec5653de3efe787a0251a91d94f14b

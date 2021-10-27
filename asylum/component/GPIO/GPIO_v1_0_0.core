@@ -62,7 +62,8 @@ targets:
 
 provider:
   name:    github
-  repo:    asylum-component-gpio
   user:    deuskane
-  #        1_0_0
+  repo:    asylum-component-gpio
+ #version: 1_0_0
   version: 0ee13bb1c15b19c4bb0edb83f4724b99822f4b01
+  

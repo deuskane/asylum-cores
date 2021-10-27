@@ -85,6 +85,8 @@ parameters :
 
 provider:
   name:    github
-  repo:    asylum-component-clock_divider
   user:    deuskane
-  version: 1_0_0
+  repo:    asylum-component-clock_divider
+ #version: 1_0_0
+  version: 00296805da9f46c94701628adab4ce6808fadbdc
+  
