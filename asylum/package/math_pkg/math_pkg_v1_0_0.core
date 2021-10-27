@@ -1,0 +1,46 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : Mathematic Package Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : math_pkg.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2021-10-26  1.0.0    mrosiere Created
+#-----------------------------------------------------------------------------
+
+name : asylum:package:math_pkg:1.0.0
+description : Mathematics Package
+
+filesets:
+
+  #---------------------------------------
+  # Source Files
+  #---------------------------------------
+  files_hdl:
+    files:
+      - src/math_pkg.vhd
+    file_type : vhdlSource
+
+targets:
+
+  #---------------------------------------
+  # Default Target
+  #---------------------------------------
+  default:
+    description : Default Target
+    filesets    :
+      - files_hdl
+
+provider:
+  name:    github
+  repo:    asylum-package-math_pkg
+  user:    deuskane
+  version: 1_0_0
