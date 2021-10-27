@@ -1,0 +1,46 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : PicoBlaze Bus Interface Package Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : pbi_pkg.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2021-10-26  1.0.0    mrosiere Created
+#-----------------------------------------------------------------------------
+
+name        : asylum:package:pbi_pkg:1.0.0
+description : Picoblaze bus interface
+
+filesets:
+
+  #---------------------------------------
+  # Source Files
+  #---------------------------------------
+  files_hdl:
+    files:
+      - src/pbi_pkg.vhd
+    file_type : vhdlSource
+
+targets:
+
+  #---------------------------------------
+  # Default Target
+  #---------------------------------------
+  default:
+    description : Default Target
+    filesets    :
+      - files_hdl
+
+provider:
+  name:    github
+  repo:    asylum-package-pbi_pkg
+  user:    deuskane
+  version: 1_0_0
