@@ -1,0 +1,48 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : Gated Clock Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : gated_clock.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2021-10-26  1.0.0    mrosiere Created
+#-----------------------------------------------------------------------------
+
+name : asylum:component:gated_clock:1.0.0
+description : Gated Clock Cell
+
+filesets:
+
+  #---------------------------------------
+  # Source Files
+  #---------------------------------------
+  files_hdl:
+    files:
+      - src/gated_clock.vhd
+    file_type : vhdlSource
+
+targets:
+
+  #---------------------------------------
+  # Default Target
+  #---------------------------------------
+  default:
+    description  : Default Target
+    filesets     :
+      - files_hdl
+    toplevel     : gated_clock
+    default_tool : ghdl
+
+provider:
+  name:    github
+  repo:    asylum-component-gated_clock
+  user:    deuskane
+  version: 1_0_0
