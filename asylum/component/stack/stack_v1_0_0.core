@@ -1,0 +1,91 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : Stack Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : stack.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2021-10-26  1.0.0    mrosiere Created
+#-----------------------------------------------------------------------------
+
+name : asylum:component:stack:1.0.0
+description : Stack
+
+filesets:
+
+  #---------------------------------------
+  # Source Files
+  #---------------------------------------
+  files_hdl:
+    files     :
+      - src/stack_pkg.vhd
+      - src/stack.vhd
+    file_type : vhdlSource
+    depend    :
+      - ">=asylum:component:ram_1r1w:1.0.0"
+      
+  #---------------------------------------
+  # Testbench Files
+  #---------------------------------------
+  files_sim:
+    files:
+      - sim/tb_stack.vhd
+    file_type : vhdlSource
+
+targets:
+
+  #---------------------------------------
+  # Default Target
+  #---------------------------------------
+  default: &default
+    description     : Default Target
+    filesets        :
+      - files_hdl
+    toplevel        : stack
+    default_tool    : ghdl
+
+  sim:
+    << : *default
+    description     : Simulation of all cases
+    filesets_append :
+      - files_sim
+    toplevel        : tb_stack
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        run_options : ["--vcd=dut.vcd"]
+
+parameters :
+
+  WIDTH :
+    description : Word width
+    datatype    : int
+    default     : 8
+    paramtype   : generic
+
+  DEPTH :
+    description : Number of words
+    datatype    : int
+    default     : 8
+    paramtype   : generic
+
+  OVERWRITE :
+    description : Allow the write if the stack is full
+    datatype    : bool
+    default     : false
+    paramtype   : generic
+
+provider:
+  name:    github
+  user:    deuskane
+  repo:    asylum-component-stack
+ #version: 1_0_0
+  version: c498158deedc10e16c6109e97f64458e4a43afa1

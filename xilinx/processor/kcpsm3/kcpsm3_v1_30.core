@@ -1,0 +1,40 @@
+CAPI=2:
+
+name : xilinx:processor:kcpsm:1.30
+description : PicoBlaze
+
+filesets:
+
+  #---------------------------------------
+  # Source Files
+  #---------------------------------------
+  files_hdl:
+    files     :
+      - src/kcpsm3.vhd
+    file_type : vhdlSource
+    depend    :
+      - ">=xilinx:primitive:unisim:11.1"
+
+targets:
+
+  #---------------------------------------
+  # Default Target
+  #---------------------------------------
+  default: &default
+    description     : Default Target
+    filesets        :
+      - files_hdl
+    toplevel        : kcpsm3
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : []
+        run_options     : []
+   
+provider:
+  name:    github
+  user:    deuskane
+  repo:    xilinx-processor-kcpsm3
+ #version: 1_30
+  version: a4e55f217e8db37b00ad822d465b7d51ef4a436f
+  
