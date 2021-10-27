@@ -1168,6 +1168,6 @@ targets:
 provider:
   name:    github
   user:    deuskane
-  repo:    xilinx-processor-unisim
+  repo:    xilinx-primitive-unisim
  #version: 11_1
   version: 0239ff02b8f6caa2bcfdc32c5585915c0989beba
