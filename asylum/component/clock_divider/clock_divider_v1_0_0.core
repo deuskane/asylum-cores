@@ -1,0 +1,90 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : Clock Divider Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : clock_divider.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2021-10-26  1.0.0    mrosiere Created
+#-----------------------------------------------------------------------------
+
+name : asylum:component:clock_divider:1.0.0
+description : Clock Divider Cell
+
+filesets:
+
+  #---------------------------------------
+  # Source Files
+  #---------------------------------------
+  files_hdl:
+    files:
+      - src/clock_divider.vhd
+    file_type : vhdlSource
+    depend :
+      - ">=asylum:package:math_pkg:1.0.0"
+      - ">=asylum:component:gated_clock:1.0.0"
+      
+  #---------------------------------------
+  # Testbench Files
+  #---------------------------------------
+  files_sim:
+    files:
+      - sim/tb_clock_divider.vhd
+    file_type : vhdlSource
+
+targets:
+
+  #---------------------------------------
+  # Default Target
+  #---------------------------------------
+  default: &default
+    description     : Default Target
+    filesets        :
+      - files_hdl
+    toplevel        : clock_divider
+    default_tool    : ghdl
+
+  sim:
+    << : *default
+    description     : Simulation of all cases
+    filesets_append :
+      - files_sim
+    toplevel        : tb_clock_divider
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        run_options : ["--vcd=dut.vcd"]
+
+parameters :
+
+  RATIO :
+    description : fixed clock division ratio
+    datatype    : int
+    default     : 2
+    paramtype   : generic
+
+  ALGO :
+    description : Clock division algorithm
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+  GATED_CLK :
+    description : Add clock gated after divider
+    datatype    : bool
+    default     : true
+    paramtype   : generic
+
+provider:
+  name:    github
+  repo:    asylum-component-clock_divider
+  user:    deuskane
+  version: 1_0_0
