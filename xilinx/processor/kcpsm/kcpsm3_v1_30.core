@@ -38,5 +38,5 @@ provider  :
   name    : git
   repo    : git@github.com:deuskane/xilinx-processor-kcpsm3.git
  #version : v1_30
-  version : a4e55f217e8db37b00ad822d465b7d51ef4a436f
+  version : 9e8031ea5aeaf1b73c42ac743cce743abf68ec2d
 #<PROVIDER_END>

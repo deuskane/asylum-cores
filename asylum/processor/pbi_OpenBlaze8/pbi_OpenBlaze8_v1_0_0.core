@@ -50,5 +50,5 @@ provider  :
   name    : git
   repo    : git@github.com:deuskane/asylum-processor-pbi_OpenBlaze8.git
  #version : v1_0_0
-  version : 9944bb6f5ba8417b0598dfd11702c8255a9a3602
+  version : ad3dceefffef88d2080e6ab2ed52eec4120c7fbc
 #<PROVIDER_END>

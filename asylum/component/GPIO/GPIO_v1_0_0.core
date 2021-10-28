@@ -67,5 +67,5 @@ provider  :
   name    : git
   repo    : git@github.com:deuskane/asylum-component-gpio.git
  #version : v1_0_0
-  version : 0ee13bb1c15b19c4bb0edb83f4724b99822f4b01
+  version : 8c558f6ec401e2dff5dcec5ef16828363e6d2281
 #<PROVIDER_END>

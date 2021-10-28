@@ -47,5 +47,5 @@ provider  :
   name    : git
   repo    : git@github.com:deuskane/asylum-component-gated_clock.git
  #version : v1_0_0
-  version : 3637d86b2177e3fa7952cdda2a6b9a08a54c2bf5
+  version : c4e5fa06dfe26441ddac0dcdd5bc7ab09e30125f
 #<PROVIDER_END>

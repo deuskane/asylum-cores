@@ -50,5 +50,5 @@ provider  :
   name    : git
   repo    : git@github.com:deuskane/asylum-component-pbi_timer.git
  #version : v1_0_0
-  version : 8ce90c054c9a0d192bda57eb92ba015028c61c52
+  version : 8597a202207b220fbcbd1f7cc20e117798c17c40
 #<PROVIDER_END>

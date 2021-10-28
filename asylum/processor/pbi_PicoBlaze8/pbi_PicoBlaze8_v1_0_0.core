@@ -52,5 +52,5 @@ provider  :
   name    : git
   repo    : git@github.com:deuskane/asylum-processor-pbi_PicoBlaze.git
  #version : v1_0_0
-  version : 80ed44522b106d0ac55fe23a2bbdb84ac1a6cc80
+  version : 2e7bfb00d45323100608ca3397ef713ec58c8bc4
 #<PROVIDER_END>

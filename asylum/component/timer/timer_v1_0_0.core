@@ -92,5 +92,5 @@ provider  :
   name    : git
   repo    : git@github.com:deuskane/asylum-component-timer.git
  #version : v1_0_0
-  version : b7765adf644408685c8cf13ba0f2cd4ceeb3cd81
+  version : 74891019d148a4bdd3a177b0ede8ff8b61e8ac32
 #<PROVIDER_END>

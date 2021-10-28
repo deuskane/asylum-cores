@@ -95,5 +95,5 @@ provider  :
   name    : git
   repo    : git@github.com:deuskane/asylum-soc-OB8_timer.git
  #version : v1_0_0
-  version : 69f992df888130e71b923d533067de3edc4fa2f4
+  version : 6d13354580f9bd5f77bb504b00f8a1e0ffe9856e
 #<PROVIDER_END>

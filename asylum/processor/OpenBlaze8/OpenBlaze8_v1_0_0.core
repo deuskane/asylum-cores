@@ -625,5 +625,5 @@ provider  :
   name    : git
   repo    : git@github.com:deuskane/asylum-processor-OpenBlaze8.git
  #version : v1_0_0
-  version : 9d386af9f6818491e3cb014db2163b15e3185eba
+  version : 0a6765d158542414d57b055feefe97259b1a0958
 #<PROVIDER_END>

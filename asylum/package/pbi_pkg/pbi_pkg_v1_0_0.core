@@ -44,5 +44,5 @@ provider  :
   name    : git
   repo    : git@github.com:deuskane/asylum-package-pbi_pkg.git
  #version : v1_0_0
-  version : 8a5b1469d355db7d9e6d012a0c04691c469f6c13
+  version : 1c4005f06d6968e2ef9869a994247ebc2f584c3e
 #<PROVIDER_END>

@@ -94,5 +94,5 @@ provider  :
   name    : git
   repo    : git@github.com:deuskane/asylum-soc-OB8_gpio.git
  #version : v1_0_0
-  version : 6d492ee27a8a8ed4d981169cde1bcdac53b3e1a3
+  version : ec0fca6248e9ea9d95cd931b3d18dac9d7980fe6
 #<PROVIDER_END>

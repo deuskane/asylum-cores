@@ -89,5 +89,5 @@ provider  :
   name    : git
   repo    : git@github.com:deuskane/asylum-component-stack.git
  #version : v1_0_0
-  version : c498158deedc10e16c6109e97f64458e4a43afa1
+  version : 7d90c6cfd03078d2dd0ff7f0e48d06142c2978c9
 #<PROVIDER_END>
