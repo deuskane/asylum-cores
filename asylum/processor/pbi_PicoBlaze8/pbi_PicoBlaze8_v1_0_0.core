@@ -1,10 +1,10 @@
 CAPI=2:
 
 #-----------------------------------------------------------------------------
-# Title      : Mathematic Package Core file
+# Title      : PBI PicoBlaze file
 # Project    : Asylum
 #-----------------------------------------------------------------------------
-# File       : math_pkg.core
+# File       : pbi_PicoBlaze8.core
 # Author     : mrosiere
 #-----------------------------------------------------------------------------
 # Description: 
@@ -16,8 +16,8 @@ CAPI=2:
 # 2021-10-26  1.0.0    mrosiere Created
 #-----------------------------------------------------------------------------
 
-name : asylum:package:math_pkg:1.0.0
-description : Mathematics Package
+name : asylum:processor:pbi_PicoBlaze8:1.0.0
+description : PBI Generic wrapper for target IP
 
 filesets:
 
@@ -26,24 +26,31 @@ filesets:
   #---------------------------------------
   files_hdl:
     files:
-      - src/math_pkg.vhd
+      - src/pbi_PicoBlaze.vhd
     file_type : vhdlSource
-
+    depend :
+      - ">=asylum:processor:pbi_OpenBlaze8:1.0.0"
+      - ">=asylum:package:pbi_pkg:1.0.0"
+      - ">=asylum:component:gated_clock:1.0.0"
+      - ">=xilinx:processor:kcpsm:1.30"
+      
 targets:
 
   #---------------------------------------
   # Default Target
   #---------------------------------------
-  default:
-    description : Default Target
-    filesets    :
+  default: &default
+    description  : Default Target
+    filesets     :
       - files_hdl
-  
+    toplevel     : pbi_PicoBlaze
+    default_tool : ghdl
+
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
 provider  :
   name    : git
-  repo    : git@github.com:deuskane/asylum-package-math_pkg.git
+  repo    : git@github.com:deuskane/asylum-processor-pbi_PicoBlaze.git
  #version : v1_0_0
-  version : 637dcbf63d1f5a775a3f71120e58e9f850a72db8
+  version : 80ed44522b106d0ac55fe23a2bbdb84ac1a6cc80
 #<PROVIDER_END>

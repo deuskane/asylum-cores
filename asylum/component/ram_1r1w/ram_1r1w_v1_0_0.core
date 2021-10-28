@@ -77,9 +77,11 @@ parameters :
     default     : 8
     paramtype   : generic
 
-provider:
-  name:    github
-  user:    deuskane
-  repo:    asylum-component-ram_1r1w
- #version: 1_0_0
-  version: b9ba34fd8cd618069f54aee36957dd6d8952d2ff
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : git
+  repo    : git@github.com:deuskane/asylum-component-ram_1r1w.git
+ #version : v1_0_0
+  version : b9ba34fd8cd618069f54aee36957dd6d8952d2ff
+#<PROVIDER_END>

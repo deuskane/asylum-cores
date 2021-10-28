@@ -619,9 +619,11 @@ targets:
   #<TARGETS_END>
   # Previous line is a pragma, don't modify
 
-provider:
-  name:    github
-  user:    deuskane
-  repo:    asylum-processor-OpenBlaze8
- #version: 1_0_0
-  version: 4202cc9355926620dad078ea012fd3fa3c9b7943
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : git
+  repo    : git@github.com:deuskane/asylum-processor-OpenBlaze8.git
+ #version : v1_0_0
+  version : 9d386af9f6818491e3cb014db2163b15e3185eba
+#<PROVIDER_END>

@@ -83,9 +83,11 @@ parameters :
     default     : false
     paramtype   : generic
 
-provider:
-  name:    github
-  user:    deuskane
-  repo:    asylum-component-stack
- #version: 1_0_0
-  version: c498158deedc10e16c6109e97f64458e4a43afa1
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : git
+  repo    : git@github.com:deuskane/asylum-component-stack.git
+ #version : v1_0_0
+  version : c498158deedc10e16c6109e97f64458e4a43afa1
+#<PROVIDER_END>

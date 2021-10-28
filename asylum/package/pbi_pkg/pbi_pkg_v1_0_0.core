@@ -37,11 +37,12 @@ targets:
   default:
     description : Default Target
     filesets    :
-      - files_hdl
-
-provider:
-  name:    github
-  user:    deuskane
-  repo:    asylum-package-pbi_pkg
- #version: 1_0_0
-  version: 8a5b1469d355db7d9e6d012a0c04691c469f6c13
+      - files_hdl  
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : git
+  repo    : git@github.com:deuskane/asylum-package-pbi_pkg.git
+ #version : v1_0_0
+  version : 8a5b1469d355db7d9e6d012a0c04691c469f6c13
+#<PROVIDER_END>

@@ -60,10 +60,12 @@ targets:
       ghdl :
         run_options : ["--vcd=dut.vcd"]
 
-provider:
-  name:    github
-  user:    deuskane
-  repo:    asylum-component-gpio
- #version: 1_0_0
-  version: 0ee13bb1c15b19c4bb0edb83f4724b99822f4b01
-  
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : git
+  repo    : git@github.com:deuskane/asylum-component-gpio.git
+ #version : v1_0_0
+  version : 0ee13bb1c15b19c4bb0edb83f4724b99822f4b01
+#<PROVIDER_END>

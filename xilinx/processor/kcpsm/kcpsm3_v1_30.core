@@ -31,10 +31,12 @@ targets:
         analyze_options : []
         run_options     : []
    
-provider:
-  name:    github
-  user:    deuskane
-  repo:    xilinx-processor-kcpsm3
- #version: 1_30
-  version: a4e55f217e8db37b00ad822d465b7d51ef4a436f
-  
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : git
+  repo    : git@github.com:deuskane/xilinx-processor-kcpsm3.git
+ #version : v1_30
+  version : a4e55f217e8db37b00ad822d465b7d51ef4a436f
+#<PROVIDER_END>

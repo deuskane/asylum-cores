@@ -40,10 +40,12 @@ targets:
       - files_hdl
     toplevel     : gated_clock
     default_tool : ghdl
-
-provider:
-  name:    github
-  user:    deuskane
-  repo:    asylum-component-gated_clock
- #version: 1_0_0
-  version: 3637d86b2177e3fa7952cdda2a6b9a08a54c2bf5
+  
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : git
+  repo    : git@github.com:deuskane/asylum-component-gated_clock.git
+ #version : v1_0_0
+  version : 3637d86b2177e3fa7952cdda2a6b9a08a54c2bf5
+#<PROVIDER_END>

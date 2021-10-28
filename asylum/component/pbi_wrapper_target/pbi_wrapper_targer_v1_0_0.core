@@ -1,10 +1,10 @@
 CAPI=2:
 
 #-----------------------------------------------------------------------------
-# Title      : Mathematic Package Core file
+# Title      : PBI Wrapper Target Core file
 # Project    : Asylum
 #-----------------------------------------------------------------------------
-# File       : math_pkg.core
+# File       : pbi_wrapper_target.core
 # Author     : mrosiere
 #-----------------------------------------------------------------------------
 # Description: 
@@ -16,8 +16,8 @@ CAPI=2:
 # 2021-10-26  1.0.0    mrosiere Created
 #-----------------------------------------------------------------------------
 
-name : asylum:package:math_pkg:1.0.0
-description : Mathematics Package
+name : asylum:component:pbi_wrapper_target:1.0.0
+description : PBI Generic wrapper for target IP
 
 filesets:
 
@@ -26,24 +26,28 @@ filesets:
   #---------------------------------------
   files_hdl:
     files:
-      - src/math_pkg.vhd
+      - src/pbi_wrapper_target.vhd
     file_type : vhdlSource
+    depend :
+      - ">=asylum:package:pbi_pkg:1.0.0"
 
 targets:
 
   #---------------------------------------
   # Default Target
   #---------------------------------------
-  default:
-    description : Default Target
-    filesets    :
+  default: &default
+    description  : Default Target
+    filesets     :
       - files_hdl
-  
+    toplevel     : pbi_wrapper_target
+    default_tool : ghdl
+
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
 provider  :
   name    : git
-  repo    : git@github.com:deuskane/asylum-package-math_pkg.git
+  repo    : git@github.com:deuskane/asylum-component-pbi_wrapper_target.git
  #version : v1_0_0
-  version : 637dcbf63d1f5a775a3f71120e58e9f850a72db8
+  version : 05d9c50cef3902bc1242a3da2acdf59f73517e27
 #<PROVIDER_END>
