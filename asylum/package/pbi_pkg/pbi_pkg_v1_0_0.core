@@ -45,5 +45,5 @@ provider  :
   user    : deuskane
   repo    : asylum-package-pbi_pkg
  #version : v1_0_0
-  version : 1c4005f06d6968e2ef9869a994247ebc2f584c3e
+  version : 96d34a889a651038dbd724f38d1070f8a2d2b570
 #<PROVIDER_END>

@@ -51,5 +51,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-pbi_timer
  #version : v1_0_0
-  version : 8597a202207b220fbcbd1f7cc20e117798c17c40
+  version : b3d405626584b80f5bbf6810d019ab72eb9e5f5a
 #<PROVIDER_END>

@@ -51,5 +51,5 @@ provider  :
   user    : deuskane
   repo    : asylum-processor-pbi_OpenBlaze8
  #version : v1_0_0
-  version : ad3dceefffef88d2080e6ab2ed52eec4120c7fbc
+  version : 9adede8c091f0dbd16e030176dc1d504028f883d
 #<PROVIDER_END>

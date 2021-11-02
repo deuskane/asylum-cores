@@ -96,5 +96,5 @@ provider  :
   user    : deuskane
   repo    : asylum-soc-OB8_timer
  #version : v1_0_0
-  version : 6d13354580f9bd5f77bb504b00f8a1e0ffe9856e
+  version : b1525ee5e24c7e928e3a0ccc2a6097a997e13053
 #<PROVIDER_END>

@@ -50,5 +50,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-pbi_wrapper_target
  #version : v1_0_0
-  version : 345ada1a694941c7f37bcfadc2c1367b5b60dd80
+  version : f87f79f407a6b65fe0d3843b672b018108f10e0b
 #<PROVIDER_END>

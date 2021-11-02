@@ -68,5 +68,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-gpio
  #version : v1_0_0
-  version : 8c558f6ec401e2dff5dcec5ef16828363e6d2281
+  version : 1edf13ddf084ddefd4a1ed0bccc02267527118c8
 #<PROVIDER_END>

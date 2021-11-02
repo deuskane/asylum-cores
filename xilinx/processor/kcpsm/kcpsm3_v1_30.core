@@ -39,5 +39,5 @@ provider  :
   user    : deuskane
   repo    : xilinx-processor-kcpsm3
  #version : v1_30
-  version : 9e8031ea5aeaf1b73c42ac743cce743abf68ec2d
+  version : c6f2d19fd14a86ba64907956b0fcedf1be47ec96
 #<PROVIDER_END>

@@ -48,5 +48,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-gated_clock
  #version : v1_0_0
-  version : c4e5fa06dfe26441ddac0dcdd5bc7ab09e30125f
+  version : e64387cf9ca9883650df42e8ef25e0d8373b8c4b
 #<PROVIDER_END>

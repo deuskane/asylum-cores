@@ -95,5 +95,5 @@ provider  :
   user    : deuskane
   repo    : asylum-soc-OB8_gpio
  #version : v1_0_0
-  version : ec0fca6248e9ea9d95cd931b3d18dac9d7980fe6
+  version : d3498ed531177b14b208da224558c17464ca8684
 #<PROVIDER_END>

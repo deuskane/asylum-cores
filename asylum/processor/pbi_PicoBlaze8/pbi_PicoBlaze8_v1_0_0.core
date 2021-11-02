@@ -53,5 +53,5 @@ provider  :
   user    : deuskane
   repo    : asylum-processor-pbi_PicoBlaze
  #version : v1_0_0
-  version : 2e7bfb00d45323100608ca3397ef713ec58c8bc4
+  version : c0b00d76d5dca03ef83cdd577bb8e97034a3137d
 #<PROVIDER_END>
