@@ -80,8 +80,9 @@ parameters :
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
 provider  :
-  name    : git
-  repo    : git@github.com:deuskane/asylum-component-ram_1r1w.git
+  name    : github
+  user    : deuskane
+  repo    : asylum-component-ram_1r1w
  #version : v1_0_0
   version : 3b4b248feeb8243320ef9a1e5358b1504be6f508
 #<PROVIDER_END>

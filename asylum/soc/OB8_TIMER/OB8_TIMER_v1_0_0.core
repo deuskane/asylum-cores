@@ -92,8 +92,9 @@ parameters :
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
 provider  :
-  name    : git
-  repo    : git@github.com:deuskane/asylum-soc-OB8_timer.git
+  name    : github
+  user    : deuskane
+  repo    : asylum-soc-OB8_timer
  #version : v1_0_0
   version : 6d13354580f9bd5f77bb504b00f8a1e0ffe9856e
 #<PROVIDER_END>

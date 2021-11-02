@@ -136,7 +136,6 @@ function import_main()
             continue;
         fi
             
-
         git_version=$(cd ${core_dir} && git rev-parse HEAD)
         if [[ -z ${git_version} ]];
         then
@@ -146,8 +145,12 @@ function import_main()
             continue;
         fi
 
+	git_user=$(echo ${git_url}|cut -d':' -f2|cut -d'/' -f1)
+	git_repo=$(echo ${git_url}|cut -d':' -f2|cut -d'/' -f2)
+	git_repo=${git_repo/.git/}
+	
         printf "OK : '%s'\n" ${dst_core}
-
+		
         if [[ ${dry_run} -eq 0 ]];
         then
             mkdir -p $(dirname ${dst_core})
@@ -161,8 +164,9 @@ function import_main()
             echo "# Next lines is a pragma, don't modify">> ${dst_core}
             echo "#<PROVIDER_BEGIN>"                     >> ${dst_core}
             echo "provider  :"                           >> ${dst_core}
-            echo "  name    : git"                       >> ${dst_core}
-            echo "  repo    : ${git_url}"                >> ${dst_core}
+            echo "  name    : github"                    >> ${dst_core}
+            echo "  user    : ${git_user}"               >> ${dst_core}
+            echo "  repo    : ${git_repo}"               >> ${dst_core}
             echo " #version : ${version}"                >> ${dst_core}
             echo "  version : ${git_version}"            >> ${dst_core}
             echo "#<PROVIDER_END>"                       >> ${dst_core}

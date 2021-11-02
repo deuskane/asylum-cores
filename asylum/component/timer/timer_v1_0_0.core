@@ -89,8 +89,9 @@ parameters :
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
 provider  :
-  name    : git
-  repo    : git@github.com:deuskane/asylum-component-timer.git
+  name    : github
+  user    : deuskane
+  repo    : asylum-component-timer
  #version : v1_0_0
   version : 74891019d148a4bdd3a177b0ede8ff8b61e8ac32
 #<PROVIDER_END>

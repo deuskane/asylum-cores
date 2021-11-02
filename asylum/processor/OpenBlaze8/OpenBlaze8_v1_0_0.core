@@ -19,7 +19,18 @@ CAPI=2:
 name : asylum:processor:OpenBlaze8:1.0.0
 description : OpenBlaze8
 
+generate:
+  pbccv2:
+    generator : pbccv2_gen
+    parameters:
+      file : sim/testbench-c/test_uadd32.c
+
+
+
 filesets:
+  pbccv2_dep:
+    depend:
+      - nanoxplore:utils:generators:1.1.0      
 
   #---------------------------------------
   # Source Files
@@ -285,6 +296,7 @@ filesets:
 
 targets:
 
+
   #---------------------------------------
   # Default Target
   #---------------------------------------
@@ -295,6 +307,11 @@ targets:
     toplevel        : OpenBlaze8
     default_tool    : ghdl
 
+
+  toto: 
+    << : *default
+    filesets : [pbccv2_dep]
+    generate : [pbccv2]
 
   sim : &sim
     << : *default
@@ -622,8 +639,9 @@ targets:
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
 provider  :
-  name    : git
-  repo    : git@github.com:deuskane/asylum-processor-OpenBlaze8.git
+  name    : github
+  user    : deuskane
+  repo    : asylum-processor-OpenBlaze8
  #version : v1_0_0
   version : 0a6765d158542414d57b055feefe97259b1a0958
 #<PROVIDER_END>

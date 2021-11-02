@@ -35,8 +35,9 @@ targets:
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
 provider  :
-  name    : git
-  repo    : git@github.com:deuskane/xilinx-processor-kcpsm3.git
+  name    : github
+  user    : deuskane
+  repo    : xilinx-processor-kcpsm3
  #version : v1_30
   version : 9e8031ea5aeaf1b73c42ac743cce743abf68ec2d
 #<PROVIDER_END>

@@ -86,8 +86,9 @@ parameters :
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
 provider  :
-  name    : git
-  repo    : git@github.com:deuskane/asylum-component-stack.git
+  name    : github
+  user    : deuskane
+  repo    : asylum-component-stack
  #version : v1_0_0
   version : 7d90c6cfd03078d2dd0ff7f0e48d06142c2978c9
 #<PROVIDER_END>

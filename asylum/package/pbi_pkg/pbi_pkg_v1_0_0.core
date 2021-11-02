@@ -41,8 +41,9 @@ targets:
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
 provider  :
-  name    : git
-  repo    : git@github.com:deuskane/asylum-package-pbi_pkg.git
+  name    : github
+  user    : deuskane
+  repo    : asylum-package-pbi_pkg
  #version : v1_0_0
   version : 1c4005f06d6968e2ef9869a994247ebc2f584c3e
 #<PROVIDER_END>

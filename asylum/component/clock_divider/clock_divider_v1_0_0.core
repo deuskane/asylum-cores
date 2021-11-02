@@ -86,8 +86,9 @@ parameters :
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
 provider  :
-  name    : git
-  repo    : git@github.com:deuskane/asylum-component-clock_divider.git
+  name    : github
+  user    : deuskane
+  repo    : asylum-component-clock_divider
  #version : v1_0_0
   version : 4446bb90034f237cd45bc37b0790d353dd48a30b
 #<PROVIDER_END>

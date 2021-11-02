@@ -1168,8 +1168,9 @@ targets:
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
 provider  :
-  name    : git
-  repo    : git@github.com:deuskane/xilinx-primitive-unisim.git
+  name    : github
+  user    : deuskane
+  repo    : xilinx-primitive-unisim
  #version : v11_1
   version : c1e1ae75a6b97ce57424929f50bfe52c6355d395
 #<PROVIDER_END>

@@ -47,8 +47,9 @@ targets:
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
 provider  :
-  name    : git
-  repo    : git@github.com:deuskane/asylum-processor-pbi_OpenBlaze8.git
+  name    : github
+  user    : deuskane
+  repo    : asylum-processor-pbi_OpenBlaze8
  #version : v1_0_0
   version : ad3dceefffef88d2080e6ab2ed52eec4120c7fbc
 #<PROVIDER_END>

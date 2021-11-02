@@ -64,8 +64,9 @@ targets:
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
 provider  :
-  name    : git
-  repo    : git@github.com:deuskane/asylum-component-gpio.git
+  name    : github
+  user    : deuskane
+  repo    : asylum-component-gpio
  #version : v1_0_0
   version : 8c558f6ec401e2dff5dcec5ef16828363e6d2281
 #<PROVIDER_END>

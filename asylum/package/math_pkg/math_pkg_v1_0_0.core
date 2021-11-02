@@ -42,8 +42,9 @@ targets:
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
 provider  :
-  name    : git
-  repo    : git@github.com:deuskane/asylum-package-math_pkg.git
+  name    : github
+  user    : deuskane
+  repo    : asylum-package-math_pkg
  #version : v1_0_0
   version : 5664806fcc9cc7a909e3a2efa3ab3bcbb482d185
 #<PROVIDER_END>

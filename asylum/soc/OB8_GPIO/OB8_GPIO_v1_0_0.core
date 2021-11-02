@@ -91,8 +91,9 @@ parameters :
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
 provider  :
-  name    : git
-  repo    : git@github.com:deuskane/asylum-soc-OB8_gpio.git
+  name    : github
+  user    : deuskane
+  repo    : asylum-soc-OB8_gpio
  #version : v1_0_0
   version : ec0fca6248e9ea9d95cd931b3d18dac9d7980fe6
 #<PROVIDER_END>
