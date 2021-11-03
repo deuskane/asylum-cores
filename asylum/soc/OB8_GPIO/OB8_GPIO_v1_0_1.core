@@ -1,0 +1,114 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : OB8 SOC Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : OB8_GPIO.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2021-10-26  1.0.0    mrosiere Created
+# 2021-11-03  1.0.1    mrosiere Use generator
+#-----------------------------------------------------------------------------
+
+name : asylum:soc:OB8_GPIO:1.0.1
+description : SoC with OpenBlaze8, switch and led
+
+generate:
+  gen_asm_identity:
+    generator : pbcc_gen
+    parameters:
+      file: soft/identity.psm
+      type: pblazeide
+
+filesets:
+  #---------------------------------------
+  # Generator
+  #---------------------------------------
+  pbcc_dep:
+    depend:
+      - asylum:utils:generators:1.0.0      
+
+  #---------------------------------------
+  # Source Files
+  #---------------------------------------
+  files_hdl:
+    files:
+      - src/OB8_GPIO.vhd
+    file_type : vhdlSource
+    depend :
+      - ">=asylum:component:clock_divider:1.0.0"
+      - ">=asylum:component:pbi_GPIO:1.0.0"
+      - ">=asylum:processor:pbi_PicoBlaze8:1.0.0"
+      
+  #---------------------------------------
+  # Testbench Files
+  #---------------------------------------
+  files_sim:
+    files:
+      - sim/tb_OB8_GPIO.vhd
+    file_type : vhdlSource
+    depend :
+      - ">=xilinx:primitive:unisim:11.1"
+
+targets:
+
+  #---------------------------------------
+  # Default Target
+  #---------------------------------------
+  default: &default
+    description     : Default Target
+    filesets        :
+      - files_hdl
+    toplevel        : OB8_GPIO
+    default_tool    : ghdl
+
+  sim:
+    << : *default
+    description     : Simulation of all cases
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_identity]
+    toplevel        : tb_OB8_GPIO
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-fsynopsys"]
+        run_options      : ["--vcd=dut.vcd"]
+        
+parameters :
+
+  RATIO :
+    description : fixed clock division ratio
+    datatype    : int
+    default     : 2
+    paramtype   : generic
+
+  ALGO :
+    description : Clock division algorithm
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+  GATED_CLK :
+    description : Add clock gated after divider
+    datatype    : bool
+    default     : true
+    paramtype   : generic
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-soc-OB8_gpio
+ #version : v1_0_1
+  version : 1c657a0d3ae9cd95772ec75ac4b1ffd3cf02af8a
+#<PROVIDER_END>
