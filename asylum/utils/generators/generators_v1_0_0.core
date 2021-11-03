@@ -1,0 +1,59 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : Generators Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : generators.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2021-11-03  1.0      mrosiere Created
+#-----------------------------------------------------------------------------
+
+name: asylum:utils:generators:1.0.0
+description: A collection of useful generators
+
+generators:
+  pbcc_gen:
+    interpreter: python3
+    command    : scripts/pbcc.py
+    description: ROM Generator
+    usage: |
+      This generate translate a source file (C or Assembler) in ROM
+
+      The generator requires the following parameters:
+
+        file   : (Mandatory)
+                 source file
+       
+        type   : (Mandatory)
+                 Type of source file
+                 "c"         : c file
+                 "kcpsm3"    : assembler file with kcpsm3 syntax
+                 "pblazeide" : assembler file with kcpsm3 syntax
+
+        entity : (Optional)
+                 Entity Name
+                 Default : OpenBlaze8_ROM
+
+        model  : (Optional)
+                 ROM Model 
+                 "generic"   : Generic implementation
+                 "xilinx"    : Xilinx  implementation
+                 Default : "generic"
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-utils-generators
+ #version : v1_0_0
+  version : 08b2919537e4d951d152dff1d02304c454a6417f
+#<PROVIDER_END>
