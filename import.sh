@@ -98,7 +98,7 @@ function import_main()
 
         if [ ${core_map[${company}${type}${name}]+_} ];
         then
-            printf "KO : Duplicate information in file ${core_map[${company}${type}${name}]}\n"
+            printf "ERROR   : Duplicate information in file ${core_map[${company}${type}${name}]}\n"
             nb_error=$((${nb_error}+1));
 
             continue;
@@ -108,7 +108,7 @@ function import_main()
         
 #       if [[ ${version} != +([0-9]).+([0-9]).+([0-9]) ]]; 
 #       then
-#           printf "KO : Version bad format\n"
+#           printf "ERROR   : Version bad format\n"
 #           nb_error=$((${nb_error}+1));
 #
 #           continue;
@@ -120,8 +120,8 @@ function import_main()
         
         if [[ -f ${dst_core} ]];
         then
-            printf "KO : Existing destination core\n"
-            nb_error=$((${nb_error}+1));
+            printf "WARNING : Existing destination core\n"
+            #nb_error=$((${nb_error}+1));
 
             continue;
         fi
@@ -130,7 +130,7 @@ function import_main()
         
         if [[ -z ${git_url} ]];
         then
-            printf "KO : Can't get git url\n"
+            printf "ERROR  : Can't get git url\n"
             nb_error=$((${nb_error}+1));
 
             continue;
@@ -139,7 +139,7 @@ function import_main()
         git_version=$(cd ${core_dir} && git rev-parse HEAD)
         if [[ -z ${git_version} ]];
         then
-            printf "KO : Can't get git id\n"
+            printf "ERROR  : Can't get git id\n"
             nb_error=$((${nb_error}+1));
 
             continue;
@@ -149,7 +149,7 @@ function import_main()
 	git_repo=$(echo ${git_url}|cut -d':' -f2|cut -d'/' -f2)
 	git_repo=${git_repo/.git/}
 	
-        printf "OK : '%s'\n" ${dst_core}
+        printf "OK      : '%s'\n" ${dst_core}
 		
         if [[ ${dry_run} -eq 0 ]];
         then
