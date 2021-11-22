@@ -50,6 +50,6 @@ provider  :
   name    : github
   user    : deuskane
   repo    : asylum-processor-pbi_OpenBlaze8
-  version : v1_0_0
- #version : 5ce83cfb0e7c19c2bfaf11ee9d41f872a3b4667f
+ #version : v1_0_0
+  version : 5ce83cfb0e7c19c2bfaf11ee9d41f872a3b4667f
 #<PROVIDER_END>

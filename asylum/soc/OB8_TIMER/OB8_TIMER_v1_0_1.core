@@ -175,6 +175,6 @@ provider  :
   name    : github
   user    : deuskane
   repo    : asylum-soc-OB8_timer
-  version : v1_0_1
- #version : d70bdac8655b71e2427098773e887e1f98f0656f
+ #version : v1_0_1
+  version : d70bdac8655b71e2427098773e887e1f98f0656f
 #<PROVIDER_END>

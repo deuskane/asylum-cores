@@ -50,6 +50,6 @@ provider  :
   name    : github
   user    : deuskane
   repo    : asylum-component-pbi_gpio
-  version : v1_0_0
- #version : 83d65ff4a22047509514ab644d09c64489354931
+ #version : v1_0_0
+  version : 83d65ff4a22047509514ab644d09c64489354931
 #<PROVIDER_END>

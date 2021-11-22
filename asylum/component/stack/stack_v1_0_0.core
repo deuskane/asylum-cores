@@ -89,6 +89,6 @@ provider  :
   name    : github
   user    : deuskane
   repo    : asylum-component-stack
-  version : v1_0_0
- #version : 8b4c95073b1a51d3acee07fc63a50696470ff0a1
+ #version : v1_0_0
+  version : 8b4c95073b1a51d3acee07fc63a50696470ff0a1
 #<PROVIDER_END>

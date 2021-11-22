@@ -50,6 +50,6 @@ provider  :
   name    : github
   user    : deuskane
   repo    : asylum-component-pbi_timer
-  version : v1_0_0
- #version : b3d405626584b80f5bbf6810d019ab72eb9e5f5a
+ #version : v1_0_0
+  version : b3d405626584b80f5bbf6810d019ab72eb9e5f5a
 #<PROVIDER_END>
