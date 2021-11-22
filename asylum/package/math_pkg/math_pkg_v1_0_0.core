@@ -45,6 +45,6 @@ provider  :
   name    : github
   user    : deuskane
   repo    : asylum-package-math_pkg
- #version : v1_0_0
-  version : 374556db6ab38e176c5a185b830fb34e0ca3152d
+  version : v1_0_0
+ #version : 374556db6ab38e176c5a185b830fb34e0ca3152d
 #<PROVIDER_END>

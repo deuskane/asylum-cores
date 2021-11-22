@@ -38,6 +38,6 @@ provider  :
   name    : github
   user    : deuskane
   repo    : xilinx-processor-kcpsm3
- #version : v1_30
-  version : c6f2d19fd14a86ba64907956b0fcedf1be47ec96
+  version : v1_30
+ #version : c6f2d19fd14a86ba64907956b0fcedf1be47ec96
 #<PROVIDER_END>

@@ -1,0 +1,732 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : OpenBlaze8 Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : Openblaze8.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2021-10-26  1.0.0    mrosiere Created
+# 2021-11-03  1.0.1    mrosiere Use generator
+# 2021-11-16  1.1.0    mrosiere Delete Debug Bus
+#-----------------------------------------------------------------------------
+
+name : asylum:processor:OpenBlaze8:1.1.0
+description : OpenBlaze8
+
+generate:
+  # Next line is a pragma, don't modify
+  #<GENERATE_BEGIN>
+  gen_asm_test_000_default:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_000_default.psm
+      type: pblazeide
+
+  gen_asm_test_001_test_ok:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_001_test_ok.psm
+      type: pblazeide
+
+  gen_asm_test_002_jump:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_002_jump.psm
+      type: pblazeide
+
+  gen_asm_test_003_jump:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_003_jump.psm
+      type: pblazeide
+
+  gen_asm_test_004_comp:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_004_comp.psm
+      type: pblazeide
+
+  gen_asm_test_005_comp:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_005_comp.psm
+      type: pblazeide
+
+  gen_asm_test_006_and:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_006_and.psm
+      type: pblazeide
+
+  gen_asm_test_007_or:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_007_or.psm
+      type: pblazeide
+
+  gen_asm_test_008_xor:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_008_xor.psm
+      type: pblazeide
+
+  gen_asm_test_009_andi:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_009_andi.psm
+      type: pblazeide
+
+  gen_asm_test_010_ori:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_010_ori.psm
+      type: pblazeide
+
+  gen_asm_test_011_xori:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_011_xori.psm
+      type: pblazeide
+
+  gen_asm_test_012_add:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_012_add.psm
+      type: pblazeide
+
+  gen_asm_test_013_addi:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_013_addi.psm
+      type: pblazeide
+
+  gen_asm_test_014_sub:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_014_sub.psm
+      type: pblazeide
+
+  gen_asm_test_015_subi:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_015_subi.psm
+      type: pblazeide
+
+  gen_asm_test_016_comp:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_016_comp.psm
+      type: pblazeide
+
+  gen_asm_test_017_compi:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_017_compi.psm
+      type: pblazeide
+
+  gen_asm_test_018_rl:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_018_rl.psm
+      type: pblazeide
+
+  gen_asm_test_019_rr:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_019_rr.psm
+      type: pblazeide
+
+  gen_asm_test_020_sl0:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_020_sl0.psm
+      type: pblazeide
+
+  gen_asm_test_021_sl1:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_021_sl1.psm
+      type: pblazeide
+
+  gen_asm_test_022_sla:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_022_sla.psm
+      type: pblazeide
+
+  gen_asm_test_023_slx:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_023_slx.psm
+      type: pblazeide
+
+  gen_asm_test_024_sr:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_024_sr.psm
+      type: pblazeide
+
+  gen_asm_test_025_call:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_025_call.psm
+      type: pblazeide
+
+  gen_asm_test_026_call_ret:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_026_call_ret.psm
+      type: pblazeide
+
+  gen_asm_test_027_call_ret:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_027_call_ret.psm
+      type: pblazeide
+
+  gen_asm_test_028_call_ret_cond:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_028_call_ret_cond.psm
+      type: pblazeide
+
+  gen_asm_test_029_fetch_store:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_029_fetch_store.psm
+      type: pblazeide
+
+  gen_asm_test_030_fetch_store:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_030_fetch_store.psm
+      type: pblazeide
+
+  gen_asm_test_031_fetch_store:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_031_fetch_store.psm
+      type: pblazeide
+
+  gen_asm_test_032_stack_depth:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_032_stack_depth.psm
+      type: pblazeide
+
+  gen_asm_test_033_mul:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_033_mul.psm
+      type: pblazeide
+
+  gen_asm_test_034_div:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_034_div.psm
+      type: pblazeide
+
+  gen_asm_test_035_test:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_035_test.psm
+      type: pblazeide
+
+  gen_asm_test_036_test:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_036_test.psm
+      type: pblazeide
+
+  gen_asm_test_037_in_out:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_037_in_out.psm
+      type: pblazeide
+
+  gen_asm_test_038_in_out:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_038_in_out.psm
+      type: pblazeide
+
+  gen_asm_test_039_eint_reti:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_039_eint_reti.psm
+      type: pblazeide
+
+  gen_asm_test_040_eint_reti:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_040_eint_reti.psm
+      type: pblazeide
+
+  gen_asm_test_041_eint_reti:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-asm/test_041_eint_reti.psm
+      type: pblazeide
+
+  gen_c_test_uadd32:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-c/test_uadd32.c
+      type: c
+
+  gen_c_test_umul32:
+    generator : pbcc_gen
+    parameters:
+      file: sim/testbench-c/test_umul32.c
+      type: c
+
+  #<GENERATE_END>
+  # Previous line is a pragma, don't modify
+
+
+filesets:
+  #---------------------------------------
+  # Generator
+  #---------------------------------------
+  pbcc_dep:
+    depend:
+      - asylum:utils:generators:1.0.0      
+
+  #---------------------------------------
+  # Source Files
+  #---------------------------------------
+  files_hdl:
+    files     :
+      - src/OpenBlaze8_ALU.vhd
+      - src/OpenBlaze8_Clock.vhd
+      - src/OpenBlaze8_Control.vhd
+      - src/OpenBlaze8_Decode.vhd
+      - src/OpenBlaze8_Flags.vhd
+      - src/OpenBlaze8_Interrupt.vhd
+      - src/OpenBlaze8_LoadStore.vhd
+      - src/OpenBlaze8_Operand.vhd
+      - src/OpenBlaze8_pkg.vhd
+      - src/OpenBlaze8_Program_Counter.vhd
+      - src/OpenBlaze8_RAM.vhd
+      - src/OpenBlaze8_RegFile.vhd
+      - src/OpenBlaze8_Result.vhd
+      - src/OpenBlaze8_Stack.vhd
+      - src/OpenBlaze8.vhd
+    file_type : vhdlSource
+    depend    :
+      - ">=asylum:component:ram_1r1w:1.0.0"
+      - ">=asylum:component:stack:1.0.0"
+      
+  #---------------------------------------
+  # Testbench Files
+  #---------------------------------------
+  files_sim:
+    files:
+      - sim/tb_OpenBlaze8.vhd
+    file_type : vhdlSource
+    depend    :
+      - ">=xilinx:processor:kcpsm:1.30"
+      - ">=xilinx:primitive:unisim:11.1"
+
+
+  # Next line is a pragma, don't modify
+  #<FILESETS_BEGIN>
+  #<FILESETS_END>
+  # Previous line is a pragma, don't modify
+
+targets:
+
+  #---------------------------------------
+  # Default Target
+  #---------------------------------------
+  default: &default
+    description     : Default Target
+    filesets        :
+      - files_hdl
+    toplevel        : OpenBlaze8
+    default_tool    : ghdl
+
+  sim : &sim
+    << : *default
+    description     : Simulation env
+    toplevel        : tb_OpenBlaze8
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-fsynopsys"]
+        run_options     : ["--vcd=dut.vcd"]
+
+  # Next line is a pragma, don't modify
+  #<TARGETS_BEGIN>
+  sim_asm_test_000_default:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_000_default.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_000_default]
+
+  sim_asm_test_001_test_ok:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_001_test_ok.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_001_test_ok]
+
+  sim_asm_test_002_jump:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_002_jump.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_002_jump]
+
+  sim_asm_test_003_jump:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_003_jump.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_003_jump]
+
+  sim_asm_test_004_comp:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_004_comp.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_004_comp]
+
+  sim_asm_test_005_comp:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_005_comp.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_005_comp]
+
+  sim_asm_test_006_and:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_006_and.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_006_and]
+
+  sim_asm_test_007_or:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_007_or.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_007_or]
+
+  sim_asm_test_008_xor:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_008_xor.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_008_xor]
+
+  sim_asm_test_009_andi:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_009_andi.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_009_andi]
+
+  sim_asm_test_010_ori:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_010_ori.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_010_ori]
+
+  sim_asm_test_011_xori:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_011_xori.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_011_xori]
+
+  sim_asm_test_012_add:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_012_add.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_012_add]
+
+  sim_asm_test_013_addi:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_013_addi.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_013_addi]
+
+  sim_asm_test_014_sub:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_014_sub.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_014_sub]
+
+  sim_asm_test_015_subi:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_015_subi.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_015_subi]
+
+  sim_asm_test_016_comp:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_016_comp.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_016_comp]
+
+  sim_asm_test_017_compi:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_017_compi.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_017_compi]
+
+  sim_asm_test_018_rl:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_018_rl.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_018_rl]
+
+  sim_asm_test_019_rr:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_019_rr.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_019_rr]
+
+  sim_asm_test_020_sl0:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_020_sl0.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_020_sl0]
+
+  sim_asm_test_021_sl1:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_021_sl1.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_021_sl1]
+
+  sim_asm_test_022_sla:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_022_sla.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_022_sla]
+
+  sim_asm_test_023_slx:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_023_slx.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_023_slx]
+
+  sim_asm_test_024_sr:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_024_sr.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_024_sr]
+
+  sim_asm_test_025_call:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_025_call.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_025_call]
+
+  sim_asm_test_026_call_ret:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_026_call_ret.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_026_call_ret]
+
+  sim_asm_test_027_call_ret:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_027_call_ret.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_027_call_ret]
+
+  sim_asm_test_028_call_ret_cond:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_028_call_ret_cond.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_028_call_ret_cond]
+
+  sim_asm_test_029_fetch_store:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_029_fetch_store.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_029_fetch_store]
+
+  sim_asm_test_030_fetch_store:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_030_fetch_store.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_030_fetch_store]
+
+  sim_asm_test_031_fetch_store:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_031_fetch_store.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_031_fetch_store]
+
+  sim_asm_test_032_stack_depth:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_032_stack_depth.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_032_stack_depth]
+
+  sim_asm_test_033_mul:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_033_mul.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_033_mul]
+
+  sim_asm_test_034_div:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_034_div.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_034_div]
+
+  sim_asm_test_035_test:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_035_test.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_035_test]
+
+  sim_asm_test_036_test:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_036_test.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_036_test]
+
+  sim_asm_test_037_in_out:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_037_in_out.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_037_in_out]
+
+  sim_asm_test_038_in_out:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_038_in_out.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_038_in_out]
+
+  sim_asm_test_039_eint_reti:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_039_eint_reti.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_039_eint_reti]
+
+  sim_asm_test_040_eint_reti:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_040_eint_reti.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_040_eint_reti]
+
+  sim_asm_test_041_eint_reti:
+    << : *sim
+    description     : Simulation of the test sim/testbench-asm/test_041_eint_reti.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_asm_test_041_eint_reti]
+
+  sim_c_test_uadd32:
+    << : *sim
+    description     : Simulation of the test sim/testbench-c/test_uadd32.c
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_c_test_uadd32]
+
+  sim_c_test_umul32:
+    << : *sim
+    description     : Simulation of the test sim/testbench-c/test_umul32.c
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+    generate : [gen_c_test_umul32]
+
+  #<TARGETS_END>
+  # Previous line is a pragma, don't modify
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-processor-OpenBlaze8
+  version : v1_1_0
+ #version : cd781a4cb42a748d2cd45b0a7a43d7ce330f958e
+#<PROVIDER_END>

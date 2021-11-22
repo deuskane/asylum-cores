@@ -54,6 +54,6 @@ provider  :
   name    : github
   user    : deuskane
   repo    : asylum-utils-generators
- #version : v1_0_0
-  version : 08b2919537e4d951d152dff1d02304c454a6417f
+  version : v1_0_0
+ #version : 79dd1a1ae913390c569ebae2cc51cbd7788a9ea5
 #<PROVIDER_END>

@@ -1157,13 +1157,7 @@ targets:
   default: &default
     description     : Default Target
     filesets        :
-      - files_hdl
-    toplevel        : unisim.RAMB16_S9_S18
-    default_tool    : ghdl
-    tools :
-      ghdl :
-#       analyze_options : ["-fexplicit","-Wbinding","-Wno-hide","-Wno-others","-Wno-static","--ieee=standard","--no-vital-checks","-frelaxed"]
-        run_options     : []
+      - "!tool_ise?(files_hdl)"
 
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
@@ -1171,6 +1165,6 @@ provider  :
   name    : github
   user    : deuskane
   repo    : xilinx-primitive-unisim
- #version : v11_1
-  version : e38074e8851ae02d45e97cb9b0bf5d36172048d2
+  version : v11_1
+ #version : ab38e85c67f928feef7afd09ef8e2c46e350084d
 #<PROVIDER_END>

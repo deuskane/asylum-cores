@@ -123,7 +123,7 @@ function import_main()
             printf "WARNING : Existing destination core\n"
             #nb_error=$((${nb_error}+1));
 
-            continue;
+            #continue;
         fi
 
         git_url=$(cd ${core_dir} && git config --get remote.origin.url)
@@ -157,7 +157,7 @@ function import_main()
 
             cp ${src_core} ${dst_core}
 
-            (cd ${core_dir} && git tag -a ${version} -m "Tag ${version}")
+            (cd ${core_dir} && git tag -f -a ${version} -m "Tag ${version}")
 
 
             echo ""                                      >> ${dst_core}
@@ -167,8 +167,8 @@ function import_main()
             echo "  name    : github"                    >> ${dst_core}
             echo "  user    : ${git_user}"               >> ${dst_core}
             echo "  repo    : ${git_repo}"               >> ${dst_core}
-            echo " #version : ${version}"                >> ${dst_core}
-            echo "  version : ${git_version}"            >> ${dst_core}
+            echo "  version : ${version}"                >> ${dst_core}
+            echo " #version : ${git_version}"            >> ${dst_core}
             echo "#<PROVIDER_END>"                       >> ${dst_core}
         fi
     done
