@@ -69,12 +69,12 @@ function import_dump()
 	then
 	    printf "## ${type}\n" >> ${file}
 
-	    printf "| %-20s | %-20s | %-20s | %-10s | %-100s | Description |\n" "Company" "Type" "Name" "Version" "Core" >> ${file}
-	    printf "| %-20s | %-20s | %-20s | %-10s | %-100s | --- |\n"         "---"     "---"  "---"  "---"     "---"  >> ${file}
+	    printf "| %-20s | %-20s | %-20s | %-100s | Description |\n" "Company" "Type" "Name" "Version" >> ${file}
+	    printf "| %-20s | %-20s | %-20s | %-100s | --- |\n"         "---"     "---"  "---"  "---"     >> ${file}
 
 	fi;
 
-	printf "| %-20s | %-20s | %-20s | %-10s | %-100s | %s|\n" "${company}" "${type}" "${name}" "${version}" "[Core](${core/${src_dir}\//})" "${description}">> ${file}
+	printf "| %-20s | %-20s | %-20s | %-100s | %s|\n" "${company}" "${type}" "${name}" "[${version}](${core/${src_dir}\//})" "${description}">> ${file}
 	
 	company_prev=${company}
 	type_prev=${type}
