@@ -74,7 +74,7 @@ function import_dump()
 
 	fi;
 
-	printf "| %-20s | %-20s | %-20s | %-10s | %-100s | %s|\n" "${company}" "${type}" "${name}" "${version}" "[Core]:${core/${src_dir}\//}" "${description}">> ${file}
+	printf "| %-20s | %-20s | %-20s | %-10s | %-100s | %s|\n" "${company}" "${type}" "${name}" "${version}" "[Core](${core/${src_dir}\//})" "${description}">> ${file}
 	
 	company_prev=${company}
 	type_prev=${type}
