@@ -35,6 +35,56 @@ function import_usage()
 #-----------------------------------------------------------------------------
 # import_main
 #-----------------------------------------------------------------------------
+# 
+#-----------------------------------------------------------------------------
+function import_dump()
+{
+    echo "yo"
+    src_dir=$1
+    file=$2
+
+    rm -f ${file}
+    
+    company_prev=""
+    type_prev=""
+    
+    for core in `find ${src_dir} -iname "*.core" | sort -V`;
+    do
+	
+        fullname=$(grep name ${core}|head -n1)
+        description=$(grep description ${core}|head -n1|sed 's/^[^:]*://g')
+        
+        company=$(echo ${fullname}|cut -d':' -f2| tr -cd [:graph:])
+        type=$(   echo ${fullname}|cut -d':' -f3| tr -cd [:graph:])
+        name=$(   echo ${fullname}|cut -d':' -f4| tr -cd [:graph:])
+        version=$(echo ${fullname}|cut -d':' -f5| tr -cd [:graph:])
+
+	if test "${company}" != "${company_prev}";
+	then
+	    printf "# ${company}\n" >> ${file}
+	    type_prev=""
+	fi;
+
+	if test "${type}" != "${type_prev}";
+	then
+	    printf "## ${type}\n" >> ${file}
+
+	    printf "| %-20s | %-20s | %-20s | %-10s | %-100s | Description |\n" "Company" "Type" "Name" "Version" "Core" >> ${file}
+	    printf "| %-20s | %-20s | %-20s | %-10s | %-100s | --- |\n"         "---"     "---"  "---"  "---"     "---"  >> ${file}
+
+	fi;
+
+	printf "| %-20s | %-20s | %-20s | %-10s | %-100s | %s|\n" "${company}" "${type}" "${name}" "${version}" "[Core]:${core/${src_dir}\//}" "${description}">> ${file}
+	
+	company_prev=${company}
+	type_prev=${type}
+
+    done
+}
+
+#-----------------------------------------------------------------------------
+# import_main
+#-----------------------------------------------------------------------------
 # Copy core fies
 #-----------------------------------------------------------------------------
 function import_main()
@@ -112,7 +162,7 @@ function import_main()
         name=$(   echo ${fullname}|cut -d':' -f4| tr -cd [:graph:])
         version=$(echo ${fullname}|cut -d':' -f5| tr -cd [:graph:])
 
-        printf "[INFO   ] %-20s | %-20s | %-20s | %-10s -> " ${company} ${type} ${name} ${version}
+        printf "[INFO   ] %-20s | %-20s | %-20s | %-10s -> " "${company}" "${type}" "${name}" "${version}"
 
         if [ ${core_map[${company}${type}${name}]+_} ];
         then
@@ -139,6 +189,7 @@ function import_main()
         if [[ -f ${dst_core} ]];
         then
             printf "WARNING : Existing destination core\n"
+	    printf "[INFO   ] %-20s | %-20s | %-20s | %-10s    "
             #nb_error=$((${nb_error}+1));
 
             #continue;
@@ -196,6 +247,9 @@ function import_main()
         echo "[ERROR  ] ${nb_error} error(s) detected";
         return;
     fi;
+
+    import_dump ${dst_dir} IP.md
+
 }
 
 import_main $*
