@@ -14,6 +14,7 @@
 # Revisions  :
 # Date        Version  Author   Description
 # 2021-10-28  1.0      mrosiere Created
+# 2021-11-23  1.1      mrosiere Use getops
 #-----------------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------
@@ -25,49 +26,66 @@
 #-----------------------------------------------------------------------------
 function import_usage()
 {
-    echo "Usage : $0 src dst [dry_run]"
+    echo "$0 usage:"
+    grep " .)\ ##" $0
+
+    echo ""
 }
 
 #-----------------------------------------------------------------------------
 # import_main
 #-----------------------------------------------------------------------------
-# Argument 1 : Source      directory
-# Argument 2 : Destination directory
-# Argument 3 : dry run
-#-----------------------------------------------------------------------------
 # Copy core fies
 #-----------------------------------------------------------------------------
 function import_main()
 {
-    # Check parameter number
-    if test $# -ne 2 -a $# -ne 3;
-    then
-        import_usage $0
-        return;
-    fi
-
-    if test $# -eq 3;
-    then
-        dry_run=$3;
-    else
-        dry_run=0
-    fi;
-
-    src_dir=$1
-    dst_dir=$2
+    src_dir="";
+    dst_dir=".";
+    dry_run=1;
     verbose=0
+    
+    while getopts ":s:d:rvh" arg; do
+	case $arg in
+	    s) ## Source directory (mandatory)
+		src_dir=${OPTARG}
+		if test ! -d "${src_dir}";
+		then
+		    echo "[ERROR  ] Invalid directory : ${src_dir}";
+		    import_usage
+		    exit -1;
+		fi
+		;;
+	    d) ## destination directory (optional, default = .)
+		dst_dir=${OPTARG}
+
+		if test ! -d "${dst_dir}";
+		then
+		    echo "[ERROR  ] Invalid directory : ${dst_dir}";
+		    import_usage
+		    exit -1;
+		fi
+
+		;;
+	    r) ## Execute (else dry run)
+		dry_run=0
+		;;
+	    
+	    v) ## Verbose
+		verbose=1
+		;;
+
+	    h | *) ## Display help
+		echo "${OPTARG}"
+		imort_usage
+		exit 0
+		;;
+	esac
+    done
 
     # Check source directory
-    if test ! -d "${src_dir}";
+    if test -z "${src_dir}";
     then
-        echo "[ERROR  ] Invalid directory : \"${src_dir}\"";
-        import_usage $0
-        return;
-    fi;
-
-    if test ! -d "${dst_dir}";
-    then
-        echo "[ERROR  ] Invalid directory : \"${dst_dir}\"";
+        echo "[ERROR  ] Undefine source directory";
         import_usage $0
         return;
     fi;
