@@ -1,0 +1,73 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : GPIO Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : GPIO.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2022-03-31  1.1.0    mrosiere Update source code
+# 2021-10-26  1.0.0    mrosiere Created
+#-----------------------------------------------------------------------------
+
+name        : asylum:component:GPIO:1.1.0
+description : GPIO Module
+
+filesets:
+
+  #---------------------------------------
+  # Source Files
+  #---------------------------------------
+  files_hdl:
+    files:
+      - src/GPIO.vhd
+    file_type : vhdlSource
+      
+  #---------------------------------------
+  # Testbench Files
+  #---------------------------------------
+  files_sim:
+    files:
+      - sim/tb_GPIO_bidir.vhd
+    file_type : vhdlSource
+
+targets:
+
+  #---------------------------------------
+  # Default Target
+  #---------------------------------------
+  default: &default
+    description     : Default Target
+    filesets        :
+      - files_hdl
+    toplevel        : GPIO
+    default_tool    : ghdl
+
+  sim:
+    << : *default
+    description     : Simulation of all cases
+    filesets_append :
+      - files_sim
+    toplevel        : tb_GPIO_bidir
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        run_options : ["--vcd=dut.vcd"]
+
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-component-gpio
+ #version : v1_1_0
+  version : eae79fa9f1a37ef86b89b3fc0b313cb73dbf5bd6
+#<PROVIDER_END>

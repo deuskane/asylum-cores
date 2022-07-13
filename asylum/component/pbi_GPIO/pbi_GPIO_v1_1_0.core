@@ -1,0 +1,56 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : PBI GPIO file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : pbi_GPIO.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version Author   Description
+# 2022-07-13  1.1.0   mrosiere DATA_OE_<INIT/FORCE> in NB_IO
+# 2021-10-26  1.0.0   mrosiere Created
+#-----------------------------------------------------------------------------
+
+name : asylum:component:pbi_GPIO:1.1.0
+description : PBI Generic wrapper for target IP
+
+filesets:
+
+  #---------------------------------------
+  # Source Files
+  #---------------------------------------
+  files_hdl:
+    files:
+      - src/pbi_GPIO.vhd
+    file_type : vhdlSource
+    depend :
+      - ">=asylum:component:pbi_wrapper_target:1.0.0"
+      - ">=asylum:component:GPIO:1.0.0"
+
+targets:
+
+  #---------------------------------------
+  # Default Target
+  #---------------------------------------
+  default: &default
+    description  : Default Target
+    filesets     :
+      - files_hdl
+    toplevel     : pbi_GPIO
+    default_tool : ghdl
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-component-pbi_gpio
+ #version : v1_1_0
+  version : f9f578ae7f1e98a92c1795bfbe368881f5a407a8
+#<PROVIDER_END>
