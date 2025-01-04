@@ -25,7 +25,6 @@
 | asylum               | processor            | OpenBlaze8           | [1.0.0](asylum/processor/OpenBlaze8/OpenBlaze8_v1_0_0.core)                                          |  OpenBlaze8|
 | asylum               | processor            | OpenBlaze8           | [1.0.1](asylum/processor/OpenBlaze8/OpenBlaze8_v1_0_1.core)                                          |  OpenBlaze8|
 | asylum               | processor            | OpenBlaze8           | [1.1.0](asylum/processor/OpenBlaze8/OpenBlaze8_v1_1_0.core)                                          |  OpenBlaze8|
-| asylum               | processor            | OpenBlaze8           | [2.0.0](asylum/processor/OpenBlaze8/OpenBlaze8_v2_0_0.core)                                          |  OpenBlaze8|
 | asylum               | processor            | pbi_OpenBlaze8       | [1.0.0](asylum/processor/pbi_OpenBlaze8/pbi_OpenBlaze8_v1_0_0.core)                                  |  PBI Generic wrapper for target IP|
 | asylum               | processor            | pbi_PicoBlaze8       | [1.0.0](asylum/processor/pbi_PicoBlaze8/pbi_PicoBlaze8_v1_0_0.core)                                  |  PBI Generic wrapper for target IP|
 ## soc
@@ -36,6 +35,7 @@
 | asylum               | soc                  | OB8_GPIO             | [1.0.2](asylum/soc/OB8_GPIO/OB8_GPIO_v1_0_2.core)                                                    |  SoC with OpenBlaze8, switch and led|
 | asylum               | soc                  | OB8_GPIO             | [1.0.3](asylum/soc/OB8_GPIO/OB8_GPIO_v1_0_3.core)                                                    |  SoC with OpenBlaze8, switch and led|
 | asylum               | soc                  | OB8_GPIO             | [1.1.0](asylum/soc/OB8_GPIO/OB8_GPIO_v1_1_0.core)                                                    |  SoC with OpenBlaze8, switch and led|
+| asylum               | soc                  | OB8_GPIO             | [1.1.1](asylum/soc/OB8_GPIO/OB8_GPIO_v1_1_1.core)                                                    |  SoC with OpenBlaze8, switch and led|
 | asylum               | soc                  | OB8_TIMER            | [1.0.0](asylum/soc/OB8_TIMER/OB8_TIMER_v1_0_0.core)                                                  |  SoC with OpenBlaze8, switch, led and timer|
 | asylum               | soc                  | OB8_TIMER            | [1.0.1](asylum/soc/OB8_TIMER/OB8_TIMER_v1_0_1.core)                                                  |  SoC with OpenBlaze8, switch, led and timer|
 | asylum               | soc                  | OB8_TIMER            | [1.1.0](asylum/soc/OB8_TIMER/OB8_TIMER_v1_1_0.core)                                                  |  SoC with OpenBlaze8, switch, led and timer|
