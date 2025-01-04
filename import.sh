@@ -39,7 +39,6 @@ function import_usage()
 #-----------------------------------------------------------------------------
 function import_dump()
 {
-    echo "yo"
     src_dir=$1
     file=$2
 
