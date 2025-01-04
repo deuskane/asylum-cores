@@ -248,7 +248,7 @@ function import_main()
         return;
     fi;
 
-    import_dump ${dst_dir} IP.md
+    import_dump ${dst_dir} README.md
 
 }
 
