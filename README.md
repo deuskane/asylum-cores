@@ -39,6 +39,10 @@
 | asylum               | soc                  | OB8_TIMER            | [1.0.0](asylum/soc/OB8_TIMER/OB8_TIMER_v1_0_0.core)                                                  |  SoC with OpenBlaze8, switch, led and timer|
 | asylum               | soc                  | OB8_TIMER            | [1.0.1](asylum/soc/OB8_TIMER/OB8_TIMER_v1_0_1.core)                                                  |  SoC with OpenBlaze8, switch, led and timer|
 | asylum               | soc                  | OB8_TIMER            | [1.1.0](asylum/soc/OB8_TIMER/OB8_TIMER_v1_1_0.core)                                                  |  SoC with OpenBlaze8, switch, led and timer|
+## target
+| Company              | Type                 | Name                 | Version                                                                                              | Description |
+| ---                  | ---                  | ---                  | ---                                                                                                  | --- |
+| asylum               | target               | generic              | [1.0.0](asylum/target/generic/target_generic_v1_0_0.core)                                            |  Set of technology cells into RTL behviour|
 ## utils
 | Company              | Type                 | Name                 | Version                                                                                              | Description |
 | ---                  | ---                  | ---                  | ---                                                                                                  | --- |

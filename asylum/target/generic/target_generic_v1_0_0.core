@@ -1,0 +1,79 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : 
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : target_generic.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: Set of technology cells into RTL behviour
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2025-01-06  1.0.0    mrosiere Created
+#-----------------------------------------------------------------------------
+
+name        : asylum:target:generic:1.0.0
+description : Set of technology cells into RTL behviour
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  files_hdl:
+  #---------------------------------------
+    files:
+      - src/cgate.vhd
+      - src/sync2dff.vhd
+    file_type : vhdlSource
+
+  #---------------------------------------
+  files_sim:
+  #---------------------------------------
+    files:
+      - sim/src/tb_dummy.vhd
+    file_type : vhdlSource
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target (DON'T RUN)
+    filesets        :
+      - files_hdl
+    default_tool    : ghdl
+
+  #---------------------------------------
+  lint: &lint
+  #---------------------------------------
+    << : *default
+    description     : Lint
+    default_tool    : ghdl
+    toplevel        : tb_dummy
+    filesets_append :
+      - files_sim
+    tools :
+      ghdl :
+        analyze_options : ["-fsynopsys"]
+        run_options     : 
+
+#=========================================
+parameters :
+#=========================================
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-target-generic
+ #version : v1_0_0
+  version : e514c775f8f57e9a7fc24d05fd713f081b7b4f40
+#<PROVIDER_END>
