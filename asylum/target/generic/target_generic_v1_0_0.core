@@ -29,6 +29,7 @@ filesets:
     files:
       - src/cgate.vhd
       - src/sync2dff.vhd
+      - src/sync2dffrn.vhd
     file_type : vhdlSource
 
   #---------------------------------------
@@ -75,5 +76,5 @@ provider  :
   user    : deuskane
   repo    : asylum-target-generic
  #version : v1_0_0
-  version : e514c775f8f57e9a7fc24d05fd713f081b7b4f40
+  version : 517d53ad0b674a9c7eb15e5c3300fd81c4a25492
 #<PROVIDER_END>
