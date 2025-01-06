@@ -1,0 +1,247 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : OB8 SOC Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : OB8_GPIO.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2021-10-26  1.0.0    mrosiere Created
+# 2021-11-03  1.0.1    mrosiere Use generator
+# 2021-11-16  1.0.2    mrosiere Add identity.c
+# 2022-01-06  1.0.3    mrosiere Support nxmap
+# 2022-07-13  1.1.0    mrosiere DATA_OE_<INIT/FORCE> in NB_IO
+# 2024-12-31  1.1.1    mrosiere Fix constant in gpio declaration
+# 2025-01-04  1.1.2    mrosiere Update Target and Makefile 
+# 2025-01-06  1.1.3    mrosiere Add reset resynchonizer
+# 2025-01-06  1.1.4    mrosiere Add top level to separate clock and reset management
+#                               Usefull to student
+#-----------------------------------------------------------------------------
+
+name        : asylum:soc:OB8_GPIO:1.1.4
+description : SoC with OpenBlaze8, switch and led
+
+#=========================================
+generate:
+#=========================================
+  # Next line is a pragma, don't modify
+  #<GENERATE_BEGIN>
+  gen_asm_identity:
+    generator : pbcc_gen
+    parameters:
+      file: soft/identity.psm
+      type: pblazeide
+
+  gen_c_identity:
+    generator : pbcc_gen
+    parameters:
+      file: soft/identity.c
+      type: c
+
+  #<GENERATE_END>
+  # Previous line is a pragma, don't modify
+
+#=========================================
+filesets:
+#=========================================
+  #---------------------------------------
+  pbcc_dep:
+  #---------------------------------------
+    depend:
+      - ">=asylum:utils:generators:1.0.0"      
+
+  #---------------------------------------
+  files_hdl:
+  #---------------------------------------
+    files:
+      - src/OB8_GPIO_top.vhd
+      - src/OB8_GPIO.vhd
+    file_type : vhdlSource
+    depend :
+      - ">=asylum:component:clock_divider:1.0.0"
+      - ">=asylum:component:pbi_GPIO:1.0.0"
+      - ">=asylum:processor:pbi_OpenBlaze8:1.0.0"
+
+  #---------------------------------------
+  files_sim:
+  #---------------------------------------
+    files:
+      - sim/tb_OB8_GPIO.vhd
+    file_type : vhdlSource
+    depend :
+      - ">=xilinx:primitive:unisim:11.1"
+
+  #---------------------------------------
+  files_basys:
+  #---------------------------------------
+    files:
+      - boards/Digilent-Basys1/pads.ucf : {file_type : UCF}
+    file_type : vhdlSource
+
+  #---------------------------------------
+  files_ng_medium:
+  #---------------------------------------
+    files:
+      - boards/NanoXplore-DK625V0/pads.py    : {file_type : nx_pads}
+      - boards/NanoXplore-DK625V0/options.py : {file_type : nx_options}
+    file_type : vhdlSource
+
+  #---------------------------------------
+  target_generic:
+  #---------------------------------------
+    depend :
+      - ">=asylum:target:generic:1.0.0"
+
+  # Next line is a pragma, don't modify
+  #<FILESETS_BEGIN>
+  #<FILESETS_END>
+  # Previous line is a pragma, don't modify
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target (DON'T RUN)
+    filesets        :
+      - files_hdl
+    toplevel        : OB8_GPIO
+    default_tool    : ghdl
+
+  #---------------------------------------
+  sim: &sim
+  #---------------------------------------
+    << : *default
+    description     : default rule to sim (DON'T RUN)
+    default_tool    : ghdl
+    toplevel        : tb_OB8_GPIO
+    tools :
+      ghdl :
+        analyze_options : ["-fsynopsys"]
+        run_options     : ["--vcd=dut.vcd"]
+
+  #---------------------------------------
+  emu_basys_asm_identity:
+  #---------------------------------------
+    description  : Synthesis for Digilent Basys board of the test soft/identity.psm
+    default_tool : ise
+    filesets     :
+      - files_hdl
+      - files_basys 
+      - pbcc_dep
+      - target_generic
+    generate : [gen_asm_identity]
+    parameters   :
+      - FSYS=50000000
+      - FSYS_INT=50000000
+      - NB_SWITCH=8
+      - NB_LED=8
+      - RESET_POLARITY=pos
+    tools:
+      ise:
+        family  : Spartan3E
+        device  : xc3s100e
+        package : tq144
+        speed   : -5
+    toplevel : OB8_GPIO_top
+
+  #---------------------------------------
+  emu_ng_medium_c_identity:
+  #---------------------------------------
+    description  : Synthesis for NanoXplore Ng_Medium board of the test soft/identity.psm
+    default_tool : nxmap
+    filesets     :
+      - files_hdl
+      - files_ng_medium 
+      - pbcc_dep
+      - target_generic
+    generate : [gen_c_identity]
+    parameters   :
+      - FSYS=25000000
+      - FSYS_INT=25000000
+      - NB_SWITCH=6
+      - NB_LED=8
+      - RESET_POLARITY=neg
+    tools:
+      nxmap:
+        board   : 
+        fpga    : NG-MEDIUM
+        program : True
+    toplevel : OB8_GPIO_top
+
+
+  # Next line is a pragma, don't modify
+  #<TARGETS_BEGIN>
+  sim_asm_identity:
+    << : *sim
+    description     : Simulation of the test soft/identity.psm
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+      - target_generic
+    generate : [gen_asm_identity]
+
+  sim_c_identity:
+    << : *sim
+    description     : Simulation of the test soft/identity.c
+    filesets_append :
+      - files_sim
+      - pbcc_dep
+      - target_generic
+    generate : [gen_c_identity]
+
+  #<TARGETS_END>
+  # Previous line is a pragma, don't modify
+
+#=========================================
+parameters :
+#=========================================
+
+  FSYS :
+    description : External frequency
+    datatype    : int
+    default     : 500000000
+    paramtype   : generic
+
+  FSYS_INT :
+    description : Internal frequency
+    datatype    : int
+    default     : 500000000
+    paramtype   : generic
+
+  NB_SWITCH :
+    description : Switch number on board
+    datatype    : int
+    default     : 8
+    paramtype   : generic
+
+  NB_LED :
+    description : led number on board
+    datatype    : int
+    default     : 8
+    paramtype   : generic
+
+  RESET_POLARITY :
+    description : Polarity of arst_i signal (neg / pos)
+    datatype    : str
+    default     : neg
+    paramtype   : generic
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-soc-OB8_gpio
+ #version : v1_1_4
+  version : 9c758e26d48f6692e99cc9373f9c4cf463dfca3d
+#<PROVIDER_END>
