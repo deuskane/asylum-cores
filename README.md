@@ -19,6 +19,7 @@
 | ---                  | ---                  | ---                  | ---                                                                                                  | --- |
 | asylum               | package              | math_pkg             | [1.0.0](asylum/package/math_pkg/math_pkg_v1_0_0.core)                                                |  Mathematics Package|
 | asylum               | package              | pbi_pkg              | [1.0.0](asylum/package/pbi_pkg/pbi_pkg_v1_0_0.core)                                                  |  Picoblaze bus interface|
+| asylum               | package              | pbi_pkg              | [1.1.0](asylum/package/pbi_pkg/pbi_pkg_v1_1_0.core)                                                  |  Picoblaze bus interface|
 ## processor
 | Company              | Type                 | Name                 | Version                                                                                              | Description |
 | ---                  | ---                  | ---                  | ---                                                                                                  | --- |
