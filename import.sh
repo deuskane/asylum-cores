@@ -125,7 +125,7 @@ function import_main()
 
 	    h | *) ## Display help
 		echo "${OPTARG}"
-		imort_usage
+		import_usage
 		exit 0
 		;;
 	esac
@@ -247,7 +247,7 @@ function import_main()
         return;
     fi;
 
-    import_dump ${dst_dir} README.md
+    import_dump ${dst_dir} ${dst_dir}/README.md
 
 }
 
