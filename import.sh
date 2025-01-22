@@ -203,7 +203,7 @@ function import_main()
 
             continue;
         fi
-            
+
         git_version=$(cd ${core_dir} && git rev-parse HEAD)
         if [[ -z ${git_version} ]];
         then
@@ -213,6 +213,15 @@ function import_main()
             continue;
         fi
 
+	git_branch=$(cd ${core_dir} && git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/')
+	if [[ ${git_branch} != "main" ]];
+	then
+	    printf "ERROR   : Branch ${git_branch} is different of main";
+
+	    continue;
+	fi
+
+	
 	git_user=$(echo ${git_url}|cut -d':' -f2|cut -d'/' -f1)
 	git_repo=$(echo ${git_url}|cut -d':' -f2|cut -d'/' -f2)
 	git_repo=${git_repo/.git/}
