@@ -1,0 +1,56 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : PBI OpenBlaze8 file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : pbi_OpenBlaze8.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2021-10-26  1.0.0    mrosiere Created
+# 2025-01-21  1.1.0    mrosiere Fix busy usage
+#-----------------------------------------------------------------------------
+
+name        : asylum:processor:pbi_OpenBlaze8:1.1.0
+description : PBI Generic wrapper for target IP
+
+filesets:
+
+  #---------------------------------------
+  # Source Files
+  #---------------------------------------
+  files_hdl:
+    files:
+      - src/pbi_OpenBlaze8.vhd
+    file_type : vhdlSource
+    depend :
+      - ">=asylum:processor:OpenBlaze8:1.0.0"
+      - ">=asylum:package:pbi_pkg:1.0.0"
+
+targets:
+
+  #---------------------------------------
+  # Default Target
+  #---------------------------------------
+  default: &default
+    description  : Default Target
+    filesets     :
+      - files_hdl
+    toplevel     : pbi_OpenBlaze8
+    default_tool : ghdl
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-processor-pbi_OpenBlaze8
+ #version : v1_1_0
+  version : 21074f2e145f0cd80dd51a4c0a4f555d10fdf7bd
+#<PROVIDER_END>

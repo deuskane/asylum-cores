@@ -362,7 +362,7 @@ targets:
     tools :
       ghdl :
         analyze_options : ["-fsynopsys"]
-        run_options     : ["--vcd=dut.vcd"]
+        run_options     : ["--vcd=dut.vcd","--ieee-asserts=disable"]
 
   # Next line is a pragma, don't modify
   #<TARGETS_BEGIN>
@@ -728,5 +728,5 @@ provider  :
   user    : deuskane
   repo    : asylum-processor-OpenBlaze8
  #version : v1_1_0
-  version : cd781a4cb42a748d2cd45b0a7a43d7ce330f958e
+  version : 971b0c43eb7209489b624ff12a31edd227f081b4
 #<PROVIDER_END>

@@ -84,5 +84,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-ram_1r1w
  #version : v1_0_0
-  version : 58a4e935fd1b5d12fa506f8482912d5c7faac7ef
+  version : 6b4e58d100c4fd14e780a4dda7f729d36c646618
 #<PROVIDER_END>

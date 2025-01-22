@@ -1,0 +1,58 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : PBI PicoBlaze file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : pbi_PicoBlaze8.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2021-10-26  1.0.0    mrosiere Created
+# 2025-01-21  1.1.0    mrosiere Fix busy usage
+#-----------------------------------------------------------------------------
+
+name : asylum:processor:pbi_PicoBlaze8:1.1.0
+description : PBI Generic wrapper for target IP
+
+filesets:
+
+  #---------------------------------------
+  # Source Files
+  #---------------------------------------
+  files_hdl:
+    files:
+      - src/pbi_PicoBlaze.vhd
+    file_type : vhdlSource
+    depend :
+      - ">=asylum:processor:pbi_OpenBlaze8:1.0.0"
+      - ">=asylum:package:pbi_pkg:1.0.0"
+      - ">=asylum:component:gated_clock:1.0.0"
+      - ">=xilinx:processor:kcpsm:1.30"
+      
+targets:
+
+  #---------------------------------------
+  # Default Target
+  #---------------------------------------
+  default: &default
+    description  : Default Target
+    filesets     :
+      - files_hdl
+    toplevel     : pbi_PicoBlaze
+    default_tool : ghdl
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-processor-pbi_PicoBlaze
+ #version : v1_1_0
+  version : 7aa1af2a2b8cd5bb7369e099c759d20ee837b6b7
+#<PROVIDER_END>
