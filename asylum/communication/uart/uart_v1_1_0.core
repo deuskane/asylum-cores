@@ -1,0 +1,58 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : UART
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : uart.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2025
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2025/01/21  1.0.0    mrosiere Created
+# 2025/02/05  1.1.0    mrosiere UART RX + check with loopback
+#-----------------------------------------------------------------------------
+
+name        : asylum:communication:uart:1.1.0
+description : UART TX and RX
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  rtl:
+  #---------------------------------------
+    files:
+      - src/uart_baud_rate_gen.vhd
+      - src/uart_rx_axis.vhd
+      - src/uart_tx_axis.vhd
+      - src/pbi_uart.vhd
+    file_type : vhdlSource
+    depend :
+      - ">=asylum:package:math_pkg:1.0.0"
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target
+    filesets        :
+      - rtl
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-communication-uart
+ #version : v1_1_0
+  version : efc655fce120ef778e4b0859b063e31eb886211a
+#<PROVIDER_END>
