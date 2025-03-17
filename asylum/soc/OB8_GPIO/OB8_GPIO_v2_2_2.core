@@ -125,7 +125,7 @@ filesets:
     file_type : vhdlSource
     depend :
       - ">=asylum:component:clock_divider:1.0.0"
-      - ">=asylum:component:pbi_GPIO:1.0.0"
+      - ">=asylum:component:GPIO:1.0.0"
       - ">=asylum:processor:pbi_OpenBlaze8:1.0.0"
       - ">=asylum:communication:uart:1.0.0"
 
@@ -458,5 +458,5 @@ provider  :
   user    : deuskane
   repo    : asylum-soc-OB8_gpio
  #version : v2_2_2
-  version : 32ede2b73e54242b92246f5bf086ae4c6a711d7a
+  version : ea3b40008d16db8ff4e1d83f351c286928ffd47c
 #<PROVIDER_END>
