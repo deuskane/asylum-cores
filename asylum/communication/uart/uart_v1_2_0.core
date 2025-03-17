@@ -1,43 +1,42 @@
 CAPI=2:
 
 #-----------------------------------------------------------------------------
-# Title      : 
+# Title      : UART
 # Project    : Asylum
 #-----------------------------------------------------------------------------
-# File       : target_generic.core
+# File       : uart.core
 # Author     : mrosiere
 #-----------------------------------------------------------------------------
-# Description: Set of technology cells into RTL behviour
+# Description: 
 #-----------------------------------------------------------------------------
-# Copyright (c) 2021
+# Copyright (c) 2025
 #-----------------------------------------------------------------------------
 # Revisions  :
 # Date        Version  Author   Description
-# 2025-01-06  1.0.0    mrosiere Created
+# 2025/01/21  1.0.0    mrosiere Created
+# 2025/02/05  1.1.0    mrosiere UART RX + check with loopback
+# 2025/03/09  1.2.0    mrosiere use unconstrained pbi
 #-----------------------------------------------------------------------------
 
-name        : asylum:target:generic:1.0.0
-description : Set of technology cells into RTL behviour
+name        : asylum:communication:uart:1.2.0
+description : UART TX and RX
 
 #=========================================
 filesets:
 #=========================================
 
   #---------------------------------------
-  files_hdl:
+  rtl:
   #---------------------------------------
     files:
-      - src/cgate.vhd
-      - src/sync2dff.vhd
-      - src/sync2dffrn.vhd
+      - src/uart_baud_rate_gen.vhd
+      - src/uart_rx_axis.vhd
+      - src/uart_tx_axis.vhd
+      - src/pbi_uart.vhd
     file_type : vhdlSource
-
-  #---------------------------------------
-  files_sim:
-  #---------------------------------------
-    files:
-      - sim/src/tb_dummy.vhd
-    file_type : vhdlSource
+    depend :
+      - asylum:package:math_pkg
+      - asylum:component:pbi_wrapper_target
 
 #=========================================
 targets:
@@ -46,35 +45,16 @@ targets:
   #---------------------------------------
   default: &default
   #---------------------------------------
-    description     : Default Target (DON'T RUN)
+    description     : Default Target
     filesets        :
-      - files_hdl
-    default_tool    : ghdl
-
-  #---------------------------------------
-  lint: &lint
-  #---------------------------------------
-    << : *default
-    description     : Lint
-    default_tool    : ghdl
-    toplevel        : tb_dummy
-    filesets_append :
-      - files_sim
-    tools :
-      ghdl :
-        analyze_options : ["-fsynopsys"]
-        run_options     : 
-
-#=========================================
-parameters :
-#=========================================
+      - rtl
 
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
 provider  :
   name    : github
   user    : deuskane
-  repo    : asylum-target-generic
- #version : v1_0_0
-  version : 9b1f8a12dde88e64ec0a950d8d4fa07b39e18c0c
+  repo    : asylum-communication-uart
+ #version : v1_2_0
+  version : 6f895a1d5ee90ce343cb756ffdee50aaf51a5e32
 #<PROVIDER_END>

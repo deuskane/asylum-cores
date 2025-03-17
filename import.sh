@@ -113,7 +113,7 @@ function import_main()
         core_dir=$(dirname ${src_core})
         core=${src_core/${src_dir}\//}
         core=${core/.core/}
-        fullname=$(grep name ${src_core}|head -n1)
+        fullname=$(grep ^name ${src_core}|head -n1)
         
         company=$(echo ${fullname}|cut -d':' -f2| tr -cd [:graph:])
         type=$(   echo ${fullname}|cut -d':' -f3| tr -cd [:graph:])
@@ -216,7 +216,7 @@ function import_main()
     fi;
 
     
-    ${dst_dir}/dump.sh
+    #${dst_dir}/dump.sh
 }
 
 import_main $*

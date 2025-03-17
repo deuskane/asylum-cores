@@ -1,0 +1,57 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : PBI Wrapper Target Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : pbi_wrapper_target.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2021-10-26  1.0.0    mrosiere Created
+# 2025-03-08  1.1.0    mrosiere Use unconstraint pbi
+#-----------------------------------------------------------------------------
+
+name        : asylum:component:pbi_wrapper_target:1.1.0
+description : PBI Generic wrapper for target IP
+
+filesets:
+
+  #---------------------------------------
+  # Source Files
+  #---------------------------------------
+  files_hdl:
+    files:
+      - src/pbi_wrapper_target.vhd
+      - src/pbi_wrapper_target_v1.vhd
+    file_type    : vhdlSource-2008
+    #logical_name : asylum
+    depend       :
+      - ">=asylum:package:pbi_pkg:1.0.0"
+
+targets:
+
+  #---------------------------------------
+  # Default Target
+  #---------------------------------------
+  default: &default
+    description  : Default Target
+    filesets     :
+      - files_hdl
+    toplevel     : pbi_wrapper_target
+    default_tool : ghdl
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-component-pbi_wrapper_target
+ #version : v1_1_0
+  version : 53f5b23c461b7b9078d9f7c299fb55167d126d4a
+#<PROVIDER_END>
