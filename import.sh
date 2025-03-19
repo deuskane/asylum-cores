@@ -114,11 +114,11 @@ function import_main()
         core=${src_core/${src_dir}\//}
         core=${core/.core/}
         fullname=$(grep ^name ${src_core}|head -n1)
-        
         vendor=$( echo ${fullname}|cut -d':' -f2| tr -cd [:graph:])
         library=$(echo ${fullname}|cut -d':' -f3| tr -cd [:graph:])
         name=$(   echo ${fullname}|cut -d':' -f4| tr -cd [:graph:])
         version=$(echo ${fullname}|cut -d':' -f5| tr -cd [:graph:])
+        vlnv=${vendor}-${library}-${name}-${version}
 
         printf "[INFO   ] %-20s | %-20s | %-20s | %-10s -> " "${vendor}" "${library}" "${name}" "${version}"
 
@@ -193,8 +193,7 @@ function import_main()
 
             cp ${src_core} ${dst_core}
 
-            (cd ${core_dir} && git tag -f -a ${version} -m "Tag ${version}")
-
+            (cd ${core_dir} && git tag -f -a ${vlnv} -m "Tag ${vlnv}")
 
             echo ""                                      >> ${dst_core}
             echo "# Next lines is a pragma, don't modify">> ${dst_core}
@@ -220,11 +219,3 @@ function import_main()
 }
 
 import_main $*
-
-
-
-
-
-
-
-
