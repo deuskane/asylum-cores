@@ -106,7 +106,7 @@ function import_main()
 
     declare -A core_map;
 
-    printf "[INFO   ] %-20s | %-20s | %-20s | %-10s \n" "Company" "Type" "Name" "Version"
+    printf "[INFO   ] %-20s | %-20s | %-20s | %-10s \n" "Vendor" "Library" "Name" "Version"
     for src_core in ${src_cores};
     do
         test ${verbose} -gt 0 && echo "[DEBUG  ] * ${src_core}"
@@ -115,21 +115,21 @@ function import_main()
         core=${core/.core/}
         fullname=$(grep ^name ${src_core}|head -n1)
         
-        company=$(echo ${fullname}|cut -d':' -f2| tr -cd [:graph:])
-        type=$(   echo ${fullname}|cut -d':' -f3| tr -cd [:graph:])
+        vendor=$( echo ${fullname}|cut -d':' -f2| tr -cd [:graph:])
+        library=$(echo ${fullname}|cut -d':' -f3| tr -cd [:graph:])
         name=$(   echo ${fullname}|cut -d':' -f4| tr -cd [:graph:])
         version=$(echo ${fullname}|cut -d':' -f5| tr -cd [:graph:])
 
-        printf "[INFO   ] %-20s | %-20s | %-20s | %-10s -> " "${company}" "${type}" "${name}" "${version}"
+        printf "[INFO   ] %-20s | %-20s | %-20s | %-10s -> " "${vendor}" "${library}" "${name}" "${version}"
 
-        if [ ${core_map[${company}${type}${name}]+_} ];
+        if [ ${core_map[${vendor}${library}${name}]+_} ];
         then
-            printf "ERROR   : Duplicate information in file ${core_map[${company}${type}${name}]}\n"
+            printf "ERROR   : Duplicate information in file ${core_map[${vendor}${library}${name}]}\n"
             nb_error=$((${nb_error}+1));
 
             continue;
         else
-            core_map[${company}${type}${name}]=${src_core}
+            core_map[${vendor}${library}${name}]=${src_core}
         fi
         
 #       if [[ ${version} != +([0-9]).+([0-9]).+([0-9]) ]]; 
@@ -141,7 +141,7 @@ function import_main()
 #       fi
 
         version=v${version//./_}
-        dst_core=${dst_dir}/${company}/${type}/${name}/`basename ${core} .core`_${version}.core
+        dst_core=${dst_dir}/${vendor}/${library}/${name}/`basename ${core} .core`_${version}.core
        #dst_core=${dst_dir}/${core}_${version}.core
         
         if [[ -f ${dst_core} ]];

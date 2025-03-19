@@ -30,8 +30,8 @@ function dump_main()
 
     rm -f ${file}
     
-    company_prev=""
-    type_prev=""
+    vendor_prev=""
+    library_prev=""
     
     for core in `find ${src_dir} -iname "*.core" | sort -V`;
     do
@@ -40,30 +40,30 @@ function dump_main()
         fullname=$(grep name ${core}|head -n1)
         description=$(grep description ${core}|head -n1|sed 's/^[^:]*://g')
         
-        company=$(echo ${fullname}|cut -d':' -f2| tr -cd [:graph:])
-        type=$(   echo ${fullname}|cut -d':' -f3| tr -cd [:graph:])
+        vendor=$( echo ${fullname}|cut -d':' -f2| tr -cd [:graph:])
+        library=$(echo ${fullname}|cut -d':' -f3| tr -cd [:graph:])
         name=$(   echo ${fullname}|cut -d':' -f4| tr -cd [:graph:])
         version=$(echo ${fullname}|cut -d':' -f5| tr -cd [:graph:])
 
-	if test "${company}" != "${company_prev}";
+	if test "${vendor}" != "${vendor_prev}";
 	then
-	    printf "# ${company}\n" >> ${file}
-	    type_prev=""
+	    printf "# ${vendor}\n" >> ${file}
+	    library_prev=""
 	fi;
 
-	if test "${type}" != "${type_prev}";
+	if test "${library}" != "${library_prev}";
 	then
-	    printf "## ${type}\n" >> ${file}
+	    printf "## ${library}\n" >> ${file}
 
-	    printf "| %-20s | %-20s | %-20s | %-100s | Description |\n" "Company" "Type" "Name" "Version" >> ${file}
-	    printf "| %-20s | %-20s | %-20s | %-100s | --- |\n"         "---"     "---"  "---"  "---"     >> ${file}
+	    printf "| %-20s | %-20s | %-20s | %-100s | Description |\n" "Vendor" "Library" "Name" "Version" >> ${file}
+	    printf "| %-20s | %-20s | %-20s | %-100s | --- |\n"         "---"     "---"    "---"  "---"     >> ${file}
 
 	fi;
 
-	printf "| %-20s | %-20s | %-20s | %-100s | %s|\n" "${company}" "${type}" "${name}" "[${version}](${core/${src_dir}\//})" "${description}">> ${file}
+	printf "| %-20s | %-20s | %-20s | %-100s | %s|\n" "${vendor}" "${library}" "${name}" "[${version}](${core/${src_dir}\//})" "${description}">> ${file}
 	
-	company_prev=${company}
-	type_prev=${type}
+	vendor_prev=${vendor}
+	library_prev=${library}
 
     done
 }
