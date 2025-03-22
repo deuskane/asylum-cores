@@ -32,7 +32,7 @@ filesets:
     file_type    : vhdlSource
     #logical_name : asylum
     depend       :
-      - asylum:package:math_pkg
+      - asylum:utils:pkg
       
   #---------------------------------------
   # Testbench Files
@@ -85,6 +85,6 @@ provider  :
   name    : github
   user    : deuskane
   repo    : asylum-component-clock_divider
- #version : v2_0_0
-  version : ce060bccedc8930c9ed4b984a536339c48dde54b
+  version : asylum-component-clock_divider-2.0.0
+ #version : ce4550e7395b8a70be87fd38c748aeae5aeaecdb
 #<PROVIDER_END>

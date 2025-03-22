@@ -1,10 +1,10 @@
 CAPI=2:
 
 #-----------------------------------------------------------------------------
-# Title      : PBI Wrapper Target Core file
+# Title      : VHDL Package Core file
 # Project    : Asylum
 #-----------------------------------------------------------------------------
-# File       : pbi_wrapper_target.core
+# File       : utils_pkg.core
 # Author     : mrosiere
 #-----------------------------------------------------------------------------
 # Description: 
@@ -13,12 +13,16 @@ CAPI=2:
 #-----------------------------------------------------------------------------
 # Revisions  :
 # Date        Version  Author   Description
-# 2021-10-26  1.0.0    mrosiere Created
-# 2025-03-08  1.1.0    mrosiere Use unconstraint pbi
+# 2021-10-26  1.0.0    mrosiere math_pkg  : Created
+#                               pbi_pkg   : Created
+# 2025-01-11  1.1.0    mrosiere pbi_pkg   : Surcharge and / or
+# 2025-03-08  1.2.0    mrosiere pbi_pkg   : Use unconstrainted pbi
+# 2025-03-19  1.3.0    mrosiere logic_pkg : Created
+#                               string_pkg: Created
 #-----------------------------------------------------------------------------
 
-name        : asylum:component:pbi_wrapper_target:1.1.0
-description : PBI Generic wrapper for target IP
+name        : asylum:utils:pkg:1.3.0
+description : VHDL Utility Package
 
 filesets:
 
@@ -27,31 +31,29 @@ filesets:
   #---------------------------------------
   files_hdl:
     files:
-      - src/pbi_wrapper_target.vhd
-      - src/pbi_wrapper_target_v1.vhd
-    file_type    : vhdlSource-2008
-    #logical_name : asylum
-    depend       :
-      - asylum:utils:pkg
+      - src/convert_pkg.vhd
+      - src/logic_pkg.vhd
+      - src/math_pkg.vhd
+      - src/pbi_pkg.vhd
+      - src/string_pkg.vhd
+    file_type : vhdlSource
 
 targets:
 
   #---------------------------------------
   # Default Target
   #---------------------------------------
-  default: &default
-    description  : Default Target
-    filesets     :
+  default:
+    description : Default Target
+    filesets    :
       - files_hdl
-    toplevel     : pbi_wrapper_target
-    default_tool : ghdl
-
+  
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
 provider  :
   name    : github
   user    : deuskane
-  repo    : asylum-component-pbi_wrapper_target
-  version : asylum-component-pbi_wrapper_target-1.1.0
- #version : 09d5e4ad973c34e7c4b0032daf43483ccb180a6b
+  repo    : asylum-utils-pkg
+  version : asylum-utils-pkg-1.3.0
+ #version : 25237de47401d8ef93f47f05af8c35e2307adefd
 #<PROVIDER_END>

@@ -32,9 +32,9 @@ filesets:
     file_type : vhdlSource
     depend :
       - ">=asylum:processor:pbi_OpenBlaze8:1.0.0"
-      - ">=asylum:package:pbi_pkg:1.0.0"
-      - ">=asylum:component:gated_clock:1.0.0"
-      - ">=xilinx:processor:kcpsm:1.30"
+      - asylum:utils:pkg
+      - asylum:component:gated_clock
+      - xilinx:processor:kcpsm
       
 targets:
 
@@ -54,6 +54,6 @@ provider  :
   name    : github
   user    : deuskane
   repo    : asylum-processor-pbi_PicoBlaze
- #version : v1_2_0
-  version : 973bc4109bba866f3919082ec8541be95dd6449e
+  version : asylum-processor-pbi_PicoBlaze8-1.2.0
+ #version : 3863a8727125530da0a06fd372e7ae6bbe808b07
 #<PROVIDER_END>

@@ -50,8 +50,8 @@ filesets:
     #logical_name : asylum
     depend       :
       - asylum:utils:generators
+      - asylum:utils:pkg
       - asylum:component:pbi_wrapper_target
-      - asylum:package:pbi_pkg      
   #---------------------------------------
   sim:
   #---------------------------------------
@@ -95,6 +95,6 @@ provider  :
   name    : github
   user    : deuskane
   repo    : asylum-component-gpio
- #version : v1_3_0
-  version : a9731de623e03be1a5b64250caa8db9947b4a223
+  version : asylum-component-GPIO-1.3.0
+ #version : 3a484cfdfd9ae88d87bae8679a89a4cb8053ae18
 #<PROVIDER_END>

@@ -1165,6 +1165,6 @@ provider  :
   name    : github
   user    : deuskane
   repo    : xilinx-primitive-unisim
- #version : v11_1
-  version : ab38e85c67f928feef7afd09ef8e2c46e350084d
+  version : xilinx-primitive-unisim-11.1
+ #version : ab38e85c67f928feef7afd09ef8e2c46e350084d
 #<PROVIDER_END>

@@ -202,8 +202,8 @@ function import_main()
             echo "  name    : github"                    >> ${dst_core}
             echo "  user    : ${git_user}"               >> ${dst_core}
             echo "  repo    : ${git_repo}"               >> ${dst_core}
-            echo " #version : ${version}"                >> ${dst_core}
-            echo "  version : ${git_version}"            >> ${dst_core}
+            echo "  version : ${vlnv}"                   >> ${dst_core}
+            echo " #version : ${git_version}"            >> ${dst_core}
             echo "#<PROVIDER_END>"                       >> ${dst_core}
         fi
     done

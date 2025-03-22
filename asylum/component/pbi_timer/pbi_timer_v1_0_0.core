@@ -49,7 +49,7 @@ targets:
 provider  :
   name    : github
   user    : deuskane
-  repo    : asylum-component-pbi_timer
- #version : v1_0_0
-  version : b3d405626584b80f5bbf6810d019ab72eb9e5f5a
+  repo    : asylum-component-timer
+  version : asylum-component-pbi_timer-1.0.0
+ #version : 173224b099a28a04e5e12ec5d0ccb2e6cf2f3a16
 #<PROVIDER_END>

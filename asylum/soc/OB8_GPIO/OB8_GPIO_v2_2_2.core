@@ -457,6 +457,6 @@ provider  :
   name    : github
   user    : deuskane
   repo    : asylum-soc-OB8_gpio
- #version : v2_2_2
-  version : ea3b40008d16db8ff4e1d83f351c286928ffd47c
+  version : asylum-soc-OB8_GPIO-2.2.2
+ #version : c5cc8ede1a8939ab23ef4434d8fc2eadbb9b71d9
 #<PROVIDER_END>

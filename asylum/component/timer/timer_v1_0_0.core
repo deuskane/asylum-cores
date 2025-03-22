@@ -93,6 +93,6 @@ provider  :
   name    : github
   user    : deuskane
   repo    : asylum-component-timer
- #version : v1_0_0
-  version : 7e2c3ffcc7fe5f94f29f9aeb3829de4da5fd842c
+  version : asylum-component-timer-1.0.0
+ #version : 173224b099a28a04e5e12ec5d0ccb2e6cf2f3a16
 #<PROVIDER_END>

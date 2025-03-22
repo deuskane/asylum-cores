@@ -30,7 +30,7 @@ filesets:
       - src/ram_1r1w.vhd
     file_type : vhdlSource
     depend :
-      - ">=asylum:package:math_pkg:1.0.0"
+      - asylum:utils:pkg
       
   #---------------------------------------
   # Testbench Files
@@ -83,6 +83,6 @@ provider  :
   name    : github
   user    : deuskane
   repo    : asylum-component-ram_1r1w
- #version : v1_0_0
-  version : 6b4e58d100c4fd14e780a4dda7f729d36c646618
+  version : asylum-component-ram_1r1w-1.0.0
+ #version : a646b94db4c1026df52fd50e1a0fc16c01b57dd0
 #<PROVIDER_END>

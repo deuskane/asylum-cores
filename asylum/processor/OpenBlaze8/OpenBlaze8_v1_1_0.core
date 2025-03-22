@@ -727,6 +727,6 @@ provider  :
   name    : github
   user    : deuskane
   repo    : asylum-processor-OpenBlaze8
- #version : v1_1_0
-  version : 971b0c43eb7209489b624ff12a31edd227f081b4
+  version : asylum-processor-OpenBlaze8-1.1.0
+ #version : 971b0c43eb7209489b624ff12a31edd227f081b4
 #<PROVIDER_END>
