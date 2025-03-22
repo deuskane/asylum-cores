@@ -95,7 +95,7 @@ function dump_main()
 
 	fi;
 
-	printf "| %-20s | %-20s | %-20s | %-100s | %s|\n" "${vendor}" "${library}" "${name}" "[${version}](${core/${src_dir}\//})" "[url](${URL})" "${description}">> ${file}
+	printf "| %-20s | %-20s | %-20s | %-100s | %-20s | %s|\n" "${vendor}" "${library}" "${name}" "[${version}](${core/${src_dir}\//})" "[url](${URL})" "${description}">> ${file}
 	
 	vendor_prev=${vendor}
 	library_prev=${library}
