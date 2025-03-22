@@ -90,8 +90,8 @@ function dump_main()
 	then
 	    printf "## ${library}\n" >> ${file}
 
-	    printf "| %-20s | %-20s | %-20s | %-100s | %-20s | Description |\n" "Vendor" "Library" "Name" "URL" "Version" >> ${file}
-	    printf "| %-20s | %-20s | %-20s | %-100s | %-20s | --- |\n"         "---"     "---"    "---"  "---"  "---"     >> ${file}
+	    printf "| %-20s | %-20s | %-20s | %-100s | %-20s | Description |\n" "Vendor" "Library" "Name" "Version" "URL" >> ${file}
+	    printf "| %-20s | %-20s | %-20s | %-100s | %-20s | --- |\n"         "---"     "---"    "---"   "---"    "---" >> ${file}
 
 	fi;
 
