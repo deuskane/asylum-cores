@@ -1,0 +1,57 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : ICN Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : ICN.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2025
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2025-03-22  1.0.0    mrosiere Created
+# 2025-04-05  1.1.0    mrosiere Add Algo
+#-----------------------------------------------------------------------------
+
+name        : asylum:infrastructure:icn:1.1.0
+description : Interconnection
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  hdl:
+  #---------------------------------------
+    files        :
+      - src/pbi_icn.vhd
+    file_type    : vhdlSource
+   #logical_name : asylum
+    depend       :
+      - asylum:component:pbi_wrapper_target
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target
+    filesets        :
+      - hdl
+
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-infrastructure_icn
+  version : asylum-infrastructure-icn-1.1.0
+ #version : bb22e3ddc8e13bac9e4c77dff881695914f8597f
+#<PROVIDER_END>
