@@ -17,7 +17,7 @@ CAPI=2:
 #-----------------------------------------------------------------------------
 
 name : asylum:component:GPIO:1.0.0
-description : Clock Divider Cell
+description : GPIO Module
 
 filesets:
 

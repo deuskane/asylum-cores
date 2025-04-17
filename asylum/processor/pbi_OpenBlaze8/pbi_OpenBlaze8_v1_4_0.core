@@ -21,7 +21,7 @@ CAPI=2:
 #-----------------------------------------------------------------------------
 
 name        : asylum:processor:pbi_OpenBlaze8:1.4.0
-description : PBI Generic wrapper for target IP
+description : OpenBlaze8 Module with PBI interface 
 
 filesets:
 
