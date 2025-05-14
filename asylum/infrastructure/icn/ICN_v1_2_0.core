@@ -1,48 +1,39 @@
 CAPI=2:
 
 #-----------------------------------------------------------------------------
-# Title      : PBI PicoBlaze file
+# Title      : ICN Core file
 # Project    : Asylum
 #-----------------------------------------------------------------------------
-# File       : pbi_PicoBlaze8.core
+# File       : ICN.core
 # Author     : mrosiere
 #-----------------------------------------------------------------------------
 # Description: 
 #-----------------------------------------------------------------------------
-# Copyright (c) 2021
+# Copyright (c) 2025
 #-----------------------------------------------------------------------------
 # Revisions  :
 # Date        Version  Author   Description
-# 2021-10-26  1.0.0    mrosiere Created
-# 2025-01-21  1.1.0    mrosiere Fix busy usage
-# 2025-03-09  1.2.0    mrosiere Use unconstrainted pbi
-# 2025-04-14  1.3.0    mrosiere Add output ics_o
+# 2025-03-22  1.0.0    mrosiere Created
+# 2025-04-05  1.1.0    mrosiere Add Algo
+# 2025/05/08  1.2.0    mrosiere Change to into downto
 #-----------------------------------------------------------------------------
 
-name        : asylum:processor:pbi_PicoBlaze8:1.3.0
-description : PicoBlaze Module with PBI interface 
+name        : asylum:infrastructure:icn:1.2.0
+description : Interconnection
 
 #=========================================
 filesets:
 #=========================================
 
   #---------------------------------------
-  files_hdl:
+  hdl:
   #---------------------------------------
-    files:
-      - src/pbi_PicoBlaze.vhd
-    file_type : vhdlSource
-    depend :
-      - ">=asylum:processor:pbi_OpenBlaze8:1.0.0"
-      - asylum:utils:pkg
-     #- asylum:component:gated_clock
-      - xilinx:processor:kcpsm
-
-  #---------------------------------------
-  target_generic:
-  #---------------------------------------
-    depend :
-      - asylum:target:generic
+    files        :
+      - src/pbi_icn.vhd
+    file_type    : vhdlSource
+   #logical_name : asylum
+    depend       :
+      - asylum:component:pbi_wrapper_target
 
 #=========================================
 targets:
@@ -51,18 +42,17 @@ targets:
   #---------------------------------------
   default: &default
   #---------------------------------------
-    description  : Default Target
-    filesets     :
-      - files_hdl
-    toplevel     : pbi_PicoBlaze
-    default_tool : ghdl
+    description     : Default Target
+    filesets        :
+      - hdl
+
 
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
 provider  :
   name    : github
   user    : deuskane
-  repo    : asylum-processor-pbi_PicoBlaze
-  version : asylum-processor-pbi_PicoBlaze8-1.3.0
- #version : 691f66f2d5a0140c3e0849696ae42030d7b3b568
+  repo    : asylum-infrastructure_icn
+  version : asylum-infrastructure-icn-1.2.0
+ #version : 7eba2b1840155c31ece723488ed42ee7c0123a4f
 #<PROVIDER_END>

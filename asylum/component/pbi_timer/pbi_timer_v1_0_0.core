@@ -17,7 +17,7 @@ CAPI=2:
 #-----------------------------------------------------------------------------
 
 name : asylum:component:pbi_timer:1.0.0
-description : Timer Module with PBI interface
+description : PBI Generic wrapper for target IP
 
 filesets:
 

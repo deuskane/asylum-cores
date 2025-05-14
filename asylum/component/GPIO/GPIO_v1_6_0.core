@@ -1,29 +1,30 @@
 CAPI=2:
 
 #-----------------------------------------------------------------------------
-# Title      : UART
+# Title      : GPIO Core file
 # Project    : Asylum
 #-----------------------------------------------------------------------------
-# File       : uart.core
+# File       : GPIO.core
 # Author     : mrosiere
 #-----------------------------------------------------------------------------
 # Description: 
 #-----------------------------------------------------------------------------
-# Copyright (c) 2025
+# Copyright (c) 2021
 #-----------------------------------------------------------------------------
 # Revisions  :
 # Date        Version  Author   Description
-# 2025/01/21  1.0.0    mrosiere Created
-# 2025/02/05  1.1.0    mrosiere UART RX + check with loopback
-# 2025/03/09  1.2.0    mrosiere use unconstrained pbi
-# 2025/03/12  1.3.0    mrosiere Add CSR
-# 2025/03/22  1.4.0    mrosiere Use pbi instead reg interface for csr
-# 2025/04/02  1.5.0    mrosiere Remove pbi_target_wrapper
-# 2025/05/14  1.6.0    mrosiere Add parameter USER_DEFINE_BAUD_TICK and default value
+# 2021-10-26  1.0.0    mrosiere Created
+# 2022-03-31  1.1.0    mrosiere Update source code
+# 2025-03-01  1.2.0    mrosiere Add CSR
+# 2025-03-08  1.3.0    mrosiere Use unconstraint pbi
+# 2025-03-22  1.4.0    mrosiere Use pbi instead reg interface for csr
+# 2025-04-02  1.5.0    mrosiere Remove pbi_target_wrapper
+# 2025-05-14  1.6.0    mrosiere Delete parameters DATA_OE_FORCE,
+#                               csr use DATA_OE_INIT
 #-----------------------------------------------------------------------------
 
-name        : asylum:communication:uart:1.5.0
-description : UART TX and RX
+name        : asylum:component:GPIO:1.6.0
+description : GPIO Module
 
 #=========================================
 generate:
@@ -34,8 +35,8 @@ generate:
   #---------------------------------------
     generator : regtool
     parameters:
-      file         : src/csr/UART.hjson
-      name         : UART
+      file         : src/csr/GPIO.hjson
+      name         : GPIO
       copy         : src/csr
       #logical_name : asylum
 
@@ -44,17 +45,24 @@ filesets:
 #=========================================
 
   #---------------------------------------
-  rtl:
+  hdl:
   #---------------------------------------
-    files:
-      - src/uart_baud_rate_gen.vhd
-      - src/uart_rx_axis.vhd
-      - src/uart_tx_axis.vhd
-      - src/pbi_uart.vhd
-    file_type : vhdlSource
-    depend :
+    files        :
+      - src/GPIO.vhd
+      - src/pbi_GPIO.vhd
+    file_type    : vhdlSource
+    #logical_name : asylum
+    depend       :
+      - asylum:utils:generators
       - asylum:utils:pkg
       - asylum:component:pbi_wrapper_target
+  #---------------------------------------
+  sim:
+  #---------------------------------------
+    files:
+      - src/GPIO_v1.vhd
+      - sim/tb_GPIO_bidir.vhd
+    file_type : vhdlSource-2008
 
 #=========================================
 targets:
@@ -65,16 +73,32 @@ targets:
   #---------------------------------------
     description     : Default Target
     filesets        :
-      - rtl
+      - hdl
+    toplevel        : GPIO
+    default_tool    : ghdl
     generate        :
       - gen_csr
+
+  #---------------------------------------
+  sim_testcase:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of all cases
+    filesets_append :
+      - sim
+    toplevel        : tb_GPIO_bidir
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        run_options : ["--vcd=dut.vcd"]
+
 
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
 provider  :
   name    : github
   user    : deuskane
-  repo    : asylum-communication-uart
-  version : asylum-communication-uart-1.5.0
- #version : 7decbc4105c89fd738086d6ce452f5a5bbc69d6d
+  repo    : asylum-component-gpio
+  version : asylum-component-GPIO-1.6.0
+ #version : 88bcc95ef24f26032842722173531ecef671652a
 #<PROVIDER_END>
