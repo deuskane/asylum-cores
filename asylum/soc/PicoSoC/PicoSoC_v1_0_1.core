@@ -108,7 +108,7 @@ parameters :
 provider  :
   name    : github
   user    : deuskane
-  repo    : asylum-soc-OB8_gpio
+  repo    : asylum-soc-picosoc
  #version : v1_0_1
   version : 1c657a0d3ae9cd95772ec75ac4b1ffd3cf02af8a
 #<PROVIDER_END>
