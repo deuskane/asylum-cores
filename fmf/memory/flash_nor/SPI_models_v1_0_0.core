@@ -1,0 +1,70 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : SPI Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : SPI.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2025
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 13/06/2025  1.0.0    mrosiere First Release
+#-----------------------------------------------------------------------------
+
+name        : fmf:memory:flash_nor:1.0.0
+description : SPI Flash NOR
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  pkg_fmf:
+  #---------------------------------------
+    files:
+      - sim/utilities/conversions.vhd
+      - sim/utilities/gen_utils.vhd
+    logical_name : fmf
+    file_type    : vhdlSource-2008
+
+  #---------------------------------------
+  models:
+  #---------------------------------------
+    files:
+      - sim/models/m25p40.vhd
+      - sim/models/m45pe80.vhd
+      - sim/models/s25fl064p.vhd
+      - sim/models/s25fl512s.vhd
+      - sim/models/s35hl256t.vhd
+      - sim/models/memory.mem         : {file_type : user, copyto : memory.mem}
+      - sim/models/memoryOTP.mem      : {file_type : user, copyto : memoryOTP.mem}
+#    logical_name : work
+    file_type    : vhdlSource-2008
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target
+    filesets        :
+      - pkg_fmf
+      - models
+
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-communication-spi
+  version : fmf-memory-flash_nor-1.0.0
+ #version : 5c6614b3f32676058ae777fcf9751b86c978a90a
+#<PROVIDER_END>
