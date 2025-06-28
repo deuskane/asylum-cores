@@ -1,0 +1,81 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : UART
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : uart.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2025
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2025/01/21  1.0.0    mrosiere Created
+# 2025/02/05  1.1.0    mrosiere UART RX + check with loopback
+# 2025/03/09  1.2.0    mrosiere use unconstrained pbi
+# 2025/03/12  1.3.0    mrosiere Add CSR
+# 2025/03/22  1.4.0    mrosiere Use pbi instead reg interface for csr
+# 2025/04/02  1.5.0    mrosiere Remove pbi_target_wrapper
+# 2025/05/14  1.6.0    mrosiere Add parameter USER_DEFINE_BAUD_TICK and default value
+# 2025/06/21  1.6.1    mrosiere Dump FIFO activity in file
+#-----------------------------------------------------------------------------
+
+name        : asylum:communication:uart:1.6.1
+description : UART TX and RX
+
+#=========================================
+generate:
+#=========================================
+
+  #---------------------------------------
+  gen_csr:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : src/csr/UART.hjson
+      name         : UART
+      copy         : src/csr
+      #logical_name : asylum
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  rtl:
+  #---------------------------------------
+    files:
+      - src/uart_baud_rate_gen.vhd
+      - src/uart_rx_axis.vhd
+      - src/uart_tx_axis.vhd
+      - src/pbi_uart.vhd
+    file_type : vhdlSource
+    depend :
+      - asylum:utils:pkg
+      - asylum:component:pbi_wrapper_target
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target
+    filesets        :
+      - rtl
+    generate        :
+      - gen_csr
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-communication-uart
+  version : asylum-communication-uart-1.6.1
+ #version : 0d3021b2404b8c6e5cabdf7f76e19f3cbda45c43
+#<PROVIDER_END>

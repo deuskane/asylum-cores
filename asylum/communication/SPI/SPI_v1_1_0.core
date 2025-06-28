@@ -1,0 +1,136 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : SPI Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : SPI.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2025
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 13/06/2025  1.0.0    mrosiere First Release
+# 21/06/2025  1.0.1    mrosiere Dump FIFO activity in file
+# 25/06/2025  1.1.0    mrosiere Add STOP special case
+#-----------------------------------------------------------------------------
+
+name        : asylum:communication:SPI:1.1.0
+description : SPI Module
+
+#=========================================
+generate:
+#=========================================
+
+  #---------------------------------------
+  gen_csr:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : src/csr/SPI.hjson
+      name         : SPI
+      copy         : src/csr
+      #logical_name : asylum
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  hdl:
+  #---------------------------------------
+    files        :
+      - src/spi_master.vhd
+      - src/pbi_SPI.vhd
+    file_type    : vhdlSource
+#    logical_name : work
+    depend       :
+      - asylum:utils:generators
+      - asylum:utils:pkg
+      - asylum:component:pbi_wrapper_target
+
+  #---------------------------------------
+  sim_basic:
+  #---------------------------------------
+    files:
+      - sim/basic/tb_SPI.vhd
+      - sim/basic/tb_SPI_pkg.vhd
+#    logical_name : work
+    file_type : vhdlSource-2008
+
+  #---------------------------------------
+  pkg_fmf:
+  #---------------------------------------
+    files:
+      - sim/utilities/conversions.vhd
+      - sim/utilities/gen_utils.vhd
+    logical_name : fmf
+    file_type    : vhdlSource-2008
+
+  #---------------------------------------
+  models:
+  #---------------------------------------
+    files:
+      - sim/basic/tb_SPI_pkg.vhd
+      - sim/models/tb_SPI.vhd
+#    logical_name : work
+    file_type    : vhdlSource-2008
+    depend       :
+      - fmf:memory:flash_nor
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target
+    filesets        :
+      - hdl
+    toplevel        : SPI
+    default_tool    : ghdl
+    generate        :
+      - gen_csr
+
+  #---------------------------------------
+  sim_basic:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of basic unit tests
+    filesets_append :
+      - sim_basic
+    toplevel        : tb
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall"]
+        run_options     : ["--fst=dut.fst"]
+
+  #---------------------------------------
+  sim_m25p40:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of m25p40
+    filesets_append :
+      - pkg_fmf
+      - models
+    toplevel        : tb
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-frelaxed","--no-vital-checks","-Wall"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-communication-spi
+  version : asylum-communication-SPI-1.1.0
+ #version : 5c6614b3f32676058ae777fcf9751b86c978a90a
+#<PROVIDER_END>
