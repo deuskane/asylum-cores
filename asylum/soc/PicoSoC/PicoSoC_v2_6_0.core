@@ -161,7 +161,7 @@ filesets:
       - ">=asylum:communication:uart:1.0.0"
       - ">=asylum:communication:SPI:1.0.0"
       - ">=asylum:infrastructure:icn:1.0.0"
-      - ">=asylum:communication:GIC:1.0.0"
+      - ">=asylum:system:GIC:1.0.0"
       
   #---------------------------------------
   files_sim:

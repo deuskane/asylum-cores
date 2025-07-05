@@ -2,7 +2,6 @@
 ## communication
 | Vendor               | Library              | Name                 | Version                                                                                              | URL                  | Description |
 | ---                  | ---                  | ---                  | ---                                                                                                  | ---                  | --- |
-| asylum               | communication        | GIC                  | [1.0.0](asylum/communication/GIC/GIC_v1_0_0.core)                                                    | [url](https://github.com/deuskane/asylum-system-gic/tree/asylum-communication-GIC-1.0.0) |  GIC Module|
 | asylum               | communication        | SPI                  | [1.1.0](asylum/communication/SPI/SPI_v1_1_0.core)                                                    | [url](https://github.com/deuskane/asylum-communication-spi/tree/asylum-communication-SPI-1.1.0) |  SPI Module|
 | asylum               | communication        | uart                 | [1.0.0](asylum/communication/uart/uart_v1_0_0.core)                                                  | [url](https://github.com/deuskane/asylum-communication-uart/tree/dead01020d17d8137cc1febfdd5dcd7162478d42) |  UART TX and RX|
 | asylum               | communication        | uart                 | [1.1.0](asylum/communication/uart/uart_v1_1_0.core)                                                  | [url](https://github.com/deuskane/asylum-communication-uart/tree/efc655fce120ef778e4b0859b063e31eb886211a) |  UART TX and RX|
@@ -77,6 +76,10 @@
 | asylum               | soc                  | PicoSoC              | [2.4.0](asylum/soc/PicoSoC/PicoSoC_v2_4_0.core)                                                      | [url](https://github.com/deuskane/asylum-soc-picosoc/tree/asylum-soc-PicoSoC-2.4.0) |  SoC with OpenBlaze8, switch, led and UART|
 | asylum               | soc                  | PicoSoC              | [2.5.0](asylum/soc/PicoSoC/PicoSoC_v2_5_0.core)                                                      | [url](https://github.com/deuskane/asylum-soc-picosoc/tree/asylum-soc-PicoSoC-2.5.0) |  SoC with OpenBlaze8, switch, led and UART|
 | asylum               | soc                  | PicoSoC              | [2.6.0](asylum/soc/PicoSoC/PicoSoC_v2_6_0.core)                                                      | [url](https://github.com/deuskane/asylum-soc-picosoc/tree/asylum-soc-PicoSoC-2.6.0) |  SoC with OpenBlaze8, switch, led, UART, SPI and GIC|
+## system
+| Vendor               | Library              | Name                 | Version                                                                                              | URL                  | Description |
+| ---                  | ---                  | ---                  | ---                                                                                                  | ---                  | --- |
+| asylum               | system               | GIC                  | [1.0.0](asylum/system/GIC/GIC_v1_0_0.core)                                                           | [url](https://github.com/deuskane/asylum-system-gic/tree/asylum-communication-GIC-1.0.0) |  GIC Module|
 ## target
 | Vendor               | Library              | Name                 | Version                                                                                              | URL                  | Description |
 | ---                  | ---                  | ---                  | ---                                                                                                  | ---                  | --- |

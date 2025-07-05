@@ -16,7 +16,7 @@ CAPI=2:
 # 28/06/2025  1.0.0    mrosiere First Release
 #-----------------------------------------------------------------------------
 
-name        : asylum:communication:GIC:1.0.0
+name        : asylum:system:GIC:1.0.0
 description : GIC Module
 
 #=========================================
