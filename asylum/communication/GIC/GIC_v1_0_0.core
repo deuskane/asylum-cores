@@ -1,0 +1,77 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : GIC Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : GIC.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2025
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 28/06/2025  1.0.0    mrosiere First Release
+#-----------------------------------------------------------------------------
+
+name        : asylum:communication:GIC:1.0.0
+description : GIC Module
+
+#=========================================
+generate:
+#=========================================
+
+  #---------------------------------------
+  gen_csr:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : src/csr/GIC.hjson
+      name         : GIC
+      copy         : src/csr
+      #logical_name : asylum
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  hdl:
+  #---------------------------------------
+    files        :
+      - src/it_ctrl.vhd
+      - src/pbi_GIC.vhd
+    file_type    : vhdlSource
+#    logical_name : work
+    depend       :
+      - asylum:utils:generators
+      - asylum:utils:pkg
+      - asylum:component:pbi_wrapper_target
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target
+    filesets        :
+      - hdl
+    toplevel        : GIC
+    default_tool    : ghdl
+    generate        :
+      - gen_csr
+
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-system-gic
+  version : asylum-communication-GIC-1.0.0
+ #version : 74fba19dadb647621617307abb7847cffa829277
+#<PROVIDER_END>
