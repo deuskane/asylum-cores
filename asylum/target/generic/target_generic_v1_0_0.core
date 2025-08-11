@@ -74,7 +74,7 @@ parameters :
 provider  :
   name    : github
   user    : deuskane
-  repo    : asylum-target-generic
+  repo    : asylum-target
   version : asylum-target-generic-1.0.0
  #version : 9b1f8a12dde88e64ec0a950d8d4fa07b39e18c0c
 #<PROVIDER_END>
