@@ -82,7 +82,7 @@ parameters :
 provider  :
   name    : github
   user    : deuskane
-  repo    : asylum-component-ram_1r1w
+  repo    : asylum-component-ram
   version : asylum-component-ram_1r1w-1.0.0
  #version : a646b94db4c1026df52fd50e1a0fc16c01b57dd0
 #<PROVIDER_END>
