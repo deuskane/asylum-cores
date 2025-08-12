@@ -65,10 +65,6 @@ targets:
         analyze_options : ["-fsynopsys"]
         run_options     : 
 
-#=========================================
-parameters :
-#=========================================
-
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
 provider  :
