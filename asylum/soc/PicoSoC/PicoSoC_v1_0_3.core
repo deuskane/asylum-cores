@@ -155,7 +155,7 @@ targets:
       - RESET_POLARITY=neg
     tools:
       nxmap:
-        board   : 
+       #board   : 
         fpga    : NG-MEDIUM
         program : True
     toplevel : PicoSoC

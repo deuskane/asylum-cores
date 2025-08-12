@@ -278,7 +278,7 @@ targets:
       - FAULT_INJECTION=true
     tools:
       nxmap:
-        board   : 
+       #board   : 
         fpga    : NG-MEDIUM
         program : True
     toplevel : PicoSoC_top
