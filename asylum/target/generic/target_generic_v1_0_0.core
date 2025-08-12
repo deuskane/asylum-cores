@@ -63,7 +63,7 @@ targets:
     tools :
       ghdl :
         analyze_options : ["-fsynopsys"]
-        run_options     : 
+       #run_options     : 
 
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
