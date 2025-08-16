@@ -305,21 +305,21 @@ filesets:
   #---------------------------------------
   files_hdl:
     files     :
-      - src/OpenBlaze8_ALU.vhd
-      - src/OpenBlaze8_Clock.vhd
-      - src/OpenBlaze8_Control.vhd
-      - src/OpenBlaze8_Decode.vhd
-      - src/OpenBlaze8_Flags.vhd
-      - src/OpenBlaze8_Interrupt.vhd
-      - src/OpenBlaze8_LoadStore.vhd
-      - src/OpenBlaze8_Operand.vhd
-      - src/OpenBlaze8_pkg.vhd
-      - src/OpenBlaze8_Program_Counter.vhd
-      - src/OpenBlaze8_RAM.vhd
-      - src/OpenBlaze8_RegFile.vhd
-      - src/OpenBlaze8_Result.vhd
-      - src/OpenBlaze8_Stack.vhd
-      - src/OpenBlaze8.vhd
+      - hdl/OpenBlaze8_ALU.vhd
+      - hdl/OpenBlaze8_Clock.vhd
+      - hdl/OpenBlaze8_Control.vhd
+      - hdl/OpenBlaze8_Decode.vhd
+      - hdl/OpenBlaze8_Flags.vhd
+      - hdl/OpenBlaze8_Interrupt.vhd
+      - hdl/OpenBlaze8_LoadStore.vhd
+      - hdl/OpenBlaze8_Operand.vhd
+      - hdl/OpenBlaze8_pkg.vhd
+      - hdl/OpenBlaze8_Program_Counter.vhd
+      - hdl/OpenBlaze8_RAM.vhd
+      - hdl/OpenBlaze8_RegFile.vhd
+      - hdl/OpenBlaze8_Result.vhd
+      - hdl/OpenBlaze8_Stack.vhd
+      - hdl/OpenBlaze8.vhd
     file_type : vhdlSource
     depend    :
       - ">=asylum:component:ram_1r1w:1.0.0"
@@ -728,5 +728,5 @@ provider  :
   user    : deuskane
   repo    : asylum-processor-OpenBlaze8
   version : asylum-processor-OpenBlaze8-1.1.0
- #version : 971b0c43eb7209489b624ff12a31edd227f081b4
+ #version : 718d03fe419e43f3ed2e4ca83ae4d588a3f32625
 #<PROVIDER_END>

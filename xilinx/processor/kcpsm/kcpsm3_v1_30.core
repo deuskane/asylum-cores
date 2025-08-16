@@ -10,7 +10,7 @@ filesets:
   #---------------------------------------
   files_hdl:
     files     :
-      - src/kcpsm3.vhd
+      - hdl/kcpsm3.vhd
     file_type : vhdlSource
     depend    :
       - ">=xilinx:primitive:unisim:11.1"
@@ -39,5 +39,5 @@ provider  :
   user    : deuskane
   repo    : xilinx-processor-kcpsm3
   version : xilinx-processor-kcpsm-1.30
- #version : c6f2d19fd14a86ba64907956b0fcedf1be47ec96
+ #version : 7d6d2fed7818a38332d84bc7e3710d0aa3df3ef7
 #<PROVIDER_END>

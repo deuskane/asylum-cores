@@ -31,7 +31,7 @@ filesets:
   #---------------------------------------
   files_hdl:
     files:
-      - src/pbi_OpenBlaze8.vhd
+      - hdl/pbi_OpenBlaze8.vhd
     file_type : vhdlSource
     depend :
       - ">=asylum:processor:OpenBlaze8:1.0.0"
@@ -56,5 +56,5 @@ provider  :
   user    : deuskane
   repo    : asylum-processor-pbi_OpenBlaze8
   version : asylum-processor-pbi_OpenBlaze8-1.5.0
- #version : 71f26fa79c9fa95c626fb08cb395da00ac25a4ff
+ #version : eac97956c88935a226d47183cea2a80e4b88b6dd
 #<PROVIDER_END>

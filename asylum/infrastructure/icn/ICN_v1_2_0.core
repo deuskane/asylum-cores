@@ -29,7 +29,7 @@ filesets:
   hdl:
   #---------------------------------------
     files        :
-      - src/pbi_icn.vhd
+      - hdl/pbi_icn.vhd
     file_type    : vhdlSource
    #logical_name : asylum
     depend       :
@@ -54,5 +54,5 @@ provider  :
   user    : deuskane
   repo    : asylum-infrastructure_icn
   version : asylum-infrastructure-icn-1.2.0
- #version : 7eba2b1840155c31ece723488ed42ee7c0123a4f
+ #version : 0ff9dda6043e9794e391c7b721ffadd765e89c21
 #<PROVIDER_END>

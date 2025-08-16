@@ -27,7 +27,7 @@ filesets:
   #---------------------------------------
   files_hdl:
     files     :
-      - src/timer.vhd
+      - hdl/timer.vhd
     file_type : vhdlSource
       
   #---------------------------------------
@@ -94,5 +94,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-timer
   version : asylum-component-timer-1.0.0
- #version : 173224b099a28a04e5e12ec5d0ccb2e6cf2f3a16
+ #version : 8422fe2769bbc5e3d9b9bc06e469d89a3e0e71ad
 #<PROVIDER_END>

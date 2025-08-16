@@ -33,11 +33,11 @@ filesets:
   #---------------------------------------
   files_hdl:
     files:
-      - src/convert_pkg.vhd
-      - src/logic_pkg.vhd
-      - src/math_pkg.vhd
-      - src/pbi_pkg.vhd
-      - src/string_pkg.vhd
+      - hdl/convert_pkg.vhd
+      - hdl/logic_pkg.vhd
+      - hdl/math_pkg.vhd
+      - hdl/pbi_pkg.vhd
+      - hdl/string_pkg.vhd
     file_type : vhdlSource
 
 targets:
@@ -57,5 +57,5 @@ provider  :
   user    : deuskane
   repo    : asylum-utils-pkg
   version : asylum-utils-pkg-1.5.0
- #version : 28728f202372a544ecb9edc319ffb00862c3c55f
+ #version : 756f7682975b144fdd03f5265be50b866d33231b
 #<PROVIDER_END>

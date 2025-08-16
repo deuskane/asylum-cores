@@ -35,9 +35,9 @@ generate:
   #---------------------------------------
     generator : regtool
     parameters:
-      file         : src/csr/GPIO.hjson
+      file         : hdl/csr/GPIO.hjson
       name         : GPIO
-      copy         : src/csr
+      copy         : hdl/csr
       #logical_name : asylum
 
 #=========================================
@@ -48,8 +48,8 @@ filesets:
   hdl:
   #---------------------------------------
     files        :
-      - src/GPIO.vhd
-      - src/pbi_GPIO.vhd
+      - hdl/GPIO.vhd
+      - hdl/pbi_GPIO.vhd
     file_type    : vhdlSource
     #logical_name : asylum
     depend       :
@@ -60,7 +60,7 @@ filesets:
   sim:
   #---------------------------------------
     files:
-      - src/GPIO_v1.vhd
+      - hdl/GPIO_v1.vhd
       - sim/tb_GPIO_bidir.vhd
     file_type : vhdlSource-2008
 
@@ -100,5 +100,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-gpio
   version : asylum-component-GPIO-1.6.0
- #version : 88bcc95ef24f26032842722173531ecef671652a
+ #version : 3097e5fa85281a7096eed0e26775b6312e75a579
 #<PROVIDER_END>

@@ -26,8 +26,8 @@ filesets:
   #---------------------------------------
   files_hdl:
     files     :
-      - src/stack_pkg.vhd
-      - src/stack.vhd
+      - hdl/stack_pkg.vhd
+      - hdl/stack.vhd
     file_type : vhdlSource
     depend    :
       - ">=asylum:component:ram_1r1w:1.0.0"
@@ -90,5 +90,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-stack
   version : asylum-component-stack-1.0.0
- #version : 8b4c95073b1a51d3acee07fc63a50696470ff0a1
+ #version : 9769a00f3945bbe8ae0e2be4727bc05417c40d02
 #<PROVIDER_END>
