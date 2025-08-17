@@ -1,0 +1,80 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : GIC Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : GIC.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2025
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2025/06/28  1.0.0    mrosiere First Release
+# 2025/07/30  1.1.0    mrosiere Add package
+#-----------------------------------------------------------------------------
+
+name        : asylum:system:GIC:1.1.0
+description : GIC Module
+
+#=========================================
+generate:
+#=========================================
+
+  #---------------------------------------
+  gen_csr:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : hdl/csr/GIC.hjson
+      name         : GIC
+      copy         : hdl/csr
+      #logical_name : asylum
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  hdl:
+  #---------------------------------------
+    files        :
+      - hdl/GIC_pkg.vhd
+      - hdl/it_ctrl.vhd
+      - hdl/GIC_core.vhd
+      - hdl/pbi_GIC.vhd
+    file_type    : vhdlSource
+#    logical_name : work
+    depend       :
+      - asylum:utils:generators
+      - asylum:utils:pkg
+      - asylum:component:pbi_wrapper_target
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target
+    filesets        :
+      - hdl
+    toplevel        : GIC
+    default_tool    : ghdl
+    generate        :
+      - gen_csr
+
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-system-gic
+  version : asylum-system-GIC-1.1.0
+ #version : 2b77ba8f5f74c7d1990e5a0944f4dac1ef29ae17
+#<PROVIDER_END>

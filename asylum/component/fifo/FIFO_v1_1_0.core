@@ -1,0 +1,70 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : FIFO Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : FIFO.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2025
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2025/07/05  1.0.0    mrosiere First Release
+# 2025/07/28  1.1.0    mrosiere Add flags full/empty in each side
+#-----------------------------------------------------------------------------
+
+name        : asylum:component:fifo:1.1.0
+description : FIFO Module
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  hdl:
+  #---------------------------------------
+    files        :
+      - hdl/fifo_pkg.vhd
+      - hdl/fifo_sync.vhd
+    file_type    : vhdlSource
+    #logical_name : asylum
+    depend       :
+      - asylum:utils:pkg
+      - asylum:component:ram_1r1w
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target
+    filesets        :
+      - hdl
+
+  #---------------------------------------
+  lint :
+  #---------------------------------------
+    << : *default
+    description     : Simulation of basic unit tests
+    toplevel        : fifo_sync
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall"]
+        
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-component-fifo
+  version : asylum-component-fifo-1.1.0
+ #version : 0102735077017cad9cb5c0b76e44ffac464a27fa
+#<PROVIDER_END>

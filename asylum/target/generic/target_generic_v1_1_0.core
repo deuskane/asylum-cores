@@ -1,0 +1,77 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : 
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : target_generic.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: Inferred Technology Cells
+#-----------------------------------------------------------------------------
+# Copyright (c) 2025
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2025-01-06  1.0.0    mrosiere Created
+# 2025-08-11  1.1.0    mrosiere Add cbufg
+#-----------------------------------------------------------------------------
+
+name        : asylum:target:generic:1.1.0
+description : Inferred Technology Cells
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  hdl:
+  #---------------------------------------
+    files:
+      - hdl/generic/cbufg.vhd
+      - hdl/generic/cgate.vhd
+      - hdl/generic/sync2dff.vhd
+      - hdl/generic/sync2dffrn.vhd
+    file_type : vhdlSource
+
+  #---------------------------------------
+  sim:
+  #---------------------------------------
+    files:
+      - sim/src/tb_dummy.vhd
+    file_type : vhdlSource
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target (DON'T RUN)
+    filesets        :
+      - hdl
+    default_tool    : ghdl
+
+  #---------------------------------------
+  lint: &lint
+  #---------------------------------------
+    << : *default
+    description     : Lint
+    default_tool    : ghdl
+    toplevel        : tb_dummy
+    filesets_append :
+      - sim
+    tools :
+      ghdl :
+        analyze_options : ["-fsynopsys"]
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-target-techmap
+  version : asylum-target-generic-1.1.0
+ #version : b37b7e29569d018dd900028b18c0e02521c68395
+#<PROVIDER_END>

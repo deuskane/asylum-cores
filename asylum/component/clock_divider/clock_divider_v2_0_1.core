@@ -1,0 +1,92 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : Clock Divider Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : clock_divider.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description#
+# 2021-10-26  1.0.0    mrosiere Created
+# 2022-02-11  1.1.0    mrosiere Ratio parameter is string, delete GATED_CLOCK
+# 2022-02-27  2.0.0    mrosiere Create real 50% duty cycle
+# 2025-08-13  2.0.1    mrosiere Instanciate Clock Buffer after clock divider
+#-----------------------------------------------------------------------------
+
+name : asylum:component:clock_divider:2.0.1
+description : Clock Divider Cell
+
+filesets:
+
+  #---------------------------------------
+  # Source Files
+  #---------------------------------------
+  files_hdl:
+    files:
+      - hdl/clock_divider.vhd
+    file_type    : vhdlSource
+    #logical_name : asylum
+    depend       :
+      - asylum:utils:pkg
+      - asylum:target:techmap
+      
+  #---------------------------------------
+  # Testbench Files
+  #---------------------------------------
+  files_sim:
+    files:
+      - sim/tb_clock_divider.vhd
+    file_type : vhdlSource
+
+targets:
+
+  #---------------------------------------
+  # Default Target
+  #---------------------------------------
+  default: &default
+    description     : Default Target
+    filesets        :
+      - files_hdl
+    toplevel        : clock_divider
+    default_tool    : ghdl
+
+  sim:
+    << : *default
+    description     : Simulation of all cases
+    filesets_append :
+      - files_sim
+    toplevel        : tb_clock_divider
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        run_options : ["--vcd=dut.vcd"]
+
+parameters :
+
+  RATIO :
+    description : fixed clock division ratio
+    datatype    : int
+    default     : 2
+    paramtype   : generic
+
+  ALGO :
+    description : Clock division algorithm ("pulse" / "50%")
+    datatype    : str
+    default     : pulse
+    paramtype   : generic
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-component-clock_divider
+  version : asylum-component-clock_divider-2.0.1
+ #version : cc43f65320fe7ce1c525c6e083f2b99a3fa928d4
+#<PROVIDER_END>

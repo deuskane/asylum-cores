@@ -1,0 +1,58 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : 
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : target_techmap.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: Wrapper for technology cells
+#-----------------------------------------------------------------------------
+# Copyright (c) 2025
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2025-08-11  1.0.0    mrosiere Created
+#-----------------------------------------------------------------------------
+
+name        : asylum:target:techmap:1.0.0
+description : Wrapper for technology cells
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  target_generic:
+  #---------------------------------------
+    depend:
+      - asylum:target:generic
+
+  #---------------------------------------
+  target_nanoxplore_ng_medium:
+  #---------------------------------------
+    depend:
+      - nanoxplore:target:ng_medium
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target (DON'T RUN)
+    filesets        :
+      -  "TARGET_NANOXPLORE_NG_MEDIUM ? (target_nanoxplore_ng_medium)"
+      - "!TARGET_NANOXPLORE_NG_MEDIUM ? (target_generic)"
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-target-techmap
+  version : asylum-target-techmap-1.0.0
+ #version : b37b7e29569d018dd900028b18c0e02521c68395
+#<PROVIDER_END>

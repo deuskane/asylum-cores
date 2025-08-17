@@ -1,0 +1,55 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : 
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : target_medium.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: Technology Cells for FPGA NG_MEDIUM from NanoXplore
+#-----------------------------------------------------------------------------
+# Copyright (c) 2025
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2025-08-11  1.0.0    mrosiere Created
+#-----------------------------------------------------------------------------
+
+name        : nanoxplore:target:ng_medium:1.0.0
+description : Technology Cells for FPGA NG_MEDIUM from NanoXplore
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  hdl:
+  #---------------------------------------
+    files:
+      - hdl/ng_medium/cbufg.vhd
+      - hdl/generic/cgate.vhd
+      - hdl/generic/sync2dff.vhd
+      - hdl/generic/sync2dffrn.vhd
+    file_type : vhdlSource
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target (DON'T RUN)
+    filesets        :
+      - hdl
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-target-techmap
+  version : nanoxplore-target-ng_medium-1.0.0
+ #version : b37b7e29569d018dd900028b18c0e02521c68395
+#<PROVIDER_END>
