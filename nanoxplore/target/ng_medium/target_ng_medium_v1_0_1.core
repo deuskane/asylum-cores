@@ -4,36 +4,36 @@ CAPI=2:
 # Title      : 
 # Project    : Asylum
 #-----------------------------------------------------------------------------
-# File       : target_techmap.core
+# File       : target_medium.core
 # Author     : mrosiere
 #-----------------------------------------------------------------------------
-# Description: Wrapper for technology cells
+# Description: Technology Cells for FPGA NG_MEDIUM from NanoXplore
 #-----------------------------------------------------------------------------
 # Copyright (c) 2025
 #-----------------------------------------------------------------------------
 # Revisions  :
 # Date        Version  Author   Description
 # 2025-08-11  1.0.0    mrosiere Created
+# 2025-09-06  1.0.1    mrosiere Add package
 #-----------------------------------------------------------------------------
 
-name        : asylum:target:techmap:1.0.0
-description : Wrapper for technology cells
+name        : nanoxplore:target:ng_medium:1.0.1
+description : Technology Cells for FPGA NG_MEDIUM from NanoXplore
 
 #=========================================
 filesets:
 #=========================================
 
   #---------------------------------------
-  target_generic:
+  hdl:
   #---------------------------------------
-    depend:
-      - asylum:target:generic
-
-  #---------------------------------------
-  target_nanoxplore_ng_medium:
-  #---------------------------------------
-    depend:
-      - nanoxplore:target:ng_medium
+    files:
+      - hdl/generic/techmap_pkg.vhd
+      - hdl/ng_medium/cbufg.vhd
+      - hdl/generic/cgate.vhd
+      - hdl/generic/sync2dff.vhd
+      - hdl/generic/sync2dffrn.vhd
+    file_type : vhdlSource
 
 #=========================================
 targets:
@@ -44,8 +44,7 @@ targets:
   #---------------------------------------
     description     : Default Target (DON'T RUN)
     filesets        :
-      -  "TARGET_NANOXPLORE_NG_MEDIUM ? (target_nanoxplore_ng_medium)"
-      - "!TARGET_NANOXPLORE_NG_MEDIUM ? (target_generic)"
+      - hdl
 
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
@@ -53,6 +52,6 @@ provider  :
   name    : github
   user    : deuskane
   repo    : asylum-target-techmap
-  version : asylum-target-techmap-1.0.0
+  version : nanoxplore-target-ng_medium-1.0.1
  #version : 5f54cbddbabde4280b81aca09d75b3412628b18f
 #<PROVIDER_END>

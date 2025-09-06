@@ -1,0 +1,62 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : PBI OpenBlaze8 file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : pbi_OpenBlaze8.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2021-10-26  1.0.0    mrosiere Created
+# 2025-01-21  1.1.0    mrosiere Fix busy usage
+# 2025-03-09  1.2.0    mrosiere Use unconstrainted pbi
+# 2025-03-15  1.3.0    mrosiere Stall idata_i when cke desasserted
+# 2025-04-14  1.4.0    mrosiere Add output ics_o
+# 2025-05-08  1.5.0    mrosiere data cs depend of re and we
+# 2025-09-05  1.5.1    mrosiere Add Package
+#-----------------------------------------------------------------------------
+
+name        : asylum:processor:pbi_OpenBlaze8:1.5.1
+description : OpenBlaze8 Module with PBI interface 
+
+filesets:
+
+  #---------------------------------------
+  # Source Files
+  #---------------------------------------
+  files_hdl:
+    files:
+      - hdl/pbi_OpenBlaze8_pkg.vhd
+      - hdl/pbi_OpenBlaze8.vhd
+    file_type : vhdlSource
+    depend :
+      - ">=asylum:processor:OpenBlaze8:1.0.0"
+      - asylum:utils:pkg
+
+targets:
+
+  #---------------------------------------
+  # Default Target
+  #---------------------------------------
+  default: &default
+    description  : Default Target
+    filesets     :
+      - files_hdl
+    toplevel     : pbi_OpenBlaze8
+    default_tool : ghdl
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-processor-pbi_OpenBlaze8
+  version : asylum-processor-pbi_OpenBlaze8-1.5.1
+ #version : d27c84b6ac668c30c4a01d1d30849c02de756d37
+#<PROVIDER_END>

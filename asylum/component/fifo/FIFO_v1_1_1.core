@@ -1,39 +1,41 @@
 CAPI=2:
 
 #-----------------------------------------------------------------------------
-# Title      : 
+# Title      : FIFO Core file
 # Project    : Asylum
 #-----------------------------------------------------------------------------
-# File       : target_techmap.core
+# File       : FIFO.core
 # Author     : mrosiere
 #-----------------------------------------------------------------------------
-# Description: Wrapper for technology cells
+# Description: 
 #-----------------------------------------------------------------------------
 # Copyright (c) 2025
 #-----------------------------------------------------------------------------
 # Revisions  :
 # Date        Version  Author   Description
-# 2025-08-11  1.0.0    mrosiere Created
+# 2025-07-05  1.0.0    mrosiere First Release
+# 2025-07-28  1.1.0    mrosiere Add flags full/empty in each side
+# 2025-09-06  1.1.1    mrosiere Update depends
 #-----------------------------------------------------------------------------
 
-name        : asylum:target:techmap:1.0.0
-description : Wrapper for technology cells
+name        : asylum:component:fifo:1.1.1
+description : FIFO Module
 
 #=========================================
 filesets:
 #=========================================
 
   #---------------------------------------
-  target_generic:
+  hdl:
   #---------------------------------------
-    depend:
-      - asylum:target:generic
-
-  #---------------------------------------
-  target_nanoxplore_ng_medium:
-  #---------------------------------------
-    depend:
-      - nanoxplore:target:ng_medium
+    files        :
+      - hdl/fifo_pkg.vhd
+      - hdl/fifo_sync.vhd
+    file_type    : vhdlSource
+    #logical_name : asylum
+    depend       :
+      - asylum:utils:pkg
+      - asylum:component:ram
 
 #=========================================
 targets:
@@ -42,17 +44,28 @@ targets:
   #---------------------------------------
   default: &default
   #---------------------------------------
-    description     : Default Target (DON'T RUN)
+    description     : Default Target
     filesets        :
-      -  "TARGET_NANOXPLORE_NG_MEDIUM ? (target_nanoxplore_ng_medium)"
-      - "!TARGET_NANOXPLORE_NG_MEDIUM ? (target_generic)"
+      - hdl
+
+  #---------------------------------------
+  lint :
+  #---------------------------------------
+    << : *default
+    description     : Simulation of basic unit tests
+    toplevel        : fifo_sync
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall"]
+        
 
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
 provider  :
   name    : github
   user    : deuskane
-  repo    : asylum-target-techmap
-  version : asylum-target-techmap-1.0.0
- #version : 5f54cbddbabde4280b81aca09d75b3412628b18f
+  repo    : asylum-component-fifo
+  version : asylum-component-fifo-1.1.1
+ #version : 201643ea66718b0f841e56a226f728823d5fb0d2
 #<PROVIDER_END>

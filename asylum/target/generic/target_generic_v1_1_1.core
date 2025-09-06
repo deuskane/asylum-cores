@@ -4,36 +4,44 @@ CAPI=2:
 # Title      : 
 # Project    : Asylum
 #-----------------------------------------------------------------------------
-# File       : target_techmap.core
+# File       : target_generic.core
 # Author     : mrosiere
 #-----------------------------------------------------------------------------
-# Description: Wrapper for technology cells
+# Description: Inferred Technology Cells
 #-----------------------------------------------------------------------------
 # Copyright (c) 2025
 #-----------------------------------------------------------------------------
 # Revisions  :
 # Date        Version  Author   Description
-# 2025-08-11  1.0.0    mrosiere Created
+# 2025-01-06  1.0.0    mrosiere Created
+# 2025-08-11  1.1.0    mrosiere Add cbufg
+# 2025-09-06  1.1.1    mrosiere Add package
 #-----------------------------------------------------------------------------
 
-name        : asylum:target:techmap:1.0.0
-description : Wrapper for technology cells
+name        : asylum:target:generic:1.1.1
+description : Inferred Technology Cells
 
 #=========================================
 filesets:
 #=========================================
 
   #---------------------------------------
-  target_generic:
+  hdl:
   #---------------------------------------
-    depend:
-      - asylum:target:generic
+    files:
+      - hdl/generic/techmap_pkg.vhd
+      - hdl/generic/cbufg.vhd
+      - hdl/generic/cgate.vhd
+      - hdl/generic/sync2dff.vhd
+      - hdl/generic/sync2dffrn.vhd
+    file_type : vhdlSource
 
   #---------------------------------------
-  target_nanoxplore_ng_medium:
+  sim:
   #---------------------------------------
-    depend:
-      - nanoxplore:target:ng_medium
+    files:
+      - sim/src/tb_dummy.vhd
+    file_type : vhdlSource
 
 #=========================================
 targets:
@@ -44,8 +52,21 @@ targets:
   #---------------------------------------
     description     : Default Target (DON'T RUN)
     filesets        :
-      -  "TARGET_NANOXPLORE_NG_MEDIUM ? (target_nanoxplore_ng_medium)"
-      - "!TARGET_NANOXPLORE_NG_MEDIUM ? (target_generic)"
+      - hdl
+    default_tool    : ghdl
+
+  #---------------------------------------
+  lint: &lint
+  #---------------------------------------
+    << : *default
+    description     : Lint
+    default_tool    : ghdl
+    toplevel        : tb_dummy
+    filesets_append :
+      - sim
+    tools :
+      ghdl :
+        analyze_options : ["-fsynopsys"]
 
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
@@ -53,6 +74,6 @@ provider  :
   name    : github
   user    : deuskane
   repo    : asylum-target-techmap
-  version : asylum-target-techmap-1.0.0
+  version : asylum-target-generic-1.1.1
  #version : 5f54cbddbabde4280b81aca09d75b3412628b18f
 #<PROVIDER_END>

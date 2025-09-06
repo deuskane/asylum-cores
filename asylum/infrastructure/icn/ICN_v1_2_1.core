@@ -1,39 +1,41 @@
 CAPI=2:
 
 #-----------------------------------------------------------------------------
-# Title      : 
+# Title      : ICN Core file
 # Project    : Asylum
 #-----------------------------------------------------------------------------
-# File       : target_techmap.core
+# File       : ICN.core
 # Author     : mrosiere
 #-----------------------------------------------------------------------------
-# Description: Wrapper for technology cells
+# Description: 
 #-----------------------------------------------------------------------------
 # Copyright (c) 2025
 #-----------------------------------------------------------------------------
 # Revisions  :
 # Date        Version  Author   Description
-# 2025-08-11  1.0.0    mrosiere Created
+# 2025-03-22  1.0.0    mrosiere Created
+# 2025-04-05  1.1.0    mrosiere Add Algo
+# 2025-05-08  1.2.0    mrosiere Change to into downto
+# 2025-09-05  1.2.1    mrosiere Add Package
 #-----------------------------------------------------------------------------
 
-name        : asylum:target:techmap:1.0.0
-description : Wrapper for technology cells
+name        : asylum:infrastructure:icn:1.2.1
+description : Interconnection
 
 #=========================================
 filesets:
 #=========================================
 
   #---------------------------------------
-  target_generic:
+  hdl:
   #---------------------------------------
-    depend:
-      - asylum:target:generic
-
-  #---------------------------------------
-  target_nanoxplore_ng_medium:
-  #---------------------------------------
-    depend:
-      - nanoxplore:target:ng_medium
+    files        :
+      - hdl/icn_pkg.vhd
+      - hdl/pbi_icn.vhd
+    file_type    : vhdlSource
+   #logical_name : asylum
+    depend       :
+      - asylum:component:pbi_wrapper_target
 
 #=========================================
 targets:
@@ -42,17 +44,17 @@ targets:
   #---------------------------------------
   default: &default
   #---------------------------------------
-    description     : Default Target (DON'T RUN)
+    description     : Default Target
     filesets        :
-      -  "TARGET_NANOXPLORE_NG_MEDIUM ? (target_nanoxplore_ng_medium)"
-      - "!TARGET_NANOXPLORE_NG_MEDIUM ? (target_generic)"
+      - hdl
+
 
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
 provider  :
   name    : github
   user    : deuskane
-  repo    : asylum-target-techmap
-  version : asylum-target-techmap-1.0.0
- #version : 5f54cbddbabde4280b81aca09d75b3412628b18f
+  repo    : asylum-infrastructure_icn
+  version : asylum-infrastructure-icn-1.2.1
+ #version : b5564e9ddf25a622e206ea4ae58e80106faaf162
 #<PROVIDER_END>

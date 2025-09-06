@@ -1,0 +1,90 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : Ram Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : ram.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2021-10-26  1.0.0    mrosiere Created
+# 2025-08-01  1.1.0    mrosiere Add option to have asynchronous or synchronous read port
+# 2025-09-05  1.1.1    mrosiere Add Package
+#-----------------------------------------------------------------------------
+
+name        : asylum:component:ram:1.0.1
+description : RAM with 1 read port and 1 write port
+
+filesets:
+
+  #---------------------------------------
+  # Source Files
+  #---------------------------------------
+  files_hdl:
+    files:
+      - hdl/ram_pkg.vhd
+      - hdl/ram_1r1w.vhd
+    file_type : vhdlSource
+    depend :
+      - asylum:utils:pkg
+      
+  #---------------------------------------
+  # Testbench Files
+  #---------------------------------------
+  files_sim:
+    files:
+      - sim/tb_ram_1r1w.vhd
+    file_type : vhdlSource
+
+targets:
+
+  #---------------------------------------
+  # Default Target
+  #---------------------------------------
+  default: &default
+    description     : Default Target
+    filesets        :
+      - files_hdl
+    toplevel        : ram_1r1w
+    default_tool    : ghdl
+
+  sim:
+    << : *default
+    description     : Simulation of all cases
+    filesets_append :
+      - files_sim
+    toplevel        : tb_ram_1r1w
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        run_options : ["--vcd=dut.vcd"]
+
+parameters :
+
+  WIDTH :
+    description : Word width
+    datatype    : int
+    default     : 8
+    paramtype   : generic
+
+  DEPTH :
+    description : Number of words
+    datatype    : int
+    default     : 8
+    paramtype   : generic
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-component-ram
+  version : asylum-component-ram-1.0.1
+ #version : 79fef2c4b921cff76b66898182e8873fbe835136
+#<PROVIDER_END>

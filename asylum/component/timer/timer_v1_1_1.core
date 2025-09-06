@@ -1,0 +1,103 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : Timer Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : timer.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2021-10-26  1.0.0    mrosiere Created
+# 2021-11-20  1.1.0    mrosiere Fix timer_event_r clear condition
+# 2025-09-05  1.1.1    mrosiere Add Package
+#-----------------------------------------------------------------------------
+
+name : asylum:component:timer:1.1.1
+description : Timer
+
+filesets:
+
+  #---------------------------------------
+  # Source Files
+  #---------------------------------------
+  files_hdl:
+    files     :
+      - hdl/timer_pkg.vhd
+      - hdl/pbi_timer.vhd
+      - hdl/timer.vhd
+    file_type : vhdlSource
+    depend :
+      - ">=asylum:component:pbi_wrapper_target:1.0.0"
+      
+  #---------------------------------------
+  # Testbench Files
+  #---------------------------------------
+  files_sim:
+    files:
+      - sim/tb_timer.vhd
+    file_type : vhdlSource
+
+targets:
+
+  #---------------------------------------
+  # Default Target
+  #---------------------------------------
+  default: &default
+    description     : Default Target
+    filesets        :
+      - files_hdl
+    toplevel        : timer
+    default_tool    : ghdl
+
+  sim:
+    << : *default
+    description     : Simulation of all cases
+    filesets_append :
+      - files_sim
+    toplevel        : tb_timer
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        run_options : ["--vcd=dut.vcd"]
+
+parameters :
+
+  SIZE_ADDR     :
+    description : Bus Address width
+    datatype    : int
+    default     : 3
+    paramtype   : generic
+
+  SIZE_DATA :
+    description : Bus Data width
+    datatype    : int
+    default     : 8
+    paramtype   : generic
+
+  IT_ENABLE :
+    description : Allow interruption
+    datatype    : bool
+    default     : false
+    paramtype   : generic
+
+  TICK :
+    description : Value of the internal divider
+    datatype    : int
+    default     : 1000
+    paramtype   : generic
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-component-timer
+  version : asylum-component-timer-1.1.1
+ #version : 1b2ca1f7b983844ced1ba8f5aa36af453db125cd
+#<PROVIDER_END>
