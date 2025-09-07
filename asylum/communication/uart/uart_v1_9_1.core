@@ -42,7 +42,7 @@ generate:
       file         : hdl/csr/UART.hjson
       name         : UART
       copy         : hdl/csr
-      #logical_name : asylum
+      logical_name : asylum
 
 #=========================================
 filesets:
@@ -57,7 +57,8 @@ filesets:
       - hdl/uart_rx_axis.vhd
       - hdl/uart_tx_axis.vhd
       - hdl/pbi_uart.vhd
-    file_type : vhdlSource
+    file_type    : vhdlSource
+    logical_name : asylum
     depend :
       - asylum:utils:pkg
       - asylum:component:pbi_wrapper_target
@@ -83,5 +84,5 @@ provider  :
   user    : deuskane
   repo    : asylum-communication-uart
   version : asylum-communication-uart-1.9.1
- #version : 09af54097dfbd307104ed8d96bfba2e26fdcd27b
+ #version : be63163334ef1b51a6264d7ebe4e67380c4f2f7c
 #<PROVIDER_END>

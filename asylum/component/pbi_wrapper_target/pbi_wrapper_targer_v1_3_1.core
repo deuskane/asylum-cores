@@ -35,7 +35,7 @@ filesets:
       - hdl/pbi_wrapper_target.vhd
       - hdl/pbi_wrapper_target_v1.vhd
     file_type    : vhdlSource-2008
-    #logical_name : asylum
+    logical_name : asylum
     depend       :
       - asylum:utils:pkg
 
@@ -58,5 +58,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-pbi_wrapper_target
   version : asylum-component-pbi_wrapper_target-1.3.1
- #version : a00f3e45e15ed8932edc5f83e02f08815ec436f6
+ #version : 3db779bf832740a5ba5cffac63cad318c9c13f3a
 #<PROVIDER_END>

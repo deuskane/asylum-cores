@@ -53,106 +53,119 @@ generate:
   gen_user_asm_identity:
     generator : pbcc_gen
     parameters:
-      file   : esw/user_identity.psm
-      type   : pblazeide
-      entity : ROM_user
-      cflags : -Iesw/include --verbose --all-callee-saves
-
+      file         : esw/user_identity.psm
+      type         : pblazeide
+      entity       : ROM_user
+      cflags       : -Iesw/include --verbose --all-callee-saves
+      logical_name : asylum
+      
   gen_user_c_identity_inverted:
     generator : pbcc_gen
     parameters:
-      file   : esw/user_identity.c
-      type   : c
-      entity : ROM_user
-      cflags : -Iesw/include --verbose --all-callee-saves -DINVERT_SWITCH
+      file         : esw/user_identity.c
+      type         : c
+      entity       : ROM_user
+      cflags       : -Iesw/include --verbose --all-callee-saves -DINVERT_SWITCH
+      logical_name : asylum
 
   gen_user_c_identity:
     generator : pbcc_gen
     parameters:
-      file   : esw/user_identity.c
-      type   : c
-      entity : ROM_user
-      cflags : -Iesw/include --verbose --all-callee-saves
+      file         : esw/user_identity.c
+      type         : c
+      entity       : ROM_user
+      cflags       : -Iesw/include --verbose --all-callee-saves
+      logical_name : asylum
 
   gen_user_c :
     generator : pbcc_gen
     parameters :
-      file   : esw/user.c
-      type   : c
-      entity : ROM_user
-      cflags : -Iesw/include --verbose --all-callee-saves
+      file         : esw/user.c
+      type         : c
+      entity       : ROM_user
+      cflags       : -Iesw/include --verbose --all-callee-saves
+      logical_name : asylum
 
   gen_user_c_uart_921600 :
     generator : pbcc_gen
     parameters :
-      file   : esw/user.c
-      type   : c
-      entity : ROM_user
-      cflags : -Iesw/include --verbose --all-callee-saves -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=921600
+      file         : esw/user.c
+      type         : c
+      entity       : ROM_user
+      cflags       : -Iesw/include --verbose --all-callee-saves -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=921600
+      logical_name : asylum
 
   gen_user_c_uart_9600_spi :
     generator : pbcc_gen
     parameters :
-      file   : esw/user.c
-      type   : c
-      entity : ROM_user
-      cflags : -Iesw/include --verbose --all-callee-saves -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=9600 -DHAVE_SPI
+      file         : esw/user.c
+      type         : c
+      entity       : ROM_user
+      cflags       : -Iesw/include --verbose --all-callee-saves -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=9600 -DHAVE_SPI
+      logical_name : asylum
 
   gen_user_c_uart_921600_spi :
     generator : pbcc_gen
     parameters :
-      file   : esw/user.c
-      type   : c
-      entity : ROM_user
-      cflags : -Iesw/include --verbose --all-callee-saves -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=921600 -DHAVE_SPI
+      file         : esw/user.c
+      type         : c
+      entity       : ROM_user
+      cflags       : -Iesw/include --verbose --all-callee-saves -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=921600 -DHAVE_SPI
+      logical_name : asylum
 
   gen_user_c_uart_921600_spi_mem :
     generator : pbcc_gen
     parameters :
-      file   : esw/user.c
-      type   : c
-      entity : ROM_user
-      cflags : -Iesw/include --verbose --all-callee-saves -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=921600 -DHAVE_SPI -DHAVE_SPI_MEMORY
+      file         : esw/user.c
+      type         : c
+      entity       : ROM_user
+      cflags       : -Iesw/include --verbose --all-callee-saves -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=921600 -DHAVE_SPI -DHAVE_SPI_MEMORY
+      logical_name : asylum
 
   gen_user_c_uart_9600_spi_mem :
     generator : pbcc_gen
     parameters :
-      file   : esw/user.c
-      type   : c
-      entity : ROM_user
-      cflags : -Iesw/include --verbose --all-callee-saves -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=9600 -DHAVE_SPI -DHAVE_SPI_MEMORY
+      file         : esw/user.c
+      type         : c
+      entity       : ROM_user
+      cflags       : -Iesw/include --verbose --all-callee-saves -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=9600 -DHAVE_SPI -DHAVE_SPI_MEMORY
+      logical_name : asylum
 
   gen_user_xmodem_c :
     generator : pbcc_gen
     parameters :
-      file   : esw/user_xmodem.c
-      type   : c
-      entity : ROM_user_xmodem
-      cflags : -Iesw/include --verbose --all-callee-saves -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=921600
+      file         : esw/user_xmodem.c
+      type         : c
+      entity       : ROM_user_xmodem
+      cflags       : -Iesw/include --verbose --all-callee-saves -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=921600
+      logical_name : asylum
 
   gen_supervisor_c :
     generator : pbcc_gen
     parameters :
-      file   : esw/supervisor.c
-      type   : c
-      entity : ROM_supervisor
-      cflags : -Iesw/include --verbose --all-callee-saves
+      file         : esw/supervisor.c
+      type         : c
+      entity       : ROM_supervisor
+      cflags       : -Iesw/include --verbose --all-callee-saves
+      logical_name : asylum
 
   gen_supervisor_c_tmr :
     generator : pbcc_gen
     parameters :
-      file   : esw/supervisor.c
-      type   : c
-      entity : ROM_supervisor
-      cflags : -Iesw/include --verbose --all-callee-saves -DSAFETY_TMR
+      file         : esw/supervisor.c
+      type         : c
+      entity       : ROM_supervisor
+      cflags       : -Iesw/include --verbose --all-callee-saves -DSAFETY_TMR
+      logical_name : asylum
 
   gen_supervisor_c_dummy :
     generator  : pbcc_gen
     parameters :
-      file   : esw/dummy.c
-      type   : c
-      entity : ROM_supervisor
-      cflags : -Iesw/include --verbose --all-callee-saves
+      file         : esw/dummy.c
+      type         : c
+      entity       : ROM_supervisor
+      cflags       : -Iesw/include --verbose --all-callee-saves
+      logical_name : asylum
 
   #<GENERATE_END>
   # Previous line is a pragma, don't modify
@@ -169,13 +182,14 @@ filesets:
   #---------------------------------------
   files_hdl:
   #---------------------------------------
-    files:
+    files        :
       - hdl/PicoSoC_pkg.vhd
       - hdl/PicoSoC_top.vhd
       - hdl/PicoSoC_user.vhd
       - hdl/PicoSoC_supervisor.vhd
-    file_type : vhdlSource
-    depend :
+    file_type    : vhdlSource
+    logical_name : asylum
+    depend       :
       - ">=asylum:target:techmap:1.0.0"
       - ">=asylum:component:clock_divider:1.0.0"
       - ">=asylum:component:GPIO:1.0.0"
@@ -811,5 +825,5 @@ provider  :
   user    : deuskane
   repo    : asylum-soc-picosoc
   version : asylum-soc-PicoSoC-2.7.3
- #version : 30c0e2b16bd4dc5d49c352261a4510a9b1ebf3b1
+ #version : c4315214860c253fe1f817c4d2b8860151477bf9
 #<PROVIDER_END>

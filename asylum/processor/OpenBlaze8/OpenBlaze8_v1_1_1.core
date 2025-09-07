@@ -269,7 +269,7 @@ filesets:
   # Source Files
   #---------------------------------------
   files_hdl:
-    files     :
+    files        :
       - hdl/OpenBlaze8_pkg.vhd
       - hdl/OpenBlaze8_ALU.vhd
       - hdl/OpenBlaze8_Clock.vhd
@@ -285,8 +285,9 @@ filesets:
       - hdl/OpenBlaze8_Result.vhd
       - hdl/OpenBlaze8_Stack.vhd
       - hdl/OpenBlaze8.vhd
-    file_type : vhdlSource
-    depend    :
+    file_type    : vhdlSource
+    logical_name : asylum
+    depend       :
       - ">=asylum:component:ram:1.0.0"
       - ">=asylum:component:stack:1.0.0"
       
@@ -701,5 +702,5 @@ provider  :
   user    : deuskane
   repo    : asylum-processor-OpenBlaze8
   version : asylum-processor-OpenBlaze8-1.1.1
- #version : cf928dcc83569b164f24ef3e745ade097523d762
+ #version : 834fdc7cba2f1db2d60dd6a27424d3157e4ade3a
 #<PROVIDER_END>

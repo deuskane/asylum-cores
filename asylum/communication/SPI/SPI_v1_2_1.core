@@ -35,7 +35,7 @@ generate:
       file         : hdl/csr/SPI.hjson
       name         : SPI
       copy         : hdl/csr
-      #logical_name : asylum
+      logical_name : asylum
 
 #=========================================
 filesets:
@@ -49,7 +49,7 @@ filesets:
       - hdl/spi_master.vhd
       - hdl/pbi_SPI.vhd
     file_type    : vhdlSource
-#    logical_name : work
+    logical_name : asylum
     depend       :
       - asylum:utils:generators
       - asylum:utils:pkg
@@ -135,5 +135,5 @@ provider  :
   user    : deuskane
   repo    : asylum-communication-spi
   version : asylum-communication-SPI-1.2.1
- #version : cedf17b56b331c4c0693385de0ccac1922b6409e
+ #version : 4b515cc2e5b6664911e3eb01f227689322d908ae
 #<PROVIDER_END>

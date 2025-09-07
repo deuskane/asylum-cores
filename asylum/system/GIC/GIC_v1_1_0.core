@@ -32,7 +32,7 @@ generate:
       file         : hdl/csr/GIC.hjson
       name         : GIC
       copy         : hdl/csr
-      #logical_name : asylum
+      logical_name : asylum
 
 #=========================================
 filesets:
@@ -47,7 +47,7 @@ filesets:
       - hdl/GIC_core.vhd
       - hdl/pbi_GIC.vhd
     file_type    : vhdlSource
-#    logical_name : work
+    logical_name : asylum
     depend       :
       - asylum:utils:generators
       - asylum:utils:pkg
@@ -76,5 +76,5 @@ provider  :
   user    : deuskane
   repo    : asylum-system-gic
   version : asylum-system-GIC-1.1.0
- #version : dc26d279915205aba911ba0cd078bb9dd4bb0e5a
+ #version : 451b98f020007863e441e158f6e196c3ce18b47e
 #<PROVIDER_END>

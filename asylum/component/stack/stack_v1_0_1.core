@@ -26,11 +26,12 @@ filesets:
   # Source Files
   #---------------------------------------
   files_hdl:
-    files     :
+    files        :
       - hdl/stack_pkg.vhd
       - hdl/stack.vhd
-    file_type : vhdlSource
-    depend    :
+    file_type    : vhdlSource
+    logical_name : asylum
+    depend       :
       - ">=asylum:component:ram:1.0.0"
       
   #---------------------------------------
@@ -53,7 +54,7 @@ targets:
     toplevel        : stack
     default_tool    : ghdl
 
-  sim:
+  sim_basic:
     << : *default
     description     : Simulation of all cases
     filesets_append :
@@ -91,5 +92,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-stack
   version : asylum-component-stack-1.0.1
- #version : 34848597fa3955ae179d311279999d27d09ea9d3
+ #version : c50ff1dc839ccfa0d20d7ce1874f7df5ab5747e6
 #<PROVIDER_END>

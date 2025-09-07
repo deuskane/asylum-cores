@@ -33,7 +33,7 @@ filesets:
       - hdl/clock_divider_pkg.vhd
       - hdl/clock_divider.vhd
     file_type    : vhdlSource
-    #logical_name : asylum
+    logical_name : asylum
     depend       :
       - asylum:utils:pkg
       - asylum:target:techmap
@@ -58,7 +58,7 @@ targets:
     toplevel        : clock_divider
     default_tool    : ghdl
 
-  sim:
+  sim_basic:
     << : *default
     description     : Simulation of all cases
     filesets_append :
@@ -90,5 +90,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-clock_divider
   version : asylum-component-clock_divider-2.0.2
- #version : a46506e863730aae70a70b5ac59714e39c31faee
+ #version : d98d432e27c4f68dde6cefd7e6c6c98a03be14a6
 #<PROVIDER_END>

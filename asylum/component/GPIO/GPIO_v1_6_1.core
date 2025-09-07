@@ -39,7 +39,7 @@ generate:
       file         : hdl/csr/GPIO.hjson
       name         : GPIO
       copy         : hdl/csr
-      #logical_name : asylum
+      logical_name : asylum
 
 #=========================================
 filesets:
@@ -54,7 +54,7 @@ filesets:
       - hdl/GPIO.vhd
       - hdl/pbi_GPIO.vhd
     file_type    : vhdlSource
-    #logical_name : asylum
+    logical_name : asylum
     depend       :
       - asylum:utils:generators
       - asylum:utils:pkg
@@ -63,7 +63,7 @@ filesets:
   sim:
   #---------------------------------------
     files:
-      - hdl/GPIO_v1.vhd
+      - hdl/GPIO_v1.vhd : {logical_name : asylum}
       - sim/tb_GPIO_bidir.vhd
     file_type : vhdlSource-2008
 
@@ -103,5 +103,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-gpio
   version : asylum-component-GPIO-1.6.1
- #version : 2f26bb559315496c6435627cf56f6bc91a110040
+ #version : b5c751ec8a32b9dfa5358be7ab6e0f12f672631a
 #<PROVIDER_END>

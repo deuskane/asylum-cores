@@ -33,7 +33,7 @@ filesets:
       - hdl/icn_pkg.vhd
       - hdl/pbi_icn.vhd
     file_type    : vhdlSource
-   #logical_name : asylum
+    logical_name : asylum
     depend       :
       - asylum:component:pbi_wrapper_target
 
@@ -56,5 +56,5 @@ provider  :
   user    : deuskane
   repo    : asylum-infrastructure_icn
   version : asylum-infrastructure-icn-1.2.1
- #version : b5564e9ddf25a622e206ea4ae58e80106faaf162
+ #version : 14edbf6577d90ea4a72fedd2b2d7e6e633891453
 #<PROVIDER_END>

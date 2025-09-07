@@ -33,7 +33,8 @@ filesets:
       - hdl/generic/cgate.vhd
       - hdl/generic/sync2dff.vhd
       - hdl/generic/sync2dffrn.vhd
-    file_type : vhdlSource
+    file_type    : vhdlSource
+    logical_name : asylum
 
 #=========================================
 targets:
@@ -53,5 +54,5 @@ provider  :
   user    : deuskane
   repo    : asylum-target-techmap
   version : nanoxplore-target-ng_medium-1.0.1
- #version : 5f54cbddbabde4280b81aca09d75b3412628b18f
+ #version : 1bd08902892fde6f844e6eada85f7c7573a0aba6
 #<PROVIDER_END>

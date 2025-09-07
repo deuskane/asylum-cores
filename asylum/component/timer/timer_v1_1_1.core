@@ -27,12 +27,13 @@ filesets:
   # Source Files
   #---------------------------------------
   files_hdl:
-    files     :
+    files        :
       - hdl/timer_pkg.vhd
       - hdl/pbi_timer.vhd
       - hdl/timer.vhd
-    file_type : vhdlSource
-    depend :
+    file_type    : vhdlSource
+    logical_name : asylum
+    depend       :
       - ">=asylum:component:pbi_wrapper_target:1.0.0"
       
   #---------------------------------------
@@ -99,5 +100,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-timer
   version : asylum-component-timer-1.1.1
- #version : 1b2ca1f7b983844ced1ba8f5aa36af453db125cd
+ #version : a8894b78a5b22cbef9e1f2bd40285641ca1bbc20
 #<PROVIDER_END>

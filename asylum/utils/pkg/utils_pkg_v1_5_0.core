@@ -38,7 +38,8 @@ filesets:
       - hdl/math_pkg.vhd
       - hdl/pbi_pkg.vhd
       - hdl/string_pkg.vhd
-    file_type : vhdlSource
+    file_type    : vhdlSource
+    logical_name : asylum
 
 targets:
 
@@ -57,5 +58,5 @@ provider  :
   user    : deuskane
   repo    : asylum-utils-pkg
   version : asylum-utils-pkg-1.5.0
- #version : 756f7682975b144fdd03f5265be50b866d33231b
+ #version : 2707f571dfdcf23a09b4e1708e5af683ff7a70b6
 #<PROVIDER_END>
