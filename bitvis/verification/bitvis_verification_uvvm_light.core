@@ -1,0 +1,64 @@
+CAPI=2:
+
+name        : bitvis:verification:uvvm_light:2025.9.17
+description : UVVM Light is a low threshold version of UVVM and is intended for developers who want to start using UVVM Utility library and BFMs (Bus Functional Models).
+
+#  -------------------------------------------------------------------
+#  Filesets
+#  -------------------------------------------------------------------
+filesets:
+  rtl:
+    files:
+      - src_util/types_pkg.vhd
+      - src_util/adaptations_pkg.vhd
+      - src_util/string_methods_pkg.vhd
+      - src_util/protected_types_pkg.vhd
+      - src_util/global_signals_and_shared_variables_pkg.vhd
+      - src_util/hierarchy_linked_list_pkg.vhd
+      - src_util/alert_hierarchy_pkg.vhd
+      - src_util/license_pkg.vhd
+      - src_util/methods_pkg.vhd
+      - src_util/bfm_common_pkg.vhd
+      - src_util/generic_queue_pkg.vhd
+      - src_util/data_queue_pkg.vhd
+      - src_util/data_fifo_pkg.vhd
+      - src_util/data_stack_pkg.vhd
+      - src_util/dummy_rand_extension_pkg.vhd
+      - src_util/rand_pkg.vhd
+      - src_util/dummy_func_cov_extension_pkg.vhd
+      - src_util/association_list_pkg.vhd
+      - src_util/func_cov_pkg.vhd
+      - src_util/uvvm_util_context.vhd
+
+      - src_bfm/axi_bfm_pkg.vhd
+      - src_bfm/axilite_bfm_pkg.vhd
+      - src_bfm/axistream_bfm_pkg.vhd
+      - src_bfm/gpio_bfm_pkg.vhd
+      - src_bfm/i2c_bfm_pkg.vhd
+      - src_bfm/sbi_bfm_pkg.vhd
+      - src_bfm/spi_bfm_pkg.vhd
+      - src_bfm/uart_bfm_pkg.vhd
+
+    file_type   : vhdlSource-2008
+    logical_name: uvvm_util
+
+#  -------------------------------------------------------------------
+#  Targets
+#  -------------------------------------------------------------------
+targets:
+  default: &default
+    description: Don't run. Used only for dependencies.
+    filesets:
+      - rtl
+
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : UVVM
+  repo    : UVVM_Light
+ #version : asylum-communication-SPI-1.1.0
+  version : f1aaf4fabe28d58acc134728ce201ab6af58aa19
+#<PROVIDER_END>
+
