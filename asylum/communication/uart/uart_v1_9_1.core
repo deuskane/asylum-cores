@@ -84,5 +84,5 @@ provider  :
   user    : deuskane
   repo    : asylum-communication-uart
   version : asylum-communication-uart-1.9.1
- #version : be63163334ef1b51a6264d7ebe4e67380c4f2f7c
+ #version : 4fd3a2f7ca2ef5b619cb55a7f9918c4bea6673fe
 #<PROVIDER_END>

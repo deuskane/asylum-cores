@@ -1,10 +1,10 @@
 CAPI=2:
 
 #-----------------------------------------------------------------------------
-# Title      : GPIO Core file
+# Title      : Timer Core file
 # Project    : Asylum
 #-----------------------------------------------------------------------------
-# File       : GPIO.core
+# File       : timer.core
 # Author     : mrosiere
 #-----------------------------------------------------------------------------
 # Description: 
@@ -14,18 +14,13 @@ CAPI=2:
 # Revisions  :
 # Date        Version  Author   Description
 # 2021-10-26  1.0.0    mrosiere Created
-# 2022-03-31  1.1.0    mrosiere Update source code
-# 2025-03-01  1.2.0    mrosiere Add CSR
-# 2025-03-08  1.3.0    mrosiere Use unconstraint pbi
-# 2025-03-22  1.4.0    mrosiere Use pbi instead reg interface for csr
-# 2025-04-02  1.5.0    mrosiere Remove pbi_target_wrapper
-# 2025-05-14  1.6.0    mrosiere Delete parameters DATA_OE_FORCE,
-#                               csr use DATA_OE_INIT
-# 2025-09-05  1.6.1    mrosiere Add Package
+# 2021-11-20  1.1.0    mrosiere Fix timer_event_r clear condition
+# 2025-09-05  1.1.1    mrosiere Add Package
+# 2025-11-01  2.0.0    mrosiere Add CSR, core rework
 #-----------------------------------------------------------------------------
 
-name        : asylum:component:GPIO:1.6.1
-description : GPIO Module
+name        : asylum:component:timer:2.0.0
+description : Timer
 
 #=========================================
 generate:
@@ -36,8 +31,8 @@ generate:
   #---------------------------------------
     generator : regtool
     parameters:
-      file         : hdl/csr/GPIO.hjson
-      name         : GPIO
+      file         : hdl/csr/timer.hjson
+      name         : timer
       copy         : hdl/csr
       logical_name : asylum
 
@@ -46,26 +41,28 @@ filesets:
 #=========================================
 
   #---------------------------------------
-  hdl:
+  # Source Files
   #---------------------------------------
+  files_hdl:
     files        :
-      - hdl/gpio_pkg.vhd
-      - hdl/GPIO.vhd
-      - hdl/GPIO.vhd
-      - hdl/pbi_GPIO.vhd
+      - hdl/timer_pkg.vhd
+      - hdl/pbi_timer.vhd
+      - hdl/timer_core.vhd
+      - hdl/timer_v1.vhd
     file_type    : vhdlSource
     logical_name : asylum
     depend       :
       - asylum:utils:generators
       - asylum:utils:pkg
       - asylum:component:pbi_wrapper_target
+      
   #---------------------------------------
-  sim:
+  # Testbench Files
   #---------------------------------------
+  files_sim:
     files:
-      - hdl/GPIO_v1.vhd : {logical_name : asylum}
-      - sim/tb_GPIO_bidir.vhd
-    file_type : vhdlSource-2008
+      - sim/tb_timer.vhd
+    file_type : vhdlSource
 
 #=========================================
 targets:
@@ -76,32 +73,59 @@ targets:
   #---------------------------------------
     description     : Default Target
     filesets        :
-      - hdl
-    toplevel        : GPIO
+      - files_hdl
+    toplevel        : timer
     default_tool    : ghdl
     generate        :
       - gen_csr
 
   #---------------------------------------
-  sim_testcase:
+  sim_basic:
   #---------------------------------------
     << : *default
     description     : Simulation of all cases
     filesets_append :
-      - sim
-    toplevel        : tb_GPIO_bidir
+      - files_sim
+    toplevel        : tb_timer
     default_tool    : ghdl
     tools :
       ghdl :
         run_options : ["--vcd=dut.vcd"]
 
+#=========================================
+parameters :
+#=========================================
+
+  SIZE_ADDR     :
+    description : Bus Address width
+    datatype    : int
+    default     : 3
+    paramtype   : generic
+
+  SIZE_DATA :
+    description : Bus Data width
+    datatype    : int
+    default     : 8
+    paramtype   : generic
+
+  IT_ENABLE :
+    description : Allow interruption
+    datatype    : bool
+    default     : false
+    paramtype   : generic
+
+  TICK :
+    description : Value of the internal divider
+    datatype    : int
+    default     : 1000
+    paramtype   : generic
 
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
 provider  :
   name    : github
   user    : deuskane
-  repo    : asylum-component-gpio
-  version : asylum-component-GPIO-1.6.1
- #version : a5fabe82f269e33a65b7b4ae0670982b9bd0d6be
+  repo    : asylum-component-timer
+  version : asylum-component-timer-2.0.0
+ #version : c620662455809ec6f07500d9eb015f5f7c7b50d0
 #<PROVIDER_END>
