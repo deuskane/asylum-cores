@@ -1,10 +1,10 @@
 CAPI=2:
 
 #-----------------------------------------------------------------------------
-# Title      : SPI Core file
+# Title      : GIC Core file
 # Project    : Asylum
 #-----------------------------------------------------------------------------
-# File       : SPI.core
+# File       : GIC.core
 # Author     : mrosiere
 #-----------------------------------------------------------------------------
 # Description: 
@@ -13,38 +13,45 @@ CAPI=2:
 #-----------------------------------------------------------------------------
 # Revisions  :
 # Date        Version  Author   Description
-# 13/06/2025  1.0.0    mrosiere First Release
+# 2025/06/28  1.0.0    mrosiere First Release
+# 2025/07/30  1.1.0    mrosiere Add package
+# 2025-11-22  1.1.1    mrosiere Use sbi instead pbi
 #-----------------------------------------------------------------------------
 
-name        : fmf:memory:flash_nor:1.0.0
-description : SPI Flash NOR
+name        : asylum:system:GIC:1.1.1
+description : GIC Module
+
+#=========================================
+generate:
+#=========================================
+
+  #---------------------------------------
+  gen_csr:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : hdl/csr/GIC.hjson
+      name         : GIC
+      copy         : hdl/csr
+      logical_name : asylum
 
 #=========================================
 filesets:
 #=========================================
 
   #---------------------------------------
-  pkg_fmf:
+  hdl:
   #---------------------------------------
-    files:
-      - sim/utilities/conversions.vhd
-      - sim/utilities/gen_utils.vhd
-    logical_name : fmf
-    file_type    : vhdlSource-2008
-
-  #---------------------------------------
-  models:
-  #---------------------------------------
-    files:
-      - sim/models/m25p40.vhd
-      - sim/models/m45pe80.vhd
-      - sim/models/s25fl064p.vhd
-      - sim/models/s25fl512s.vhd
-      - sim/models/s35hl256t.vhd
-      - sim/models/memory.mem         : {file_type : user, copyto : memory.mem}
-      - sim/models/memoryOTP.mem      : {file_type : user, copyto : memoryOTP.mem}
-#    logical_name : work
-    file_type    : vhdlSource-2008
+    files        :
+      - hdl/GIC_pkg.vhd
+      - hdl/it_ctrl.vhd
+      - hdl/GIC_core.vhd
+      - hdl/sbi_GIC.vhd
+    file_type    : vhdlSource
+    logical_name : asylum
+    depend       :
+      - asylum:utils:generators
+      - asylum:utils:pkg
 
 #=========================================
 targets:
@@ -55,8 +62,11 @@ targets:
   #---------------------------------------
     description     : Default Target
     filesets        :
-      - pkg_fmf
-      - models
+      - hdl
+    toplevel        : GIC
+    default_tool    : ghdl
+    generate        :
+      - gen_csr
 
 
 # Next lines is a pragma, don't modify
@@ -64,7 +74,7 @@ targets:
 provider  :
   name    : github
   user    : deuskane
-  repo    : asylum-communication-spi
-  version : fmf-memory-flash_nor-1.0.0
- #version : 10e1bac08e2447b615c14a7137dd5db5b1689a99
+  repo    : asylum-system-gic
+  version : asylum-system-GIC-1.1.1
+ #version : 7976d858787756613467ac027f246e8defc4e4ad
 #<PROVIDER_END>

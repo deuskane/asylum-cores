@@ -1,10 +1,10 @@
 CAPI=2:
 
 #-----------------------------------------------------------------------------
-# Title      : SPI Core file
+# Title      : ICN Core file
 # Project    : Asylum
 #-----------------------------------------------------------------------------
-# File       : SPI.core
+# File       : ICN.core
 # Author     : mrosiere
 #-----------------------------------------------------------------------------
 # Description: 
@@ -13,38 +13,29 @@ CAPI=2:
 #-----------------------------------------------------------------------------
 # Revisions  :
 # Date        Version  Author   Description
-# 13/06/2025  1.0.0    mrosiere First Release
+# 2025-03-22  1.0.0    mrosiere Created
+# 2025-04-05  1.1.0    mrosiere Add Algo
+# 2025-05-08  1.2.0    mrosiere Change to into downto
+# 2025-09-05  1.2.1    mrosiere Add Package
+# 2025-11-22  1.2.2    mrosiere Use sbi instead pbi
 #-----------------------------------------------------------------------------
 
-name        : fmf:memory:flash_nor:1.0.0
-description : SPI Flash NOR
+name        : asylum:infrastructure:icn:1.2.2
+description : Interconnection
 
 #=========================================
 filesets:
 #=========================================
 
   #---------------------------------------
-  pkg_fmf:
+  hdl:
   #---------------------------------------
-    files:
-      - sim/utilities/conversions.vhd
-      - sim/utilities/gen_utils.vhd
-    logical_name : fmf
-    file_type    : vhdlSource-2008
-
-  #---------------------------------------
-  models:
-  #---------------------------------------
-    files:
-      - sim/models/m25p40.vhd
-      - sim/models/m45pe80.vhd
-      - sim/models/s25fl064p.vhd
-      - sim/models/s25fl512s.vhd
-      - sim/models/s35hl256t.vhd
-      - sim/models/memory.mem         : {file_type : user, copyto : memory.mem}
-      - sim/models/memoryOTP.mem      : {file_type : user, copyto : memoryOTP.mem}
-#    logical_name : work
-    file_type    : vhdlSource-2008
+    files        :
+      - hdl/icn_pkg.vhd
+      - hdl/sbi_icn.vhd
+      - hdl/sbi_wrapper_target.vhd
+    file_type    : vhdlSource
+    logical_name : asylum
 
 #=========================================
 targets:
@@ -55,8 +46,7 @@ targets:
   #---------------------------------------
     description     : Default Target
     filesets        :
-      - pkg_fmf
-      - models
+      - hdl
 
 
 # Next lines is a pragma, don't modify
@@ -64,7 +54,7 @@ targets:
 provider  :
   name    : github
   user    : deuskane
-  repo    : asylum-communication-spi
-  version : fmf-memory-flash_nor-1.0.0
- #version : 10e1bac08e2447b615c14a7137dd5db5b1689a99
+  repo    : asylum-infrastructure_icn
+  version : asylum-infrastructure-icn-1.2.2
+ #version : 1d34283ac1a94a5aa986c82d44031f4d2bf12793
 #<PROVIDER_END>

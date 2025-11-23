@@ -1,0 +1,131 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : Timer Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : timer.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2021-10-26  1.0.0    mrosiere Created
+# 2021-11-20  1.1.0    mrosiere Fix timer_event_r clear condition
+# 2025-09-05  1.1.1    mrosiere Add Package
+# 2025-11-01  2.0.0    mrosiere Add CSR, core rework
+# 2025-11-22  2.0.1    mrosiere Use sbi instead pbi
+#-----------------------------------------------------------------------------
+
+name        : asylum:component:timer:2.0.1
+description : Timer
+
+#=========================================
+generate:
+#=========================================
+
+  #---------------------------------------
+  gen_csr:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : hdl/csr/timer.hjson
+      name         : timer
+      copy         : hdl/csr
+      logical_name : asylum
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  # Source Files
+  #---------------------------------------
+  files_hdl:
+    files        :
+      - hdl/timer_pkg.vhd
+      - hdl/sbi_timer.vhd
+      - hdl/timer_core.vhd
+      - hdl/timer_v1.vhd
+    file_type    : vhdlSource-2008
+    logical_name : asylum
+    depend       :
+      - asylum:utils:generators
+      - asylum:utils:pkg
+      
+  #---------------------------------------
+  # Testbench Files
+  #---------------------------------------
+  files_sim:
+    files:
+      - sim/tb_timer.vhd
+    file_type : vhdlSource
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target
+    filesets        :
+      - files_hdl
+    toplevel        : timer
+    default_tool    : ghdl
+    generate        :
+      - gen_csr
+
+  #---------------------------------------
+  sim_basic:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of all cases
+    filesets_append :
+      - files_sim
+    toplevel        : tb_timer
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        run_options : ["--vcd=dut.vcd"]
+
+#=========================================
+parameters :
+#=========================================
+
+  SIZE_ADDR     :
+    description : Bus Address width
+    datatype    : int
+    default     : 3
+    paramtype   : generic
+
+  SIZE_DATA :
+    description : Bus Data width
+    datatype    : int
+    default     : 8
+    paramtype   : generic
+
+  IT_ENABLE :
+    description : Allow interruption
+    datatype    : bool
+    default     : false
+    paramtype   : generic
+
+  TICK :
+    description : Value of the internal divider
+    datatype    : int
+    default     : 1000
+    paramtype   : generic
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-component-timer
+  version : asylum-component-timer-2.0.1
+ #version : e573b6b8906ea26ce4045af836143afd8c78d5f3
+#<PROVIDER_END>

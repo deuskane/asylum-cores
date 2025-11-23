@@ -1,0 +1,89 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : UART
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : uart.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2025
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2025-01-21  1.0.0    mrosiere Created
+# 2025-02-05  1.1.0    mrosiere UART RX + check with loopback
+# 2025-03-09  1.2.0    mrosiere use unconstrained pbi
+# 2025-03-12  1.3.0    mrosiere Add CSR
+# 2025-03-22  1.4.0    mrosiere Use pbi instead reg interface for csr
+# 2025-04-02  1.5.0    mrosiere Remove pbi_target_wrapper
+# 2025-05-14  1.6.0    mrosiere Add parameter USER_DEFINE_BAUD_TICK and default value
+# 2025-06-21  1.6.1    mrosiere Dump FIFO activity in file
+# 2025-07-09  1.7.0    mrosiere Configure FIFO Depth
+# 2025-07-27  1.8.0    mrosiere Add Interruption
+# 2025-08-02  1.9.0    mrosiere Add CTS/RTS ports
+# 2025-09-05  1.9.1    mrosiere Add Package
+# 2025-11-10  1.10.0   mrosiere Update counter with shift register
+# 2025-11-22  1.10.1   mrosiere Use sbi instead pbi
+#-----------------------------------------------------------------------------
+
+name        : asylum:communication:uart:1.10.1
+description : UART TX and RX
+
+#=========================================
+generate:
+#=========================================
+
+  #---------------------------------------
+  gen_csr:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : hdl/csr/UART.hjson
+      name         : UART
+      copy         : hdl/csr
+      logical_name : asylum
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  rtl:
+  #---------------------------------------
+    files:
+      - hdl/uart_pkg.vhd
+      - hdl/uart_baud_rate_gen.vhd
+      - hdl/uart_rx_axis.vhd
+      - hdl/uart_tx_axis.vhd
+      - hdl/sbi_uart.vhd
+    file_type    : vhdlSource
+    logical_name : asylum
+    depend :
+      - asylum:utils:pkg
+      - asylum:system:GIC
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target
+    filesets        :
+      - rtl
+    generate        :
+      - gen_csr
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-communication-uart
+  version : asylum-communication-uart-1.10.1
+ #version : c4d622537c21b826467b5366338ad48ca460da72
+#<PROVIDER_END>
