@@ -1,0 +1,109 @@
+CAPI=2:
+
+name        : bitvis:verification:uvvm:2025.9.17
+description : UVVM (Universal VHDL Verification Methodology) is a free and Open Source Methodology and Library for making very structured VHDL-based testbenches.
+
+#  -------------------------------------------------------------------
+#  Filesets
+#  -------------------------------------------------------------------
+filesets:
+  rtl:
+    files:
+
+      # Compiling UVVM Utility Library
+      - uvvm_util/src/types_pkg.vhd                                                          : {logical_name : uvvm_util}
+      - uvvm_util/src/adaptations_pkg.vhd                                                    : {logical_name : uvvm_util}
+      - uvvm_util/src/string_methods_pkg.vhd                                                 : {logical_name : uvvm_util}
+      - uvvm_util/src/protected_types_pkg.vhd                                                : {logical_name : uvvm_util}
+      - uvvm_util/src/global_signals_and_shared_variables_pkg.vhd                            : {logical_name : uvvm_util}
+      - uvvm_util/src/hierarchy_linked_list_pkg.vhd                                          : {logical_name : uvvm_util}
+      - uvvm_util/src/alert_hierarchy_pkg.vhd                                                : {logical_name : uvvm_util}
+      - uvvm_util/src/license_pkg.vhd                                                        : {logical_name : uvvm_util}
+      - uvvm_util/src/methods_pkg.vhd                                                        : {logical_name : uvvm_util}
+      - uvvm_util/src/bfm_common_pkg.vhd                                                     : {logical_name : uvvm_util}
+      - uvvm_util/src/generic_queue_pkg.vhd                                                  : {logical_name : uvvm_util}
+      - uvvm_util/src/data_queue_pkg.vhd                                                     : {logical_name : uvvm_util}
+      - uvvm_util/src/data_fifo_pkg.vhd                                                      : {logical_name : uvvm_util}
+      - uvvm_util/src/data_stack_pkg.vhd                                                     : {logical_name : uvvm_util}
+      - uvvm_util/src/dummy_rand_extension_pkg.vhd                                           : {logical_name : uvvm_util}
+      - uvvm_util/src/rand_pkg.vhd                                                           : {logical_name : uvvm_util}
+      - uvvm_util/src/dummy_func_cov_extension_pkg.vhd                                       : {logical_name : uvvm_util}
+      - uvvm_util/src/association_list_pkg.vhd                                               : {logical_name : uvvm_util}
+      - uvvm_util/src/func_cov_pkg.vhd                                                       : {logical_name : uvvm_util}
+      - uvvm_util/src/uvvm_util_context.vhd                                                  : {logical_name : uvvm_util}
+
+      # Compiling UVVM VVC Framework
+      - uvvm_vvc_framework/src/ti_protected_types_pkg.vhd                                    : {logical_name : uvvm_vvc_framework}
+      - uvvm_vvc_framework/src/ti_vvc_framework_support_pkg.vhd                              : {logical_name : uvvm_vvc_framework}
+      - uvvm_vvc_framework/src/ti_generic_queue_pkg.vhd                                      : {logical_name : uvvm_vvc_framework}
+      - uvvm_vvc_framework/src/ti_data_queue_pkg.vhd                                         : {logical_name : uvvm_vvc_framework}
+      - uvvm_vvc_framework/src/ti_data_fifo_pkg.vhd                                          : {logical_name : uvvm_vvc_framework}
+      - uvvm_vvc_framework/src/ti_data_stack_pkg.vhd                                         : {logical_name : uvvm_vvc_framework}
+      - uvvm_vvc_framework/src/ti_uvvm_engine.vhd                                            : {logical_name : uvvm_vvc_framework}
+
+      # Compiling Bitvis VIP Scoreboard
+      - bitvis_vip_scoreboard/src/generic_sb_support_pkg.vhd                                 : {logical_name : bitvis_vip_scoreboard}
+      - bitvis_vip_scoreboard/src/generic_sb_pkg.vhd                                         : {logical_name : bitvis_vip_scoreboard}
+      - bitvis_vip_scoreboard/src/predefined_sb.vhd                                          : {logical_name : bitvis_vip_scoreboard}
+
+      # Compiling Bitvis VIP SBI
+      - bitvis_vip_sbi/src/transaction_pkg.vhd                                               : {logical_name : bitvis_vip_sbi}      
+      - bitvis_vip_sbi/src/sbi_bfm_pkg.vhd                                                   : {logical_name : bitvis_vip_sbi}
+      - bitvis_vip_sbi/src/vvc_cmd_pkg.vhd                                                   : {logical_name : bitvis_vip_sbi}
+      - uvvm_vvc_framework/src_target_dependent/td_target_support_pkg.vhd                    : {logical_name : bitvis_vip_sbi}
+      - uvvm_vvc_framework/src_target_dependent/td_vvc_framework_common_methods_pkg.vhd      : {logical_name : bitvis_vip_sbi}
+      - bitvis_vip_sbi/src/vvc_sb_pkg.vhd                                                    : {logical_name : bitvis_vip_sbi}
+      - bitvis_vip_sbi/src/vvc_methods_pkg.vhd                                               : {logical_name : bitvis_vip_sbi}
+      - uvvm_vvc_framework/src_target_dependent/td_queue_pkg.vhd                             : {logical_name : bitvis_vip_sbi}
+      - uvvm_vvc_framework/src_target_dependent/td_vvc_entity_support_pkg.vhd                : {logical_name : bitvis_vip_sbi}
+      - bitvis_vip_sbi/src/sbi_vvc.vhd                                                       : {logical_name : bitvis_vip_sbi}
+      - bitvis_vip_sbi/src/vvc_context.vhd                                                   : {logical_name : bitvis_vip_sbi}
+
+      # Compiling Bitvis VIP UART
+      - bitvis_vip_uart/src/uart_bfm_pkg.vhd                                                 : {logical_name : bitvis_vip_uart}
+      - bitvis_vip_uart/src/transaction_pkg.vhd                                              : {logical_name : bitvis_vip_uart}
+      - bitvis_vip_uart/src/vvc_cmd_pkg.vhd                                                  : {logical_name : bitvis_vip_uart}
+      - bitvis_vip_uart/src/monitor_cmd_pkg.vhd                                              : {logical_name : bitvis_vip_uart}
+      - uvvm_vvc_framework/src_target_dependent/td_target_support_pkg.vhd                    : {logical_name : bitvis_vip_uart}
+      - uvvm_vvc_framework/src_target_dependent/td_vvc_framework_common_methods_pkg.vhd      : {logical_name : bitvis_vip_uart}
+      - bitvis_vip_uart/src/vvc_sb_pkg.vhd                                                   : {logical_name : bitvis_vip_uart}
+      - bitvis_vip_uart/src/vvc_methods_pkg.vhd                                              : {logical_name : bitvis_vip_uart}
+      - uvvm_vvc_framework/src_target_dependent/td_queue_pkg.vhd                             : {logical_name : bitvis_vip_uart}
+      - uvvm_vvc_framework/src_target_dependent/td_vvc_entity_support_pkg.vhd                : {logical_name : bitvis_vip_uart}
+      - bitvis_vip_uart/src/uart_rx_vvc.vhd                                                  : {logical_name : bitvis_vip_uart}
+      - bitvis_vip_uart/src/uart_tx_vvc.vhd                                                  : {logical_name : bitvis_vip_uart}
+      - bitvis_vip_uart/src/uart_vvc.vhd                                                     : {logical_name : bitvis_vip_uart}
+      - bitvis_vip_uart/src/uart_monitor.vhd                                                 : {logical_name : bitvis_vip_uart}
+      - bitvis_vip_uart/src/vvc_context.vhd                                                  : {logical_name : bitvis_vip_uart}
+
+      # Compiling Bitvis VIP Clock Generator
+      - bitvis_vip_clock_generator/src/vvc_cmd_pkg.vhd                                       : {logical_name : bitvis_vip_clock_generator}   
+      - uvvm_vvc_framework/src_target_dependent/td_target_support_pkg.vhd                    : {logical_name : bitvis_vip_clock_generator}
+      - uvvm_vvc_framework/src_target_dependent/td_vvc_framework_common_methods_pkg.vhd      : {logical_name : bitvis_vip_clock_generator}
+      - bitvis_vip_clock_generator/src/vvc_methods_pkg.vhd                                   : {logical_name : bitvis_vip_clock_generator}
+      - uvvm_vvc_framework/src_target_dependent/td_queue_pkg.vhd                             : {logical_name : bitvis_vip_clock_generator}
+      - uvvm_vvc_framework/src_target_dependent/td_vvc_entity_support_pkg.vhd                : {logical_name : bitvis_vip_clock_generator}
+      - bitvis_vip_clock_generator/src/clock_generator_vvc.vhd                               : {logical_name : bitvis_vip_clock_generator}
+      - bitvis_vip_clock_generator/src/vvc_context.vhd                                       : {logical_name : bitvis_vip_clock_generator}
+
+    file_type   : vhdlSource-2008
+    logical_name: uvvm_util
+
+#  -------------------------------------------------------------------
+#  Targets
+#  -------------------------------------------------------------------
+targets:
+  default: &default
+    description: Don't run. Used only for dependencies.
+    filesets:
+      - rtl
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : UVVM
+  repo    : UVVM
+  version : 9163f272fb1348a966ae15e226fd5882483b88a3
+#<PROVIDER_END>
+

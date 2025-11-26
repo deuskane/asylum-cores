@@ -143,6 +143,7 @@
 ## verification
 | Vendor               | Library              | Name                 | Version                                                                                              | URL                  | Description |
 | ---                  | ---                  | ---                  | ---                                                                                                  | ---                  | --- |
+| bitvis               | verification         | uvvm                 | [2025.9.17](bitvis/verification/bitvis_verification_uvvm.core)                                       | [url](https://github.com/UVVM/UVVM/tree/9163f272fb1348a966ae15e226fd5882483b88a3) |  UVVM (Universal VHDL Verification Methodology) is a free and Open Source Methodology and Library for making very structured VHDL-based testbenches.|
 | bitvis               | verification         | uvvm_light           | [2025.9.17](bitvis/verification/bitvis_verification_uvvm_light.core)                                 | [url](https://github.com/UVVM/UVVM_Light/tree/f1aaf4fabe28d58acc134728ce201ab6af58aa19) |  UVVM Light is a low threshold version of UVVM and is intended for developers who want to start using UVVM Utility library and BFMs (Bus Functional Models).|
 # fmf
 ## memory
