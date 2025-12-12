@@ -92,5 +92,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-stack
   version : asylum-component-stack-1.0.1
- #version : c3c05122d070023ff497549853ba10eeb23c3cdc
+ #version : 58fe067dbfd73ac98804ab95eccd7feca6744220
 #<PROVIDER_END>

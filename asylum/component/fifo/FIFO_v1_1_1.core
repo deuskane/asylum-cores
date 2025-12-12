@@ -67,5 +67,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-fifo
   version : asylum-component-fifo-1.1.1
- #version : 61517c443e12b397cf689260e3b51bc8a1f5fd68
+ #version : 272019af0bf9d062f6e601b0fc0e9de6732f4d83
 #<PROVIDER_END>

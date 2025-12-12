@@ -103,5 +103,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-gpio
   version : asylum-component-GPIO-1.6.2
- #version : 3fe44bdbec9dad76da0c3d965ab8932d9f44ee93
+ #version : f0c1ac6bf0ccc98a247ae0f7217485bf36a7dbec
 #<PROVIDER_END>

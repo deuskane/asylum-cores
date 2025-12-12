@@ -34,6 +34,7 @@ CAPI=2:
 # 2025-11-02  2.5.1    mrosiere regtool : fix init value
 # 2025-11-05  2.5.2    mrosiere Generators : Use logger
 # 2025-11-22  2.5.3    mrosiere regtool : support sbi interface
+# 2025-11-27  2.5.3    mrosiere regtool : crs_reg fix connection sw2hw re/we
 #-----------------------------------------------------------------------------
 
 name       : asylum:utils:generators:2.5.3
@@ -111,5 +112,5 @@ provider  :
   user    : deuskane
   repo    : asylum-utils-generators
   version : asylum-utils-generators-2.5.3
- #version : ca5cfa5dd28ec997064cc30feebd80c48ef73fda
+ #version : 91ad825355cafdfee3f29279aefa8dda0607de95
 #<PROVIDER_END>

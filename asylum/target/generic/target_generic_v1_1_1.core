@@ -76,5 +76,5 @@ provider  :
   user    : deuskane
   repo    : asylum-target-techmap
   version : asylum-target-generic-1.1.1
- #version : 1bd08902892fde6f844e6eada85f7c7573a0aba6
+ #version : a50d8459294ccde7c93f9759dc438c0bae403eca
 #<PROVIDER_END>

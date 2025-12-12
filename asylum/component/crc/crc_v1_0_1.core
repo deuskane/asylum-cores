@@ -1,24 +1,38 @@
 CAPI=2:
 
 #-----------------------------------------------------------------------------
-# Title      : 
+# Title      : crc Core file
 # Project    : Asylum
 #-----------------------------------------------------------------------------
-# File       : target_medium.core
+# File       : crc.core
 # Author     : mrosiere
 #-----------------------------------------------------------------------------
-# Description: Technology Cells for FPGA NG_MEDIUM from NanoXplore
+# Description: 
 #-----------------------------------------------------------------------------
 # Copyright (c) 2025
 #-----------------------------------------------------------------------------
 # Revisions  :
 # Date        Version  Author   Description
-# 2025-08-11  1.0.0    mrosiere Created
-# 2025-09-06  1.0.1    mrosiere Add package
+# 2025-11-26  1.0.0    mrosiere Created
+# 2025-11-29  1.0.1    mrosiere Add Generic SHIFT_LEFT, LSB_FIRST, REVERSE, REFLECT and XOR
 #-----------------------------------------------------------------------------
 
-name        : nanoxplore:target:ng_medium:1.0.1
-description : Technology Cells for FPGA NG_MEDIUM from NanoXplore
+name        : asylum:component:crc:1.0.1
+description : CRC Module
+
+#=========================================
+generate:
+#=========================================
+
+  #---------------------------------------
+  gen_csr:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : hdl/csr/crc.hjson
+      name         : crc
+      copy         : hdl/csr
+      logical_name : asylum
 
 #=========================================
 filesets:
@@ -27,14 +41,15 @@ filesets:
   #---------------------------------------
   hdl:
   #---------------------------------------
-    files:
-      - hdl/generic/techmap_pkg.vhd
-      - hdl/ng_medium/cbufg.vhd
-      - hdl/generic/cgate.vhd
-      - hdl/generic/sync2dff.vhd
-      - hdl/generic/sync2dffrn.vhd
-    file_type    : vhdlSource
+    files        :
+      - hdl/crc_pkg.vhd
+      - hdl/crc_core.vhd
+      - hdl/sbi_crc.vhd
+    file_type    : vhdlSource-2008
     logical_name : asylum
+    depend       :
+      - asylum:utils:generators
+      - asylum:utils:pkg
 
 #=========================================
 targets:
@@ -43,16 +58,21 @@ targets:
   #---------------------------------------
   default: &default
   #---------------------------------------
-    description     : Default Target (DON'T RUN)
+    description     : Default Target
     filesets        :
       - hdl
+    toplevel        : sbi_crc
+    default_tool    : ghdl
+    generate        :
+      - gen_csr
+
 
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
 provider  :
   name    : github
   user    : deuskane
-  repo    : asylum-target-techmap
-  version : nanoxplore-target-ng_medium-1.0.1
- #version : a50d8459294ccde7c93f9759dc438c0bae403eca
+  repo    : asylum-component-crc
+  version : asylum-component-crc-1.0.1
+ #version : 1b184e1584b0eda62d39991ea8b60ed0e050cd4c
 #<PROVIDER_END>
