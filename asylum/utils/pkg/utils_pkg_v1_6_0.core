@@ -1,0 +1,82 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : VHDL Package Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : utils_pkg.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2021-10-26  1.0.0    mrosiere math_pkg   : Created
+#                               pbi_pkg    : Created
+# 2025-01-11  1.1.0    mrosiere pbi_pkg    : Surcharge and / or
+# 2025-03-08  1.2.0    mrosiere pbi_pkg    : Use unconstrainted pbi
+# 2025-03-19  1.3.0    mrosiere logic_pkg  : Created
+#                               string_pkg : Created
+# 2025-03-26  1.4.0    mrosiere pbi_pkg    : Add type for unconstrainted array
+# 2025-04-05  1.5.0    mrosiere convert_pkg: Add convertion one hot to  integer
+# 2025-11-22  1.5.1    mrosiere sbi_pkg    : Add sbi pkg (replace pbi busy with ready)
+# 2025-11-29  1.5.2    mrosiere logic_pkg  : Add mux2 and reverse_bits
+# 2025-12-06  1.5.3    mrosiere logic_pkg  : override mux2 for natural
+# 2025-12-30  1.6.0    mrosiere IEEE_dummy : add fake vital
+#-----------------------------------------------------------------------------
+
+name        : asylum:utils:pkg:1.6.0
+description : VHDL Utility Package
+
+filesets:
+
+  #---------------------------------------
+  # Source Files
+  #---------------------------------------
+
+  #---------------------------------------
+  files_hdl:
+  #---------------------------------------
+    files:
+      - hdl/convert_pkg.vhd
+      - hdl/logic_pkg.vhd
+      - hdl/math_pkg.vhd
+      - hdl/pbi_pkg.vhd
+      - hdl/sbi_pkg.vhd
+      - hdl/string_pkg.vhd
+    file_type    : vhdlSource
+    logical_name : asylum
+
+  #---------------------------------------
+  pkg_ieee_dummy:
+  #---------------------------------------
+    files:
+      - hdl/vital/vital_timing.vhdl
+      - hdl/vital/vital_timing-body.vhdl
+      - hdl/vital/vital_primitives.vhdl
+      - hdl/vital/vital_primitives-body.vhdl
+    logical_name : IEEE_dummy
+    file_type    : vhdlSource-2008    
+
+targets:
+
+  #---------------------------------------
+  # Default Target
+  #---------------------------------------
+  default:
+    description : Default Target
+    filesets    :
+      - files_hdl
+      - pkg_ieee_dummy
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-utils-pkg
+  version : asylum-utils-pkg-1.6.0
+ #version : bc0fd056dd301693d6f34417e223bf1485c209a2
+#<PROVIDER_END>

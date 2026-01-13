@@ -13,7 +13,8 @@ CAPI=2:
 #-----------------------------------------------------------------------------
 # Revisions  :
 # Date        Version  Author   Description
-# 13/06/2025  1.0.0    mrosiere First Release
+# 2025/06/13  1.0.0    mrosiere First Release
+# 2025/12/30  1.0.1    mrosiere Use IEEE_dummy pakage for vital
 #-----------------------------------------------------------------------------
 
 name        : fmf:memory:flash_nor:1.0.0
@@ -43,8 +44,10 @@ filesets:
       - sim/models/s35hl256t.vhd
       - sim/models/memory.mem         : {file_type : user, copyto : memory.mem}
       - sim/models/memoryOTP.mem      : {file_type : user, copyto : memoryOTP.mem}
-#    logical_name : work
+#   logical_name : work
     file_type    : vhdlSource-2008
+    depends      :
+      - asylum:utils:pkg
 
 #=========================================
 targets:
@@ -58,7 +61,6 @@ targets:
       - pkg_fmf
       - models
 
-
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
 provider  :
@@ -66,5 +68,5 @@ provider  :
   user    : deuskane
   repo    : asylum-communication-spi
   version : fmf-memory-flash_nor-1.0.0
- #version : 7cd542448be2700b69eea18fda90733857327896
+ #version : 5e2b940a14b0af9f357f062a2eb3daa38e51d9bb
 #<PROVIDER_END>
