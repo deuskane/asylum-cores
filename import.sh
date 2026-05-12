@@ -109,6 +109,16 @@ function import_main()
     printf "[INFO   ] %-20s | %-20s | %-20s | %-10s \n" "Vendor" "Library" "Name" "Version"
     for src_core in ${src_cores};
     do
+
+        if [[ $(head -c 4 "${src_core}") != CAPI ]];
+        then
+            printf "[WARNING] %-20s | %-20s | %-20s | %-10s -> " "" "" "" "" 
+            printf "${src_core}"
+            printf "Missing CAPI header, skipping\n"
+            continue
+        fi
+
+    
         test ${verbose} -gt 0 && echo "[DEBUG  ] * ${src_core}"
         core_dir=$(dirname ${src_core})
         core=${src_core/${src_dir}\//}
@@ -121,6 +131,15 @@ function import_main()
         vlnv=${vendor}-${library}-${name}-${version}
 
         printf "[INFO   ] %-20s | %-20s | %-20s | %-10s -> " "${vendor}" "${library}" "${name}" "${version}"
+
+        if [[ -z "${vendor}" ]] || [[ -z "${library}" ]] || [[ -z "${name}" ]] || [[ -z "${version}" ]];
+        then
+            printf "ERROR   : Invalid VLNV (one or more fields are empty)\n"
+            nb_error=$((${nb_error}+1));
+
+            continue;
+        fi
+        
 
         if [ ${core_map[${vendor}${library}${name}]+_} ];
         then
