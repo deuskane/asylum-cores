@@ -1,10 +1,10 @@
 CAPI=2:
 
 #-----------------------------------------------------------------------------
-# Title      : crc Core file
+# Title      : ICN Core file
 # Project    : Asylum
 #-----------------------------------------------------------------------------
-# File       : crc.core
+# File       : ICN.core
 # Author     : mrosiere
 #-----------------------------------------------------------------------------
 # Description: 
@@ -13,26 +13,16 @@ CAPI=2:
 #-----------------------------------------------------------------------------
 # Revisions  :
 # Date        Version  Author   Description
-# 2025-11-26  1.0.0    mrosiere Created
-# 2025-11-29  1.0.1    mrosiere Add Generic SHIFT_LEFT, LSB_FIRST, REVERSE, REFLECT and XOR
+# 2025-03-22  1.0.0    mrosiere Created
+# 2025-04-05  1.1.0    mrosiere Add Algo
+# 2025-05-08  1.2.0    mrosiere Change to into downto
+# 2025-09-05  1.2.1    mrosiere Add Package
+# 2025-11-22  1.2.2    mrosiere Use sbi instead pbi
+# 2026-01-18  1.2.3    mrosiere Use info record of sbi
 #-----------------------------------------------------------------------------
 
-name        : asylum:component:crc:1.0.1
-description : CRC Module
-
-#=========================================
-generate:
-#=========================================
-
-  #---------------------------------------
-  gen_csr:
-  #---------------------------------------
-    generator : regtool
-    parameters:
-      file         : hdl/csr/crc.hjson
-      name         : crc
-      copy         : hdl/csr
-      logical_name : asylum
+name        : asylum:infrastructure:icn:1.2.3
+description : Interconnection
 
 #=========================================
 filesets:
@@ -42,14 +32,11 @@ filesets:
   hdl:
   #---------------------------------------
     files        :
-      - hdl/crc_pkg.vhd
-      - hdl/crc_core.vhd
-      - hdl/sbi_crc.vhd
-    file_type    : vhdlSource-2008
+      - hdl/icn_pkg.vhd
+      - hdl/sbi_icn.vhd
+      - hdl/sbi_wrapper_target.vhd
+    file_type    : vhdlSource
     logical_name : asylum
-    depend       :
-      - asylum:utils:generators
-      - asylum:utils:pkg
 
 #=========================================
 targets:
@@ -61,10 +48,6 @@ targets:
     description     : Default Target
     filesets        :
       - hdl
-    toplevel        : sbi_crc
-    default_tool    : ghdl
-    generate        :
-      - gen_csr
 
 
 # Next lines is a pragma, don't modify
@@ -72,7 +55,7 @@ targets:
 provider  :
   name    : github
   user    : deuskane
-  repo    : asylum-component-crc
-  version : asylum-component-crc-1.0.1
- #version : bbbd84d47520019ba2fe8623e2d82655c81857bf
+  repo    : asylum-infrastructure_icn
+  version : asylum-infrastructure-icn-1.2.3
+ #version : 0027525ecc64267f7a8d4a7a178a71a65addb966
 #<PROVIDER_END>

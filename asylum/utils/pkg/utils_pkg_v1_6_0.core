@@ -25,6 +25,7 @@ CAPI=2:
 # 2025-11-29  1.5.2    mrosiere logic_pkg  : Add mux2 and reverse_bits
 # 2025-12-06  1.5.3    mrosiere logic_pkg  : override mux2 for natural
 # 2025-12-30  1.6.0    mrosiere IEEE_dummy : add fake vital
+# 2026-01-18  1.6.1    mrosiere sbi_pkg    : Add info record
 #-----------------------------------------------------------------------------
 
 name        : asylum:utils:pkg:1.6.0
@@ -46,7 +47,7 @@ filesets:
       - hdl/pbi_pkg.vhd
       - hdl/sbi_pkg.vhd
       - hdl/string_pkg.vhd
-    file_type    : vhdlSource
+    file_type    : vhdlSource-2008
     logical_name : asylum
 
   #---------------------------------------
@@ -78,5 +79,5 @@ provider  :
   user    : deuskane
   repo    : asylum-utils-pkg
   version : asylum-utils-pkg-1.6.0
- #version : bc0fd056dd301693d6f34417e223bf1485c209a2
+ #version : 7feeb9fc5be472bc2b0ffbb0f5c867fb56f25bcc
 #<PROVIDER_END>

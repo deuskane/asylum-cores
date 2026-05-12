@@ -37,6 +37,7 @@ CAPI=2:
 # 2025-11-27  2.5.3    mrosiere regtool : crs_reg fix connection sw2hw re/we
 # 2025-12-30  2.5.4    mrosiere picoasm : update for gcc 13.3
 #                               pbcc : update for gcc 13.3
+# 2026-01-18  2.5.5    mrosiere regtool : use info record for sbi
 #-----------------------------------------------------------------------------
 
 name       : asylum:utils:generators:2.5.4
@@ -114,5 +115,5 @@ provider  :
   user    : deuskane
   repo    : asylum-utils-generators
   version : asylum-utils-generators-2.5.4
- #version : 8f5ee6f1b4e9eabcae7854a0b012bcd2cc718597
+ #version : 0f6c243207ce92e909b19cf62297f1642a8a9312
 #<PROVIDER_END>
