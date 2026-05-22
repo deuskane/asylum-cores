@@ -61,139 +61,274 @@ generate:
 #=========================================
   # Next line is a pragma, don't modify
   #<GENERATE_BEGIN>
-  gen_user_asm_identity:
+  gen_picoblaze3_user_asm_identity:
     generator : pbcc_gen
     parameters:
       file         : esw/user_identity.psm
       type         : pblazeide
       entity       : ROM_user
-      cflags       : -Iesw/include --verbose --all-callee-saves
+      cflags       : -Dpicoblaze -Iesw/include --verbose --all-callee-saves
       logical_name : asylum
       
-  gen_user_c_identity_inverted:
+  gen_picoblaze3_user_c_identity_inverted:
     generator : pbcc_gen
     parameters:
       file         : esw/user_identity.c
       type         : c
       entity       : ROM_user
-      cflags       : -Iesw/include --verbose --all-callee-saves -DINVERT_SWITCH
+      cflags       : -Dpicoblaze -Iesw/include --verbose --all-callee-saves -DINVERT_SWITCH
       logical_name : asylum
 
-  gen_user_c_identity:
+  gen_picoblaze3_user_c_identity:
     generator : pbcc_gen
     parameters:
       file         : esw/user_identity.c
       type         : c
       entity       : ROM_user
-      cflags       : -Iesw/include --verbose --all-callee-saves
+      cflags       : -Dpicoblaze -Iesw/include --verbose --all-callee-saves
       logical_name : asylum
 
-  gen_user_c :
+  gen_picoblaze3_user_c :
     generator : pbcc_gen
     parameters :
       file         : esw/user.c
       type         : c
       entity       : ROM_user
-      cflags       : -Iesw/include --verbose --all-callee-saves
+      cflags       : -Dpicoblaze -Iesw/include --verbose --all-callee-saves
       logical_name : asylum
 
-  gen_user_c_uart_921600 :
+  gen_picoblaze3_user_c_uart_921600 :
     generator : pbcc_gen
     parameters :
       file         : esw/user.c
       type         : c
       entity       : ROM_user
-      cflags       : -Iesw/include --verbose --all-callee-saves -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=921600
+      cflags       : -Dpicoblaze -Iesw/include --verbose --all-callee-saves -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=921600
       logical_name : asylum
 
-  gen_user_c_uart_9600_spi :
+  gen_picoblaze3_user_c_uart_9600_spi :
     generator : pbcc_gen
     parameters :
       file         : esw/user.c
       type         : c
       entity       : ROM_user
-      cflags       : -Iesw/include --verbose --all-callee-saves -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=9600 -DHAVE_SPI
+      cflags       : -Dpicoblaze -Iesw/include --verbose --all-callee-saves -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=9600 -DHAVE_SPI
       logical_name : asylum
 
-  gen_user_c_uart_921600_spi :
+  gen_picoblaze3_user_c_uart_921600_spi :
     generator : pbcc_gen
     parameters :
       file         : esw/user.c
       type         : c
       entity       : ROM_user
-      cflags       : -Iesw/include --verbose --all-callee-saves -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=921600 -DHAVE_SPI
+      cflags       : -Dpicoblaze -Iesw/include --verbose --all-callee-saves -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=921600 -DHAVE_SPI
       logical_name : asylum
 
-  gen_user_c_uart_921600_spi_mem :
+  gen_picoblaze3_user_c_uart_921600_spi_mem :
     generator : pbcc_gen
     parameters :
       file         : esw/user.c
       type         : c
       entity       : ROM_user
-      cflags       : -Iesw/include --verbose --all-callee-saves -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=921600 -DHAVE_SPI -DHAVE_SPI_MEMORY
+      cflags       : -Dpicoblaze -Iesw/include --verbose --all-callee-saves -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=921600 -DHAVE_SPI -DHAVE_SPI_MEMORY
       logical_name : asylum
 
-  gen_user_c_uart_9600_spi_mem :
+  gen_picoblaze3_user_c_uart_9600_spi_mem :
     generator : pbcc_gen
     parameters :
       file         : esw/user.c
       type         : c
       entity       : ROM_user
-      cflags       : -Iesw/include --verbose --all-callee-saves -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=9600 -DHAVE_SPI -DHAVE_SPI_MEMORY
+      cflags       : -Dpicoblaze -Iesw/include --verbose --all-callee-saves -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=9600 -DHAVE_SPI -DHAVE_SPI_MEMORY
       logical_name : asylum
 
-  gen_user_xmodem_c :
+  gen_picoblaze3_user_xmodem_c :
     generator : pbcc_gen
     parameters :
       file         : esw/user_xmodem.c
       type         : c
       entity       : ROM_user
-      cflags       : -Iesw/include --verbose --all-callee-saves -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=921600
+      cflags       : -Dpicoblaze -Iesw/include --verbose --all-callee-saves -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=921600
       logical_name : asylum
 
-  gen_user_modbus_rtu_921600 :
+  gen_picoblaze3_user_modbus_rtu_921600 :
     generator : pbcc_gen
     parameters :
       file         : esw/user_modbus_rtu.c
       type         : c
       entity       : ROM_user
-      cflags       : -Iesw/include --verbose --all-callee-saves -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=921600
+      cflags       : -Dpicoblaze -Iesw/include --verbose --all-callee-saves -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=921600
       logical_name : asylum
 
-  gen_user_modbus_rtu_9600 :
+  gen_picoblaze3_user_modbus_rtu_9600 :
     generator : pbcc_gen
     parameters :
       file         : esw/user_modbus_rtu.c
       type         : c
       entity       : ROM_user
-      cflags       : -Iesw/include --verbose --all-callee-saves -DHAVE_UART -DCLOCK_FREQ=6250000 -DBAUD_RATE=9600
+      cflags       : -Dpicoblaze -Iesw/include --verbose --all-callee-saves -DHAVE_UART -DCLOCK_FREQ=6250000 -DBAUD_RATE=9600
       logical_name : asylum
 
-  gen_supervisor_c :
+  gen_picoblaze3_supervisor_c :
     generator : pbcc_gen
     parameters :
       file         : esw/supervisor.c
       type         : c
       entity       : ROM_supervisor
-      cflags       : -Iesw/include --verbose --all-callee-saves
+      cflags       : -Dpicoblaze -Iesw/include --verbose --all-callee-saves
       logical_name : asylum
 
-  gen_supervisor_c_tmr :
+  gen_picoblaze3_supervisor_c_tmr :
     generator : pbcc_gen
     parameters :
       file         : esw/supervisor.c
       type         : c
       entity       : ROM_supervisor
-      cflags       : -Iesw/include --verbose --all-callee-saves -DSAFETY_TMR
+      cflags       : -Dpicoblaze -Iesw/include --verbose --all-callee-saves -DSAFETY_TMR
       logical_name : asylum
 
-  gen_supervisor_c_dummy :
+  gen_picoblaze3_supervisor_c_dummy :
     generator  : pbcc_gen
     parameters :
       file         : esw/dummy.c
       type         : c
       entity       : ROM_supervisor
-      cflags       : -Iesw/include --verbose --all-callee-saves
+      cflags       : -Dpicoblaze -Iesw/include --verbose --all-callee-saves
+      logical_name : asylum
+
+  gen_rv32i_user_asm_identity:
+    generator : rvcc_gen
+    parameters:
+      file         : esw/user_identity.psm
+      type         : pblazeide
+      entity       : ROM_user
+      cflags       : -Iesw/include --verbose
+      logical_name : asylum
+      
+  gen_rv32i_user_c_identity_inverted:
+    generator : rvcc_gen
+    parameters:
+      file         : esw/user_identity.c
+      type         : c
+      entity       : ROM_user
+      cflags       : -Iesw/include --verbose -DINVERT_SWITCH
+      logical_name : asylum
+
+  gen_rv32i_user_c_identity:
+    generator : rvcc_gen
+    parameters:
+      file         : esw/user_identity.c
+      type         : c
+      entity       : ROM_user
+      cflags       : -Iesw/include --verbose
+      logical_name : asylum
+
+  gen_rv32i_user_c :
+    generator : rvcc_gen
+    parameters :
+      file         : esw/user.c
+      type         : c
+      entity       : ROM_user
+      cflags       : -Iesw/include --verbose
+      logical_name : asylum
+
+  gen_rv32i_user_c_uart_921600 :
+    generator : rvcc_gen
+    parameters :
+      file         : esw/user.c
+      type         : c
+      entity       : ROM_user
+      cflags       : -Iesw/include --verbose -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=921600
+      logical_name : asylum
+
+  gen_rv32i_user_c_uart_9600_spi :
+    generator : rvcc_gen
+    parameters :
+      file         : esw/user.c
+      type         : c
+      entity       : ROM_user
+      cflags       : -Iesw/include --verbose -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=9600 -DHAVE_SPI
+      logical_name : asylum
+
+  gen_rv32i_user_c_uart_921600_spi :
+    generator : rvcc_gen
+    parameters :
+      file         : esw/user.c
+      type         : c
+      entity       : ROM_user
+      cflags       : -Iesw/include --verbose -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=921600 -DHAVE_SPI
+      logical_name : asylum
+
+  gen_rv32i_user_c_uart_921600_spi_mem :
+    generator : rvcc_gen
+    parameters :
+      file         : esw/user.c
+      type         : c
+      entity       : ROM_user
+      cflags       : -Iesw/include --verbose -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=921600 -DHAVE_SPI -DHAVE_SPI_MEMORY
+      logical_name : asylum
+
+  gen_rv32i_user_c_uart_9600_spi_mem :
+    generator : rvcc_gen
+    parameters :
+      file         : esw/user.c
+      type         : c
+      entity       : ROM_user
+      cflags       : -Iesw/include --verbose -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=9600 -DHAVE_SPI -DHAVE_SPI_MEMORY
+      logical_name : asylum
+
+  gen_rv32i_user_xmodem_c :
+    generator : rvcc_gen
+    parameters :
+      file         : esw/user_xmodem.c
+      type         : c
+      entity       : ROM_user
+      cflags       : -Iesw/include --verbose -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=921600
+      logical_name : asylum
+
+  gen_rv32i_user_modbus_rtu_921600 :
+    generator : rvcc_gen
+    parameters :
+      file         : esw/user_modbus_rtu.c
+      type         : c
+      entity       : ROM_user
+      cflags       : -Iesw/include --verbose -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=921600
+      logical_name : asylum
+
+  gen_rv32i_user_modbus_rtu_9600 :
+    generator : rvcc_gen
+    parameters :
+      file         : esw/user_modbus_rtu.c
+      type         : c
+      entity       : ROM_user
+      cflags       : -Iesw/include --verbose -DHAVE_UART -DCLOCK_FREQ=6250000 -DBAUD_RATE=9600
+      logical_name : asylum
+
+  gen_rv32i_supervisor_c :
+    generator : rvcc_gen
+    parameters :
+      file         : esw/supervisor.c
+      type         : c
+      entity       : ROM_supervisor
+      cflags       : -Iesw/include --verbose
+      logical_name : asylum
+
+  gen_rv32i_supervisor_c_tmr :
+    generator : rvcc_gen
+    parameters :
+      file         : esw/supervisor.c
+      type         : c
+      entity       : ROM_supervisor
+      cflags       : -Iesw/include --verbose -DSAFETY_TMR
+      logical_name : asylum
+
+  gen_rv32i_supervisor_c_dummy :
+    generator  : rvcc_gen
+    parameters :
+      file         : esw/dummy.c
+      type         : c
+      entity       : ROM_supervisor
+      cflags       : -Iesw/include --verbose
       logical_name : asylum
 
   #<GENERATE_END>
@@ -213,6 +348,7 @@ filesets:
   #---------------------------------------
     files        :
       - hdl/cpu_wrapper.vhd
+      - hdl/cpu_safety.vhd
       - hdl/PicoSoC_pkg.vhd
       - hdl/PicoSoC_top.vhd
       - hdl/PicoSoC_user.vhd
@@ -230,7 +366,9 @@ filesets:
       - ">=asylum:system:GIC:1.0.0"
       - ">=asylum:component:fifo:1.0.0"
       - ">=asylum:component:timer:2.0.0"
+      - ">=asylum:component:ram:1.2.0"
       - ">=asylum:processor:OpenBlaze8:1.0.0"
+      - ">=asylum:processor:WardRV:0.0.1"
       
   #---------------------------------------
   files_sim:
@@ -285,6 +423,7 @@ targets:
     default_tool    : ghdl
     toplevel        : tb_PicoSoC
     parameters   :
+      - CPU_MODEL=OpenBlaze8
       - FSYS=25000000
       - FSYS_INT=12500000
     filesets_append :
@@ -296,7 +435,7 @@ targets:
         run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
 
   #---------------------------------------
-  emu_basys_asm_identity:
+  emu_basys_soc1_openblaze8_asm_identity:
   #---------------------------------------
     description  : Synthesis for Digilent Basys board of the test esw/user_identity.psm
     default_tool : ise
@@ -304,8 +443,9 @@ targets:
       - files_hdl
       - files_basys 
       - pbcc_dep
-    generate : [gen_user_asm_identity,gen_supervisor_c_dummy]
+    generate : [gen_picoblaze3_user_asm_identity,gen_picoblaze3_supervisor_c_dummy]
     parameters   :
+      - CPU_MODEL=OpenBlaze8
       - FSYS=50000000
       - FSYS_INT=50000000
       - NB_SWITCH=8
@@ -322,7 +462,7 @@ targets:
     toplevel : asylum.PicoSoC_top
 
   #---------------------------------------
-  emu_ng_medium_c_user: &emu_ng_medium_default
+  emu_ng_medium_soc1_openblaze8_c_user: &emu_ng_medium_default
   #---------------------------------------
     description  : NanoXplore NG_MEDIUM Board of the test esw/user.c            - With    Supervisor, Safety TMR      , With    Fault Injection
     default_tool : nxmap
@@ -330,8 +470,9 @@ targets:
       - files_hdl
       - files_ng_medium 
       - pbcc_dep
-    generate : [gen_user_c_uart_9600_spi,gen_supervisor_c_tmr]
+    generate : [gen_picoblaze3_user_c_uart_9600_spi,gen_picoblaze3_supervisor_c_tmr]
     parameters   :
+      - CPU_MODEL=OpenBlaze8
       - FSYS=25000000
       - FSYS_INT=12500000
       - NB_SWITCH=6
@@ -365,12 +506,13 @@ targets:
     toplevel : PicoSoC_top
 
   #---------------------------------------
-  emu_ng_medium_soc1:
+  emu_ng_medium_soc1_openblaze8:
   #---------------------------------------
     << : *emu_ng_medium_default
     description  : NanoXplore NG_MEDIUM Board of the test esw/user.c            - Without Supervisor, Safety None     , Without Fault Injection
-    generate : [gen_user_c_uart_9600_spi_mem,gen_supervisor_c_dummy]
+    generate : [gen_picoblaze3_user_c_uart_9600_spi_mem,gen_picoblaze3_supervisor_c_dummy]
     parameters   :
+      - CPU_MODEL=OpenBlaze8
       - FSYS=25000000
       - FSYS_INT=12500000
       - NB_SWITCH=6
@@ -396,12 +538,13 @@ targets:
       - DEBUG_ENABLE=false
 
   #---------------------------------------
-  emu_ng_medium_soc1_modbus_rtu:
+  emu_ng_medium_soc1_openblaze8_modbus_rtu:
   #---------------------------------------
     << : *emu_ng_medium_default
     description  : NanoXplore NG_MEDIUM Board of the test esw/user_modbus_rtu.c - Without Supervisor, Safety None     , Without Fault Injection
-    generate : [gen_user_modbus_rtu_9600,gen_supervisor_c_dummy]
+    generate : [gen_picoblaze3_user_modbus_rtu_9600,gen_picoblaze3_supervisor_c_dummy]
     parameters   :
+      - CPU_MODEL=OpenBlaze8
       - FSYS=25000000
       - FSYS_INT=6250000
       - NB_SWITCH=6
@@ -427,12 +570,13 @@ targets:
       - DEBUG_ENABLE=false
 
   #---------------------------------------
-  emu_ng_medium_soc2:
+  emu_ng_medium_soc2_openblaze8:
   #---------------------------------------
     << : *emu_ng_medium_default
     description  : NanoXplore NG_MEDIUM Board of the test esw/user.c            - Without Supervisor, Safety Lock Step, Without Fault Injection
-    generate : [gen_user_c_uart_9600,gen_supervisor_c_dummy]
+    generate : [gen_picoblaze3_user_c_uart_9600,gen_picoblaze3_supervisor_c_dummy]
     parameters   :
+      - CPU_MODEL=OpenBlaze8
       - FSYS=25000000
       - FSYS_INT=12500000
       - NB_SWITCH=6
@@ -458,12 +602,13 @@ targets:
       - DEBUG_ENABLE=false
 
   #---------------------------------------
-  emu_ng_medium_soc2_modbus_rtu:
+  emu_ng_medium_soc2_openblaze8_modbus_rtu:
   #---------------------------------------
     << : *emu_ng_medium_default
     description  : NanoXplore NG_MEDIUM Board of the test esw/user_modbus_rtu.c - Without Supervisor, Safety Lock-Step, Without Fault Injection
-    generate : [gen_user_modbus_rtu_9600,gen_supervisor_c_dummy]
+    generate : [gen_picoblaze3_user_modbus_rtu_9600,gen_picoblaze3_supervisor_c_dummy]
     parameters   :
+      - CPU_MODEL=OpenBlaze8
       - FSYS=25000000
       - FSYS_INT=6250000
       - NB_SWITCH=6
@@ -489,12 +634,13 @@ targets:
       - DEBUG_ENABLE=false
 
   #---------------------------------------
-  emu_ng_medium_soc2_fault:
+  emu_ng_medium_soc2_openblaze8_fault:
   #---------------------------------------
     << : *emu_ng_medium_default
     description  : NanoXplore NG_MEDIUM Board of the test esw/user.c            - Without Supervisor, Safety Lock Step, With    Fault Injection
-    generate : [gen_user_c_uart_9600,gen_supervisor_c]
+    generate : [gen_picoblaze3_user_c_uart_9600,gen_picoblaze3_supervisor_c]
     parameters   :
+      - CPU_MODEL=OpenBlaze8
       - FSYS=25000000
       - FSYS_INT=12500000
       - NB_SWITCH=6
@@ -520,12 +666,13 @@ targets:
       - DEBUG_ENABLE=false
 
   #---------------------------------------
-  emu_ng_medium_soc2_fault_modbus_rtu:
+  emu_ng_medium_soc2_openblaze8_fault_modbus_rtu:
   #---------------------------------------
     << : *emu_ng_medium_default
     description  : NanoXplore NG_MEDIUM Board of the test esw/user_modbus_rtu.c - Without Supervisor, Safety Lock-Step, With    Fault Injection
-    generate : [gen_user_modbus_rtu_9600,gen_supervisor_c_dummy]
+    generate : [gen_picoblaze3_user_modbus_rtu_9600,gen_picoblaze3_supervisor_c_dummy]
     parameters   :
+      - CPU_MODEL=OpenBlaze8
       - FSYS=25000000
       - FSYS_INT=6250000
       - NB_SWITCH=6
@@ -551,12 +698,13 @@ targets:
       - DEBUG_ENABLE=false
 
   #---------------------------------------
-  emu_ng_medium_soc3_fault:
+  emu_ng_medium_soc3_openblaze8_fault:
   #---------------------------------------
     << : *emu_ng_medium_default
     description  : NanoXplore NG_MEDIUM Board of the test esw/user.c            - With    Supervisor, Safety Lock-Step, With    Fault Injection
-    generate : [gen_user_c_uart_9600,gen_supervisor_c]
+    generate : [gen_picoblaze3_user_c_uart_9600,gen_picoblaze3_supervisor_c]
     parameters   :
+      - CPU_MODEL=OpenBlaze8
       - FSYS=25000000
       - FSYS_INT=12500000
       - NB_SWITCH=6
@@ -582,12 +730,13 @@ targets:
       - DEBUG_ENABLE=false
 
   #---------------------------------------
-  emu_ng_medium_soc3_fault_modbus_rtu:
+  emu_ng_medium_soc3_openblaze8_fault_modbus_rtu:
   #---------------------------------------
     << : *emu_ng_medium_default
     description  : NanoXplore NG_MEDIUM Board of the test esw/user_modbus_rtu.c - With    Supervisor, Safety Lock-Step, With    Fault Injection
-    generate : [gen_user_modbus_rtu_9600,gen_supervisor_c]
+    generate : [gen_picoblaze3_user_modbus_rtu_9600,gen_picoblaze3_supervisor_c]
     parameters   :
+      - CPU_MODEL=OpenBlaze8
       - FSYS=25000000
       - FSYS_INT=6250000
       - NB_SWITCH=6
@@ -613,12 +762,13 @@ targets:
       - DEBUG_ENABLE=false
 
   #---------------------------------------
-  emu_ng_medium_soc4_fault:
+  emu_ng_medium_soc4_openblaze8_fault:
   #---------------------------------------
     << : *emu_ng_medium_default
     description  : NanoXplore NG_MEDIUM Board of the test esw/user.c            - With    Supervisor, Safety TMR      , With    Fault Injection
-    generate     : [gen_user_c_uart_9600,gen_supervisor_c_tmr]
+    generate     : [gen_picoblaze3_user_c_uart_9600,gen_picoblaze3_supervisor_c_tmr]
     parameters   :
+      - CPU_MODEL=OpenBlaze8
       - FSYS=25000000
       - FSYS_INT=12500000
       - NB_SWITCH=6
@@ -644,12 +794,13 @@ targets:
       - DEBUG_ENABLE=false
 
   #---------------------------------------
-  emu_ng_medium_soc4_fault_modbus_rtu:
+  emu_ng_medium_soc4_openblaze8_fault_modbus_rtu:
   #---------------------------------------
     << : *emu_ng_medium_default
     description  : NanoXplore NG_MEDIUM Board of the test esw/user_modbus_rtu.c - With    Supervisor, Safety TMR      , With    Fault Injection
-    generate : [gen_user_modbus_rtu_9600,gen_supervisor_c_tmr]
+    generate : [gen_picoblaze3_user_modbus_rtu_9600,gen_picoblaze3_supervisor_c_tmr]
     parameters   :
+      - CPU_MODEL=OpenBlaze8
       - FSYS=25000000
       - FSYS_INT=6250000
       - NB_SWITCH=6
@@ -675,12 +826,13 @@ targets:
       - DEBUG_ENABLE=false
       
   #---------------------------------------
-  sim_soc1_asm_identity:
+  sim_soc1_openblaze8_asm_identity:
   #---------------------------------------
     << : *sim
     description  : Simulation of the test esw/user_identity.psm
-    generate     : [gen_user_asm_identity,gen_supervisor_c_dummy]
+    generate     : [gen_picoblaze3_user_asm_identity,gen_picoblaze3_supervisor_c_dummy]
     parameters   :
+      - CPU_MODEL=OpenBlaze8
       - FSYS=25000000
       - FSYS_INT=12500000
 
@@ -700,12 +852,13 @@ targets:
       - HAVE_SPI_MEMORY=False
 
   #---------------------------------------
-  sim_soc1_c_identity:
+  sim_soc1_openblaze8_c_identity:
   #---------------------------------------
     << : *sim
     description  : Simulation of the test esw/user_identity.c
-    generate     : [gen_user_c_identity,gen_supervisor_c_dummy]
+    generate     : [gen_picoblaze3_user_c_identity,gen_picoblaze3_supervisor_c_dummy]
     parameters   :
+      - CPU_MODEL=OpenBlaze8
       - FSYS=25000000
       - FSYS_INT=12500000
 
@@ -725,12 +878,13 @@ targets:
       - HAVE_SPI_MEMORY=False
 
   #---------------------------------------
-  sim_soc1_c_user:
+  sim_soc1_openblaze8_c_user:
   #---------------------------------------
     << : *sim
     description  : Simulation of the test esw/user.c            - Without Supervisor, Safety None     , Without Fault Injection
-    generate     : [gen_user_c,gen_supervisor_c_dummy]
+    generate     : [gen_picoblaze3_user_c,gen_picoblaze3_supervisor_c_dummy]
     parameters   :
+      - CPU_MODEL=OpenBlaze8
       - FSYS=25000000
       - FSYS_INT=12500000
 
@@ -750,12 +904,13 @@ targets:
       - HAVE_SPI_MEMORY=False
 
   #---------------------------------------
-  sim_soc1_c_user_uart:
+  sim_soc1_openblaze8_c_user_uart:
   #---------------------------------------
     << : *sim
     description  : Simulation of the test esw/user.c            - Without Supervisor, Safety None     , Without Fault Injection
-    generate     : [gen_user_c_uart_921600,gen_supervisor_c_dummy]
+    generate     : [gen_picoblaze3_user_c_uart_921600,gen_picoblaze3_supervisor_c_dummy]
     parameters   :
+      - CPU_MODEL=OpenBlaze8
       - FSYS=25000000
       - FSYS_INT=12500000
 
@@ -771,16 +926,17 @@ targets:
       - DEBUG_ENABLE=false
 
       # Test Bench Configuration
-      - TB_WATCHDOG=50000
+      - TB_WATCHDOG=200000
       - HAVE_SPI_MEMORY=False
 
   #---------------------------------------
-  sim_soc1_c_user_uart_spi:
+  sim_soc1_openblaze8_c_user_uart_spi:
   #---------------------------------------
     << : *sim
     description  : Simulation of the test esw/user.c            - Without Supervisor, Safety None     , Without Fault Injection
-    generate     : [gen_user_c_uart_921600_spi,gen_supervisor_c_dummy]
+    generate     : [gen_picoblaze3_user_c_uart_921600_spi,gen_picoblaze3_supervisor_c_dummy]
     parameters   :
+      - CPU_MODEL=OpenBlaze8
       - FSYS=25000000
       - FSYS_INT=12500000
 
@@ -800,12 +956,13 @@ targets:
       - HAVE_SPI_MEMORY=False
 
   #---------------------------------------
-  sim_soc1_c_user_uart_spi_mem:
+  sim_soc1_openblaze8_c_user_uart_spi_mem:
   #---------------------------------------
     << : *sim
     description  : Simulation of the test esw/user.c            - Without Supervisor, Safety None     , Without Fault Injection
-    generate     : [gen_user_c_uart_921600_spi_mem,gen_supervisor_c_dummy]
+    generate     : [gen_picoblaze3_user_c_uart_921600_spi_mem,gen_picoblaze3_supervisor_c_dummy]
     parameters   :
+      - CPU_MODEL=OpenBlaze8
       - FSYS=25000000
       - FSYS_INT=12500000
 
@@ -821,17 +978,18 @@ targets:
       - DEBUG_ENABLE=false
 
       # Test Bench Configuration
-      - TB_WATCHDOG=50000
+      - TB_WATCHDOG=200000
       - HAVE_SPI_MEMORY=true
 
   #---------------------------------------
-  sim_soc1_c_user_modbus_rtu:
+  sim_soc1_openblaze8_c_user_modbus_rtu:
   #---------------------------------------
     << : *sim
     description  : Simulation of the test esw/user_modbus_rtu.c - Without Supervisor, Safety None     , Without Fault Injection
-    generate     : [gen_user_modbus_rtu_921600,gen_supervisor_c_dummy]
+    generate     : [gen_picoblaze3_user_modbus_rtu_921600,gen_picoblaze3_supervisor_c_dummy]
     toplevel     : tb_PicoSoC_modbus_rtu
     parameters   :
+      - CPU_MODEL=OpenBlaze8
       - FSYS=25000000
       - FSYS_INT=12500000
 
@@ -847,15 +1005,16 @@ targets:
       - DEBUG_ENABLE=false
 
       # Test Bench Configuration
-      - TB_WATCHDOG=50000
+      - TB_WATCHDOG=200000
 
   #---------------------------------------
-  sim_soc2_c_user:
+  sim_soc2_openblaze8_c_user:
   #---------------------------------------
     << : *sim
     description  : Simulation of the test esw/user.c            - Without Supervisor, Safety Lock-Step, Without Fault Injection
-    generate     : [gen_user_c,gen_supervisor_c_dummy]
+    generate     : [gen_picoblaze3_user_c,gen_picoblaze3_supervisor_c_dummy]
     parameters   :
+      - CPU_MODEL=OpenBlaze8
       - FSYS=25000000
       - FSYS_INT=12500000
 
@@ -871,16 +1030,17 @@ targets:
       - DEBUG_ENABLE=false
 
       # Test Bench Configuration
-      - TB_WATCHDOG=50000
+      - TB_WATCHDOG=200000
       - HAVE_SPI_MEMORY=false
 
   #---------------------------------------
-  sim_soc2_c_user_uart:
+  sim_soc2_openblaze8_c_user_uart:
   #---------------------------------------
     << : *sim
     description  : Simulation of the test esw/user.c            - Without Supervisor, Safety Lock-Step, Without Fault Injection
-    generate     : [gen_user_c_uart_921600,gen_supervisor_c_dummy]
+    generate     : [gen_picoblaze3_user_c_uart_921600,gen_picoblaze3_supervisor_c_dummy]
     parameters   :
+      - CPU_MODEL=OpenBlaze8
       - FSYS=25000000
       - FSYS_INT=12500000
 
@@ -896,17 +1056,18 @@ targets:
       - DEBUG_ENABLE=false
 
       # Test Bench Configuration
-      - TB_WATCHDOG=50000
+      - TB_WATCHDOG=200000
       - HAVE_SPI_MEMORY=false
 
   #---------------------------------------
-  sim_soc2_c_user_modbus_rtu:
+  sim_soc2_openblaze8_c_user_modbus_rtu:
   #---------------------------------------
     << : *sim
     description  : Simulation of the test esw/user_modbus_rtu.c - Without Supervisor, Safety Lock-Step, Without Fault Injection
-    generate     : [gen_user_modbus_rtu_921600,gen_supervisor_c_dummy]
+    generate     : [gen_picoblaze3_user_modbus_rtu_921600,gen_picoblaze3_supervisor_c_dummy]
     toplevel     : tb_PicoSoC_modbus_rtu
     parameters   :
+      - CPU_MODEL=OpenBlaze8
       - FSYS=25000000
       - FSYS_INT=12500000
 
@@ -922,15 +1083,16 @@ targets:
       - DEBUG_ENABLE=false
 
       # Test Bench Configuration
-      - TB_WATCHDOG=50000
+      - TB_WATCHDOG=200000
 
   #---------------------------------------
-  sim_soc3_c_user:
+  sim_soc3_openblaze8_c_user:
   #---------------------------------------
     << : *sim
     description  : Simulation of the test esw/user.c            - With    Supervisor, Safety Lock-Step, Without Fault Injection
-    generate     : [gen_user_c,gen_supervisor_c]
+    generate     : [gen_picoblaze3_user_c,gen_picoblaze3_supervisor_c]
     parameters   :
+      - CPU_MODEL=OpenBlaze8
       - FSYS=25000000
       - FSYS_INT=12500000
 
@@ -946,17 +1108,18 @@ targets:
       - DEBUG_ENABLE=false
 
       # Test Bench Configuration
-      - TB_WATCHDOG=50000
+      - TB_WATCHDOG=200000
       - HAVE_SPI_MEMORY=false
 
   #---------------------------------------
-  sim_soc3_c_user_modbus_rtu:
+  sim_soc3_openblaze8_c_user_modbus_rtu:
   #---------------------------------------
     << : *sim
     description  : Simulation of the test esw/user_modbus_rtu.c - With    Supervisor, Safety Lock-Step, Without Fault Injection
-    generate     : [gen_user_modbus_rtu_921600,gen_supervisor_c]
+    generate     : [gen_picoblaze3_user_modbus_rtu_921600,gen_picoblaze3_supervisor_c]
     toplevel     : tb_PicoSoC_modbus_rtu
     parameters   :
+      - CPU_MODEL=OpenBlaze8
       - FSYS=25000000
       - FSYS_INT=12500000
 
@@ -972,15 +1135,16 @@ targets:
       - DEBUG_ENABLE=false
 
       # Test Bench Configuration
-      - TB_WATCHDOG=50000
+      - TB_WATCHDOG=200000
 
   #---------------------------------------
-  sim_soc3_fault_c_user:
+  sim_soc3_openblaze8_fault_c_user:
   #---------------------------------------
     << : *sim
     description  : Simulation of the test esw/user.c            - With    Supervisor, Safety Lock-Step, With    Fault Injection
-    generate     : [gen_user_c,gen_supervisor_c]
+    generate     : [gen_picoblaze3_user_c,gen_picoblaze3_supervisor_c]
     parameters   :
+      - CPU_MODEL=OpenBlaze8
       - FSYS=25000000
       - FSYS_INT=12500000
 
@@ -996,17 +1160,18 @@ targets:
       - DEBUG_ENABLE=false
 
       # Test Bench Configuration
-      - TB_WATCHDOG=50000
+      - TB_WATCHDOG=200000
       - HAVE_SPI_MEMORY=false
 
   #---------------------------------------
-  sim_soc3_fault_c_user_modbus_rtu:
+  sim_soc3_openblaze8_fault_c_user_modbus_rtu:
   #---------------------------------------
     << : *sim
     description  : Simulation of the test esw/user_modbus_rtu.c - With    Supervisor, Safety Lock-Step, With    Fault Injection
-    generate     : [gen_user_modbus_rtu_921600,gen_supervisor_c]
+    generate     : [gen_picoblaze3_user_modbus_rtu_921600,gen_picoblaze3_supervisor_c]
     toplevel     : tb_PicoSoC_modbus_rtu
     parameters   :
+      - CPU_MODEL=OpenBlaze8
       - FSYS=25000000
       - FSYS_INT=12500000
 
@@ -1022,15 +1187,16 @@ targets:
       - DEBUG_ENABLE=false
 
       # Test Bench Configuration
-      - TB_WATCHDOG=50000
+      - TB_WATCHDOG=200000
 
   #---------------------------------------
-  sim_soc4_fault_c_user:
+  sim_soc4_openblaze8_fault_c_user:
   #---------------------------------------
     << : *sim
     description  : Simulation of the test esw/user.c            - With    Supervisor, Safety TMR      , With    Fault Injection
-    generate     : [gen_user_c,gen_supervisor_c_tmr]
+    generate     : [gen_picoblaze3_user_c,gen_picoblaze3_supervisor_c_tmr]
     parameters   :
+      - CPU_MODEL=OpenBlaze8
       - FSYS=25000000
       - FSYS_INT=12500000
 
@@ -1046,16 +1212,17 @@ targets:
       - DEBUG_ENABLE=false
 
       # Test Bench Configuration
-      - TB_WATCHDOG=50000
+      - TB_WATCHDOG=200000
       - HAVE_SPI_MEMORY=false
 
   #---------------------------------------
-  sim_soc4_fault_c_user_uart:
+  sim_soc4_openblaze8_fault_c_user_uart:
   #---------------------------------------
     << : *sim
     description  : Simulation of the test esw/user.c            - With    Supervisor, Safety TMR      , With    Fault Injection
-    generate     : [gen_user_c_uart_921600,gen_supervisor_c_tmr]
+    generate     : [gen_picoblaze3_user_c_uart_921600,gen_picoblaze3_supervisor_c_tmr]
     parameters   :
+      - CPU_MODEL=OpenBlaze8
       - FSYS=25000000
       - FSYS_INT=12500000
 
@@ -1071,17 +1238,18 @@ targets:
       - DEBUG_ENABLE=false
 
       # Test Bench Configuration
-      - TB_WATCHDOG=50000
+      - TB_WATCHDOG=200000
       - HAVE_SPI_MEMORY=false
 
   #---------------------------------------
-  sim_soc4_fault_c_user_modbus_rtu:
+  sim_soc4_openblaze8_fault_c_user_modbus_rtu:
   #---------------------------------------
     << : *sim
     description  : Simulation of the test esw/user_modbus_rtu.c - With    Supervisor, Safety TMR      , With    Fault Injection
-    generate     : [gen_user_modbus_rtu_921600,gen_supervisor_c_tmr]
+    generate     : [gen_picoblaze3_user_modbus_rtu_921600,gen_picoblaze3_supervisor_c_tmr]
     toplevel     : tb_PicoSoC_modbus_rtu
     parameters   :
+      - CPU_MODEL=OpenBlaze8
       - FSYS=25000000
       - FSYS_INT=12500000
 
@@ -1097,7 +1265,840 @@ targets:
       - DEBUG_ENABLE=false
 
       # Test Bench Configuration
-      - TB_WATCHDOG=50000
+      - TB_WATCHDOG=200000
+
+  #---------------------------------------
+  emu_basys_soc1_wardrv_fsm_asm_identity:
+  #---------------------------------------
+    description  : Synthesis for Digilent Basys board of the test esw/user_identity.psm
+    default_tool : ise
+    filesets     :
+      - files_hdl
+      - files_basys 
+      - pbcc_dep
+    generate : [gen_rv32i_user_asm_identity,gen_rv32i_supervisor_c_dummy]
+    parameters   :
+      - CPU_MODEL=WardRV_fsm
+      - FSYS=50000000
+      - FSYS_INT=50000000
+      - NB_SWITCH=8
+      - NB_LED=8
+      - RESET_POLARITY=high
+    flags:
+      TARGET  : XILINX_UNISIM
+    tools:
+      ise:
+        family  : Spartan3E
+        device  : xc3s100e
+        package : tq144
+        speed   : -5
+    toplevel : asylum.PicoSoC_top
+
+  #---------------------------------------
+  emu_ng_medium_soc1_wardrv_fsm_c_user:
+  #---------------------------------------
+    description  : NanoXplore NG_MEDIUM Board of the test esw/user.c            - With    Supervisor, Safety TMR      , With    Fault Injection
+    default_tool : nxmap
+    filesets     :
+      - files_hdl
+      - files_ng_medium 
+      - pbcc_dep
+    generate : [gen_rv32i_user_c_uart_9600_spi,gen_rv32i_supervisor_c_tmr]
+    parameters   :
+      - CPU_MODEL=WardRV_fsm
+      - FSYS=25000000
+      - FSYS_INT=12500000
+      - NB_SWITCH=6
+      - NB_LED=19
+      - RESET_POLARITY=low
+      - IT_USER_POLARITY=low
+      - FAULT_POLARITY=low
+
+      # SoC User Configuration
+      - BAUD_RATE=9600
+      - UART_DEPTH_TX=4
+      - UART_DEPTH_RX=4
+      - SPI_DEPTH_CMD=4
+      - SPI_DEPTH_TX=4
+      - SPI_DEPTH_RX=4
+      
+      # Platform Configuration
+      - SUPERVISOR=true
+      - SAFETY=tmr
+      - FAULT_INJECTION=true
+
+      # Debug
+      - DEBUG_ENABLE=false
+    flags :
+      TARGET  : NANOXPLORE_NG_MEDIUM
+    tools:
+      nxmap:
+        fpga         : NG-MEDIUM
+        program      : True
+        logical_name : asylum
+    toplevel : PicoSoC_top
+
+  #---------------------------------------
+  emu_ng_medium_soc1_wardrv_fsm:
+  #---------------------------------------
+    << : *emu_ng_medium_default
+    description  : NanoXplore NG_MEDIUM Board of the test esw/user.c            - Without Supervisor, Safety None     , Without Fault Injection
+    generate : [gen_rv32i_user_c_uart_9600_spi_mem,gen_rv32i_supervisor_c_dummy]
+    parameters   :
+      - CPU_MODEL=WardRV_fsm
+      - FSYS=25000000
+      - FSYS_INT=12500000
+      - NB_SWITCH=6
+      - NB_LED=19
+      - RESET_POLARITY=low
+      - IT_USER_POLARITY=low
+      - FAULT_POLARITY=low
+
+      # SoC User Configuration
+      - BAUD_RATE=9600
+      - UART_DEPTH_TX=4
+      - UART_DEPTH_RX=4
+      - SPI_DEPTH_CMD=4
+      - SPI_DEPTH_TX=4
+      - SPI_DEPTH_RX=4
+      
+      # Platform Configuration
+      - SUPERVISOR=false
+      - SAFETY=none
+      - FAULT_INJECTION=false
+
+      # Debug
+      - DEBUG_ENABLE=false
+
+  #---------------------------------------
+  emu_ng_medium_soc1_wardrv_fsm_modbus_rtu:
+  #---------------------------------------
+    << : *emu_ng_medium_default
+    description  : NanoXplore NG_MEDIUM Board of the test esw/user_modbus_rtu.c - Without Supervisor, Safety None     , Without Fault Injection
+    generate : [gen_rv32i_user_modbus_rtu_9600,gen_rv32i_supervisor_c_dummy]
+    parameters   :
+      - CPU_MODEL=WardRV_fsm
+      - FSYS=25000000
+      - FSYS_INT=6250000
+      - NB_SWITCH=6
+      - NB_LED=19
+      - RESET_POLARITY=low
+      - IT_USER_POLARITY=low
+      - FAULT_POLARITY=low
+
+      # SoC User Configuration
+      - BAUD_RATE=9600
+      - UART_DEPTH_TX=4
+      - UART_DEPTH_RX=4
+      - SPI_DEPTH_CMD=4
+      - SPI_DEPTH_TX=4
+      - SPI_DEPTH_RX=4
+      
+      # Platform Configuration
+      - SUPERVISOR=false
+      - SAFETY=none
+      - FAULT_INJECTION=false
+
+      # Debug
+      - DEBUG_ENABLE=false
+
+  #---------------------------------------
+  emu_ng_medium_soc2_wardrv_fsm:
+  #---------------------------------------
+    << : *emu_ng_medium_default
+    description  : NanoXplore NG_MEDIUM Board of the test esw/user.c            - Without Supervisor, Safety Lock Step, Without Fault Injection
+    generate : [gen_rv32i_user_c_uart_9600,gen_rv32i_supervisor_c_dummy]
+    parameters   :
+      - CPU_MODEL=WardRV_fsm
+      - FSYS=25000000
+      - FSYS_INT=12500000
+      - NB_SWITCH=6
+      - NB_LED=19
+      - RESET_POLARITY=low
+      - IT_USER_POLARITY=low
+      - FAULT_POLARITY=low
+
+      # SoC User Configuration
+      - BAUD_RATE=9600
+      - UART_DEPTH_TX=4
+      - UART_DEPTH_RX=4
+      - SPI_DEPTH_CMD=4
+      - SPI_DEPTH_TX=4
+      - SPI_DEPTH_RX=4
+      
+      # Platform Configuration
+      - SUPERVISOR=false
+      - SAFETY=lock-step
+      - FAULT_INJECTION=false
+
+      # Debug
+      - DEBUG_ENABLE=false
+
+  #---------------------------------------
+  emu_ng_medium_soc2_wardrv_fsm_modbus_rtu:
+  #---------------------------------------
+    << : *emu_ng_medium_default
+    description  : NanoXplore NG_MEDIUM Board of the test esw/user_modbus_rtu.c - Without Supervisor, Safety Lock-Step, Without Fault Injection
+    generate : [gen_rv32i_user_modbus_rtu_9600,gen_rv32i_supervisor_c_dummy]
+    parameters   :
+      - CPU_MODEL=WardRV_fsm
+      - FSYS=25000000
+      - FSYS_INT=6250000
+      - NB_SWITCH=6
+      - NB_LED=19
+      - RESET_POLARITY=low
+      - IT_USER_POLARITY=low
+      - FAULT_POLARITY=low
+
+      # SoC User Configuration
+      - BAUD_RATE=9600
+      - UART_DEPTH_TX=4
+      - UART_DEPTH_RX=4
+      - SPI_DEPTH_CMD=4
+      - SPI_DEPTH_TX=4
+      - SPI_DEPTH_RX=4
+      
+      # Platform Configuration
+      - SUPERVISOR=false
+      - SAFETY=lock-step
+      - FAULT_INJECTION=false
+
+      # Debug
+      - DEBUG_ENABLE=false
+
+  #---------------------------------------
+  emu_ng_medium_soc2_wardrv_fsm_fault:
+  #---------------------------------------
+    << : *emu_ng_medium_default
+    description  : NanoXplore NG_MEDIUM Board of the test esw/user.c            - Without Supervisor, Safety Lock Step, With    Fault Injection
+    generate : [gen_rv32i_user_c_uart_9600,gen_rv32i_supervisor_c]
+    parameters   :
+      - CPU_MODEL=WardRV_fsm
+      - FSYS=25000000
+      - FSYS_INT=12500000
+      - NB_SWITCH=6
+      - NB_LED=19
+      - RESET_POLARITY=low
+      - IT_USER_POLARITY=low
+      - FAULT_POLARITY=low
+
+      # SoC User Configuration
+      - BAUD_RATE=9600
+      - UART_DEPTH_TX=4
+      - UART_DEPTH_RX=4
+      - SPI_DEPTH_CMD=4
+      - SPI_DEPTH_TX=4
+      - SPI_DEPTH_RX=4
+      
+      # Platform Configuration
+      - SUPERVISOR=false
+      - SAFETY=lock-step
+      - FAULT_INJECTION=true
+
+      # Debug
+      - DEBUG_ENABLE=false
+
+  #---------------------------------------
+  emu_ng_medium_soc2_wardrv_fsm_fault_modbus_rtu:
+  #---------------------------------------
+    << : *emu_ng_medium_default
+    description  : NanoXplore NG_MEDIUM Board of the test esw/user_modbus_rtu.c - Without Supervisor, Safety Lock-Step, With    Fault Injection
+    generate : [gen_rv32i_user_modbus_rtu_9600,gen_rv32i_supervisor_c_dummy]
+    parameters   :
+      - CPU_MODEL=WardRV_fsm
+      - FSYS=25000000
+      - FSYS_INT=6250000
+      - NB_SWITCH=6
+      - NB_LED=19
+      - RESET_POLARITY=low
+      - IT_USER_POLARITY=low
+      - FAULT_POLARITY=low
+
+      # SoC User Configuration
+      - BAUD_RATE=9600
+      - UART_DEPTH_TX=4
+      - UART_DEPTH_RX=4
+      - SPI_DEPTH_CMD=4
+      - SPI_DEPTH_TX=4
+      - SPI_DEPTH_RX=4
+      
+      # Platform Configuration
+      - SUPERVISOR=false
+      - SAFETY=lock-step
+      - FAULT_INJECTION=true
+
+      # Debug
+      - DEBUG_ENABLE=false
+
+  #---------------------------------------
+  emu_ng_medium_soc3_wardrv_fsm_fault:
+  #---------------------------------------
+    << : *emu_ng_medium_default
+    description  : NanoXplore NG_MEDIUM Board of the test esw/user.c            - With    Supervisor, Safety Lock-Step, With    Fault Injection
+    generate : [gen_rv32i_user_c_uart_9600,gen_rv32i_supervisor_c]
+    parameters   :
+      - CPU_MODEL=WardRV_fsm
+      - FSYS=25000000
+      - FSYS_INT=12500000
+      - NB_SWITCH=6
+      - NB_LED=19
+      - RESET_POLARITY=low
+      - IT_USER_POLARITY=low
+      - FAULT_POLARITY=low
+
+      # SoC User Configuration
+      - BAUD_RATE=9600
+      - UART_DEPTH_TX=4
+      - UART_DEPTH_RX=4
+      - SPI_DEPTH_CMD=4
+      - SPI_DEPTH_TX=4
+      - SPI_DEPTH_RX=4
+      
+      # Platform Configuration
+      - SUPERVISOR=true
+      - SAFETY=lock-step
+      - FAULT_INJECTION=true
+
+      # Debug
+      - DEBUG_ENABLE=false
+
+  #---------------------------------------
+  emu_ng_medium_soc3_wardrv_fsm_fault_modbus_rtu:
+  #---------------------------------------
+    << : *emu_ng_medium_default
+    description  : NanoXplore NG_MEDIUM Board of the test esw/user_modbus_rtu.c - With    Supervisor, Safety Lock-Step, With    Fault Injection
+    generate : [gen_rv32i_user_modbus_rtu_9600,gen_rv32i_supervisor_c]
+    parameters   :
+      - CPU_MODEL=WardRV_fsm
+      - FSYS=25000000
+      - FSYS_INT=6250000
+      - NB_SWITCH=6
+      - NB_LED=19
+      - RESET_POLARITY=low
+      - IT_USER_POLARITY=low
+      - FAULT_POLARITY=low
+
+      # SoC User Configuration
+      - BAUD_RATE=9600
+      - UART_DEPTH_TX=4
+      - UART_DEPTH_RX=4
+      - SPI_DEPTH_CMD=4
+      - SPI_DEPTH_TX=4
+      - SPI_DEPTH_RX=4
+      
+      # Platform Configuration
+      - SUPERVISOR=true
+      - SAFETY=lock-step
+      - FAULT_INJECTION=true
+
+      # Debug
+      - DEBUG_ENABLE=false
+
+  #---------------------------------------
+  emu_ng_medium_soc4_wardrv_fsm_fault:
+  #---------------------------------------
+    << : *emu_ng_medium_default
+    description  : NanoXplore NG_MEDIUM Board of the test esw/user.c            - With    Supervisor, Safety TMR      , With    Fault Injection
+    generate     : [gen_rv32i_user_c_uart_9600,gen_rv32i_supervisor_c_tmr]
+    parameters   :
+      - CPU_MODEL=WardRV_fsm
+      - FSYS=25000000
+      - FSYS_INT=12500000
+      - NB_SWITCH=6
+      - NB_LED=19
+      - RESET_POLARITY=low
+      - IT_USER_POLARITY=low
+      - FAULT_POLARITY=low
+
+      # SoC User Configuration
+      - BAUD_RATE=9600
+      - UART_DEPTH_TX=4
+      - UART_DEPTH_RX=4
+      - SPI_DEPTH_CMD=4
+      - SPI_DEPTH_TX=4
+      - SPI_DEPTH_RX=4
+      
+      # Platform Configuration
+      - SUPERVISOR=true
+      - SAFETY=tmr
+      - FAULT_INJECTION=true
+
+      # Debug
+      - DEBUG_ENABLE=false
+
+  #---------------------------------------
+  emu_ng_medium_soc4_wardrv_fsm_fault_modbus_rtu:
+  #---------------------------------------
+    << : *emu_ng_medium_default
+    description  : NanoXplore NG_MEDIUM Board of the test esw/user_modbus_rtu.c - With    Supervisor, Safety TMR      , With    Fault Injection
+    generate : [gen_rv32i_user_modbus_rtu_9600,gen_rv32i_supervisor_c_tmr]
+    parameters   :
+      - CPU_MODEL=WardRV_fsm
+      - FSYS=25000000
+      - FSYS_INT=6250000
+      - NB_SWITCH=6
+      - NB_LED=19
+      - RESET_POLARITY=low
+      - IT_USER_POLARITY=low
+      - FAULT_POLARITY=low
+
+      # SoC User Configuration
+      - BAUD_RATE=9600
+      - UART_DEPTH_TX=4
+      - UART_DEPTH_RX=4
+      - SPI_DEPTH_CMD=4
+      - SPI_DEPTH_TX=4
+      - SPI_DEPTH_RX=4
+      
+      # Platform Configuration
+      - SUPERVISOR=true
+      - SAFETY=tmr
+      - FAULT_INJECTION=true
+
+      # Debug
+      - DEBUG_ENABLE=false
+      
+#  #---------------------------------------
+#  sim_soc1_wardrv_fsm_asm_identity:
+#  #---------------------------------------
+#    << : *sim
+#    description  : Simulation of the test esw/user_identity.psm
+#    generate     : [gen_rv32i_user_asm_identity,gen_rv32i_supervisor_c_dummy]
+#    parameters   :
+#      - CPU_MODEL=WardRV_fsm
+#      - FSYS=25000000
+#      - FSYS_INT=12500000
+#
+#      # SoC User Configuration
+#      - BAUD_RATE=921600
+#      
+#      # Platform Configuration
+#      - SUPERVISOR=false
+#      - SAFETY=none
+#      - FAULT_INJECTION=false
+#
+#      # Debug
+#      - DEBUG_ENABLE=false
+#
+#      # Test Bench Configuration
+#      - TB_WATCHDOG=10000
+#      - HAVE_SPI_MEMORY=False
+
+  #---------------------------------------
+  sim_soc1_wardrv_fsm_c_identity:
+  #---------------------------------------
+    << : *sim
+    description  : Simulation of the test esw/user_identity.c
+    generate     : [gen_rv32i_user_c_identity,gen_rv32i_supervisor_c_dummy]
+    parameters   :
+      - CPU_MODEL=WardRV_fsm
+      - FSYS=25000000
+      - FSYS_INT=12500000
+
+      # SoC User Configuration
+      - BAUD_RATE=921600
+      
+      # Platform Configuration
+      - SUPERVISOR=false
+      - SAFETY=none
+      - FAULT_INJECTION=false
+
+      # Debug
+      - DEBUG_ENABLE=false
+
+      # Test Bench Configuration
+      - TB_WATCHDOG=10000
+      - HAVE_SPI_MEMORY=False
+
+  #---------------------------------------
+  sim_soc1_wardrv_fsm_c_identity:
+  #---------------------------------------
+    << : *sim
+    description  : Simulation of the test esw/user_identity.c
+    generate     : [gen_rv32i_user_c_identity,gen_rv32i_supervisor_c_dummy]
+    parameters   :
+      - CPU_MODEL=WardRV_fsm
+      - FSYS=25000000
+      - FSYS_INT=12500000
+
+      # SoC User Configuration
+      - BAUD_RATE=921600
+      
+      # Platform Configuration
+      - SUPERVISOR=false
+      - SAFETY=none
+      - FAULT_INJECTION=false
+
+      # Debug
+      - DEBUG_ENABLE=false
+
+      # Test Bench Configuration
+      - TB_WATCHDOG=10000
+      - HAVE_SPI_MEMORY=False
+
+  #---------------------------------------
+  sim_soc1_wardrv_fsm_c_user_uart:
+  #---------------------------------------
+    << : *sim
+    description  : Simulation of the test esw/user.c            - Without Supervisor, Safety None     , Without Fault Injection
+    generate     : [gen_rv32i_user_c_uart_921600,gen_rv32i_supervisor_c_dummy]
+    parameters   :
+      - CPU_MODEL=WardRV_fsm
+      - FSYS=25000000
+      - FSYS_INT=12500000
+
+      # SoC User Configuration
+      - BAUD_RATE=921600
+      
+      # Platform Configuration
+      - SUPERVISOR=false
+      - SAFETY=none
+      - FAULT_INJECTION=false
+
+      # Debug
+      - DEBUG_ENABLE=false
+
+      # Test Bench Configuration
+      - TB_WATCHDOG=200000
+      - HAVE_SPI_MEMORY=False
+
+  #---------------------------------------
+  sim_soc1_wardrv_fsm_c_user_uart_spi:
+  #---------------------------------------
+    << : *sim
+    description  : Simulation of the test esw/user.c            - Without Supervisor, Safety None     , Without Fault Injection
+    generate     : [gen_rv32i_user_c_uart_921600_spi,gen_rv32i_supervisor_c_dummy]
+    parameters   :
+      - CPU_MODEL=WardRV_fsm
+      - FSYS=25000000
+      - FSYS_INT=12500000
+
+      # SoC User Configuration
+      - BAUD_RATE=921600
+      
+      # Platform Configuration
+      - SUPERVISOR=false
+      - SAFETY=none
+      - FAULT_INJECTION=false
+
+      # Debug
+      - DEBUG_ENABLE=false
+
+      # Test Bench Configuration
+      - TB_WATCHDOG=100000
+      - HAVE_SPI_MEMORY=False
+
+  #---------------------------------------
+  sim_soc1_wardrv_fsm_c_user_uart_spi_mem:
+  #---------------------------------------
+    << : *sim
+    description  : Simulation of the test esw/user.c            - Without Supervisor, Safety None     , Without Fault Injection
+    generate     : [gen_rv32i_user_c_uart_921600_spi_mem,gen_rv32i_supervisor_c_dummy]
+    parameters   :
+      - CPU_MODEL=WardRV_fsm
+      - FSYS=25000000
+      - FSYS_INT=12500000
+
+      # SoC User Configuration
+      - BAUD_RATE=921600
+      
+      # Platform Configuration
+      - SUPERVISOR=false
+      - SAFETY=none
+      - FAULT_INJECTION=false
+
+      # Debug
+      - DEBUG_ENABLE=false
+
+      # Test Bench Configuration
+      - TB_WATCHDOG=200000
+      - HAVE_SPI_MEMORY=true
+
+  #---------------------------------------
+  sim_soc1_wardrv_fsm_c_user_modbus_rtu:
+  #---------------------------------------
+    << : *sim
+    description  : Simulation of the test esw/user_modbus_rtu.c - Without Supervisor, Safety None     , Without Fault Injection
+    generate     : [gen_rv32i_user_modbus_rtu_921600,gen_rv32i_supervisor_c_dummy]
+    toplevel     : tb_PicoSoC_modbus_rtu
+    parameters   :
+      - CPU_MODEL=WardRV_fsm
+      - FSYS=25000000
+      - FSYS_INT=12500000
+
+      # SoC User Configuration
+      - BAUD_RATE=921600
+      
+      # Platform Configuration
+      - SUPERVISOR=false
+      - SAFETY=none
+      - FAULT_INJECTION=false
+
+      # Debug
+      - DEBUG_ENABLE=false
+
+      # Test Bench Configuration
+      - TB_WATCHDOG=200000
+
+  #---------------------------------------
+  sim_soc2_wardrv_fsm_c_user:
+  #---------------------------------------
+    << : *sim
+    description  : Simulation of the test esw/user.c            - Without Supervisor, Safety Lock-Step, Without Fault Injection
+    generate     : [gen_rv32i_user_c,gen_rv32i_supervisor_c_dummy]
+    parameters   :
+      - CPU_MODEL=WardRV_fsm
+      - FSYS=25000000
+      - FSYS_INT=12500000
+
+      # SoC User Configuration
+      - BAUD_RATE=921600
+      
+      # Platform Configuration
+      - SUPERVISOR=false
+      - SAFETY=lock-step
+      - FAULT_INJECTION=false
+
+      # Debug
+      - DEBUG_ENABLE=false
+
+      # Test Bench Configuration
+      - TB_WATCHDOG=200000
+      - HAVE_SPI_MEMORY=false
+
+  #---------------------------------------
+  sim_soc2_wardrv_fsm_c_user_uart:
+  #---------------------------------------
+    << : *sim
+    description  : Simulation of the test esw/user.c            - Without Supervisor, Safety Lock-Step, Without Fault Injection
+    generate     : [gen_rv32i_user_c_uart_921600,gen_rv32i_supervisor_c_dummy]
+    parameters   :
+      - CPU_MODEL=WardRV_fsm
+      - FSYS=25000000
+      - FSYS_INT=12500000
+
+      # SoC User Configuration
+      - BAUD_RATE=921600
+      
+      # Platform Configuration
+      - SUPERVISOR=false
+      - SAFETY=lock-step
+      - FAULT_INJECTION=false
+
+      # Debug
+      - DEBUG_ENABLE=false
+
+      # Test Bench Configuration
+      - TB_WATCHDOG=200000
+      - HAVE_SPI_MEMORY=false
+
+  #---------------------------------------
+  sim_soc2_wardrv_fsm_c_user_modbus_rtu:
+  #---------------------------------------
+    << : *sim
+    description  : Simulation of the test esw/user_modbus_rtu.c - Without Supervisor, Safety Lock-Step, Without Fault Injection
+    generate     : [gen_rv32i_user_modbus_rtu_921600,gen_rv32i_supervisor_c_dummy]
+    toplevel     : tb_PicoSoC_modbus_rtu
+    parameters   :
+      - CPU_MODEL=WardRV_fsm
+      - FSYS=25000000
+      - FSYS_INT=12500000
+
+      # SoC User Configuration
+      - BAUD_RATE=921600
+      
+      # Platform Configuration
+      - SUPERVISOR=false
+      - SAFETY=lock-step
+      - FAULT_INJECTION=false
+
+      # Debug
+      - DEBUG_ENABLE=false
+
+      # Test Bench Configuration
+      - TB_WATCHDOG=200000
+
+  #---------------------------------------
+  sim_soc3_wardrv_fsm_c_user:
+  #---------------------------------------
+    << : *sim
+    description  : Simulation of the test esw/user.c            - With    Supervisor, Safety Lock-Step, Without Fault Injection
+    generate     : [gen_rv32i_user_c,gen_rv32i_supervisor_c]
+    parameters   :
+      - CPU_MODEL=WardRV_fsm
+      - FSYS=25000000
+      - FSYS_INT=12500000
+
+      # SoC User Configuration
+      - BAUD_RATE=921600
+      
+      # Platform Configuration
+      - SUPERVISOR=true
+      - SAFETY=lock-step
+      - FAULT_INJECTION=false
+
+      # Debug
+      - DEBUG_ENABLE=false
+
+      # Test Bench Configuration
+      - TB_WATCHDOG=200000
+      - HAVE_SPI_MEMORY=false
+
+  #---------------------------------------
+  sim_soc3_wardrv_fsm_c_user_modbus_rtu:
+  #---------------------------------------
+    << : *sim
+    description  : Simulation of the test esw/user_modbus_rtu.c - With    Supervisor, Safety Lock-Step, Without Fault Injection
+    generate     : [gen_rv32i_user_modbus_rtu_921600,gen_rv32i_supervisor_c]
+    toplevel     : tb_PicoSoC_modbus_rtu
+    parameters   :
+      - CPU_MODEL=WardRV_fsm
+      - FSYS=25000000
+      - FSYS_INT=12500000
+
+      # SoC User Configuration
+      - BAUD_RATE=921600
+      
+      # Platform Configuration
+      - SUPERVISOR=true
+      - SAFETY=lock-step
+      - FAULT_INJECTION=false
+
+      # Debug
+      - DEBUG_ENABLE=false
+
+      # Test Bench Configuration
+      - TB_WATCHDOG=200000
+
+  #---------------------------------------
+  sim_soc3_wardrv_fsm_fault_c_user:
+  #---------------------------------------
+    << : *sim
+    description  : Simulation of the test esw/user.c            - With    Supervisor, Safety Lock-Step, With    Fault Injection
+    generate     : [gen_rv32i_user_c,gen_rv32i_supervisor_c]
+    parameters   :
+      - CPU_MODEL=WardRV_fsm
+      - FSYS=25000000
+      - FSYS_INT=12500000
+
+      # SoC User Configuration
+      - BAUD_RATE=921600
+      
+      # Platform Configuration
+      - SUPERVISOR=true
+      - SAFETY=lock-step
+      - FAULT_INJECTION=true
+
+      # Debug
+      - DEBUG_ENABLE=false
+
+      # Test Bench Configuration
+      - TB_WATCHDOG=200000
+      - HAVE_SPI_MEMORY=false
+
+  #---------------------------------------
+  sim_soc3_wardrv_fsm_fault_c_user_modbus_rtu:
+  #---------------------------------------
+    << : *sim
+    description  : Simulation of the test esw/user_modbus_rtu.c - With    Supervisor, Safety Lock-Step, With    Fault Injection
+    generate     : [gen_rv32i_user_modbus_rtu_921600,gen_rv32i_supervisor_c]
+    toplevel     : tb_PicoSoC_modbus_rtu
+    parameters   :
+      - CPU_MODEL=WardRV_fsm
+      - FSYS=25000000
+      - FSYS_INT=12500000
+
+      # SoC User Configuration
+      - BAUD_RATE=921600
+      
+      # Platform Configuration
+      - SUPERVISOR=true
+      - SAFETY=lock-step
+      - FAULT_INJECTION=true
+
+      # Debug
+      - DEBUG_ENABLE=false
+
+      # Test Bench Configuration
+      - TB_WATCHDOG=200000
+
+  #---------------------------------------
+  sim_soc4_wardrv_fsm_fault_c_user:
+  #---------------------------------------
+    << : *sim
+    description  : Simulation of the test esw/user.c            - With    Supervisor, Safety TMR      , With    Fault Injection
+    generate     : [gen_rv32i_user_c,gen_rv32i_supervisor_c_tmr]
+    parameters   :
+      - CPU_MODEL=WardRV_fsm
+      - FSYS=25000000
+      - FSYS_INT=12500000
+
+      # SoC User Configuration
+      - BAUD_RATE=921600
+      
+      # Platform Configuration
+      - SUPERVISOR=true
+      - SAFETY=tmr
+      - FAULT_INJECTION=true
+
+      # Debug
+      - DEBUG_ENABLE=false
+
+      # Test Bench Configuration
+      - TB_WATCHDOG=200000
+      - HAVE_SPI_MEMORY=false
+
+  #---------------------------------------
+  sim_soc4_wardrv_fsm_fault_c_user_uart:
+  #---------------------------------------
+    << : *sim
+    description  : Simulation of the test esw/user.c            - With    Supervisor, Safety TMR      , With    Fault Injection
+    generate     : [gen_rv32i_user_c_uart_921600,gen_rv32i_supervisor_c_tmr]
+    parameters   :
+      - CPU_MODEL=WardRV_fsm
+      - FSYS=25000000
+      - FSYS_INT=12500000
+
+      # SoC User Configuration
+      - BAUD_RATE=921600
+      
+      # Platform Configuration
+      - SUPERVISOR=true
+      - SAFETY=tmr
+      - FAULT_INJECTION=false
+
+      # Debug
+      - DEBUG_ENABLE=false
+
+      # Test Bench Configuration
+      - TB_WATCHDOG=200000
+      - HAVE_SPI_MEMORY=false
+
+  #---------------------------------------
+  sim_soc4_wardrv_fsm_fault_c_user_modbus_rtu:
+  #---------------------------------------
+    << : *sim
+    description  : Simulation of the test esw/user_modbus_rtu.c - With    Supervisor, Safety TMR      , With    Fault Injection
+    generate     : [gen_rv32i_user_modbus_rtu_921600,gen_rv32i_supervisor_c_tmr]
+    toplevel     : tb_PicoSoC_modbus_rtu
+    parameters   :
+      - CPU_MODEL=WardRV_fsm
+      - FSYS=25000000
+      - FSYS_INT=12500000
+
+      # SoC User Configuration
+      - BAUD_RATE=921600
+      
+      # Platform Configuration
+      - SUPERVISOR=true
+      - SAFETY=tmr
+      - FAULT_INJECTION=true
+
+      # Debug
+      - DEBUG_ENABLE=false
+
+      # Test Bench Configuration
+      - TB_WATCHDOG=200000
 
 #=========================================
 parameters :
@@ -1217,6 +2218,12 @@ parameters :
     default     : false
     paramtype   : generic
 
+  CPU_MODEL :
+    description : CPU Model (OpenBlaze8 / WardRV_fsm)
+    datatype    : str
+    default     : OpenBlaze8
+    paramtype   : generic
+
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
 provider  :
@@ -1224,5 +2231,5 @@ provider  :
   user    : deuskane
   repo    : asylum-soc-picosoc
   version : asylum-soc-PicoSoC-3.0.0
- #version : bd421aeffc74a95341349cbe5239049529ba6cf8
+ #version : 6d10b5f4f1d38c777c08c9de3fe7db5d235f7a5e
 #<PROVIDER_END>
