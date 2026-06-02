@@ -1,10 +1,10 @@
 CAPI=2:
 
 #-----------------------------------------------------------------------------
-# Title      : GIC Core file
+# Title      : UART
 # Project    : Asylum
 #-----------------------------------------------------------------------------
-# File       : GIC.core
+# File       : uart.core
 # Author     : mrosiere
 #-----------------------------------------------------------------------------
 # Description: 
@@ -13,14 +13,25 @@ CAPI=2:
 #-----------------------------------------------------------------------------
 # Revisions  :
 # Date        Version  Author   Description
-# 2025/06/28  1.0.0    mrosiere First Release
-# 2025/07/30  1.1.0    mrosiere Add package
-# 2025/11/22  1.1.1    mrosiere Use sbi instead pbi
-# 2026/01/17  1.2.0    mrosiere Add parameter to enable syncdff
+# 2025-01-21  1.0.0    mrosiere Created
+# 2025-02-05  1.1.0    mrosiere UART RX + check with loopback
+# 2025-03-09  1.2.0    mrosiere use unconstrained pbi
+# 2025-03-12  1.3.0    mrosiere Add CSR
+# 2025-03-22  1.4.0    mrosiere Use pbi instead reg interface for csr
+# 2025-04-02  1.5.0    mrosiere Remove pbi_target_wrapper
+# 2025-05-14  1.6.0    mrosiere Add parameter USER_DEFINE_BAUD_TICK and default value
+# 2025-06-21  1.6.1    mrosiere Dump FIFO activity in file
+# 2025-07-09  1.7.0    mrosiere Configure FIFO Depth
+# 2025-07-27  1.8.0    mrosiere Add Interruption
+# 2025-08-02  1.9.0    mrosiere Add CTS/RTS ports
+# 2025-09-05  1.9.1    mrosiere Add Package
+# 2025-11-10  1.10.0   mrosiere Update counter with shift register
+# 2025-11-22  1.10.1   mrosiere Use sbi instead pbi
+# 2026-05-30  1.10.2   mrosiere Generate 2 dumps file : one raw, one debug
 #-----------------------------------------------------------------------------
 
-name        : asylum:system:GIC:1.2.0
-description : GIC Module
+name        : asylum:communication:uart:1.10.2
+description : UART TX and RX
 
 #=========================================
 generate:
@@ -31,8 +42,8 @@ generate:
   #---------------------------------------
     generator : regtool
     parameters:
-      file         : hdl/csr/GIC.hjson
-      name         : GIC
+      file         : hdl/csr/UART.hjson
+      name         : UART
       copy         : hdl/csr
       logical_name : asylum
 
@@ -41,19 +52,19 @@ filesets:
 #=========================================
 
   #---------------------------------------
-  hdl:
+  rtl:
   #---------------------------------------
-    files        :
-      - hdl/GIC_pkg.vhd
-      - hdl/it_ctrl.vhd
-      - hdl/GIC_core.vhd
-      - hdl/sbi_GIC.vhd
+    files:
+      - hdl/uart_pkg.vhd
+      - hdl/uart_baud_rate_gen.vhd
+      - hdl/uart_rx_axis.vhd
+      - hdl/uart_tx_axis.vhd
+      - hdl/sbi_uart.vhd
     file_type    : vhdlSource
     logical_name : asylum
-    depend       :
-      - asylum:utils:generators
+    depend :
       - asylum:utils:pkg
-      - asylum:target:techmap
+      - asylum:system:GIC
 
 #=========================================
 targets:
@@ -64,19 +75,16 @@ targets:
   #---------------------------------------
     description     : Default Target
     filesets        :
-      - hdl
-    toplevel        : GIC
-    default_tool    : ghdl
+      - rtl
     generate        :
       - gen_csr
-
 
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
 provider  :
   name    : github
   user    : deuskane
-  repo    : asylum-system-gic
-  version : asylum-system-GIC-1.2.0
- #version : 3d88459acc2d5b64280f94316995a31db7eaed8d
+  repo    : asylum-communication-uart
+  version : asylum-communication-uart-1.10.2
+ #version : 9c890ac9145ba2c0bbb3887799cf4da54dd617bd
 #<PROVIDER_END>

@@ -1,0 +1,359 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : WardRV Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : WardRV.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2026
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2026-01-24  0.0.1    mrosiere Created
+# 2026-06-02  0.0.2    mrosiere fsm : add state trap
+#-----------------------------------------------------------------------------
+
+name        : asylum:processor:WardRV:0.0.2
+description : WardRV - Academic RISCV processor
+
+#=========================================
+filesets:
+#=========================================
+  #---------------------------------------
+  files_hdl:
+  #---------------------------------------
+    files        :
+      # Common package
+      - hdl/RV_pkg.vhd
+      - hdl/WardRV_pkg.vhd
+      - hdl/WardRV_stats_pkg.vhd
+
+      # Bridge
+      - hdl/bridge/dmem2sbi.vhd
+      - hdl/bridge/imem2sbi.vhd
+
+      # Instruction Set Simulator
+      - hdl/iss/WardRV_iss_pkg.vhd
+      - hdl/iss/WardRV_iss.vhd
+
+      # Debug Version
+      #- hdl/debug/WardRV_debug_pkg.vhd
+      #- hdl/debug/WardRV_debug.vhd
+
+      # FSM Version
+      - hdl/fsm/WardRV_decode_pkg.vhd
+      - hdl/fsm/WardRV_fsm_fetch.vhd
+      - hdl/fsm/WardRV_fsm_alu.vhd
+      - hdl/fsm/WardRV_fsm_decode.vhd
+      - hdl/fsm/WardRV_fsm_regfile.vhd
+      - hdl/fsm/WardRV_fsm_memory.vhd
+      - hdl/fsm/WardRV_fsm_csr.vhd
+      - hdl/fsm/WardRV_fsm.vhd
+      - hdl/fsm/sbi_WardRV_fsm.vhd
+
+    file_type    : vhdlSource-2008
+    logical_name : asylum
+    depend       :
+      - ">=asylum:utils:pkg:1.0.0"
+      - ">=asylum:component:ram:1.0.0"
+
+  #---------------------------------------
+  files_sim:
+  #---------------------------------------
+    files        :
+      - sim/WardRV_vips.vhd                                          
+      - sim/tb_WardRV_pkg.vhd                                        
+      - sim/tb_WardRV.vhd                                            
+      - sim/tb_WardRV_iss.vhd                                        
+      - esw/testcase/build/firmware.hex                              : {file_type : user, copyto : firmware.hex}
+      - esw/compliance/benchs                                        : {file_type : user, copyto : benchs}
+
+    file_type    : vhdlSource-2008
+    depend :
+      - bitvis:verification:uvvm
+      
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  # Default Target
+  #---------------------------------------
+  default: &default
+    description     : Default Target
+    filesets        :
+      - files_hdl
+    toplevel        : WardRV
+    default_tool    : ghdl
+
+  #---------------------------------------
+  sim: &sim
+  #---------------------------------------
+    << : *default
+    description     : default rule to sim (DON'T RUN)
+    default_tool    : ghdl
+    toplevel        : tb_WardRV
+    filesets_append :
+      - files_sim
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+  #---------------------------------------
+  lint_nxmap:
+  #- --------------------------------------
+    << : *default
+    description  : NanoXplore NG_MEDIUM Board
+    default_tool : nxmap
+    flags :
+      TARGET  : NANOXPLORE_NG_MEDIUM
+    tools:
+      nxmap:
+        fpga         : NG-MEDIUM
+        program      : False
+        logical_name : asylum
+    toplevel     : WardRV_iss
+
+  #---------------------------------------
+  sim_basic:
+  #---------------------------------------
+    << : *sim
+    description     : Basic testcase
+    parameters      :
+      - FIRMWARE_FILE=firmware.hex
+      - VERBOSE=false
+  
+  #---------------------------------------
+  # Compliance Testcases
+  #---------------------------------------
+  sim_compliance_add_01:
+    << : *sim
+    description: Add-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/add-01.hex, GOLDEN_FILE=benchs/add-01.signature, VERBOSE=false]
+
+  sim_compliance_addi_01:
+    << : *sim
+    description: Addi-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/addi-01.hex, GOLDEN_FILE=benchs/addi-01.signature, VERBOSE=false]
+
+  sim_compliance_and_01:
+    << : *sim
+    description: And-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/and-01.hex, GOLDEN_FILE=benchs/and-01.signature, VERBOSE=false]
+
+  sim_compliance_andi_01:
+    << : *sim
+    description: Andi-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/andi-01.hex, GOLDEN_FILE=benchs/andi-01.signature, VERBOSE=false]
+
+  sim_compliance_auipc_01:
+    << : *sim
+    description: Auipc-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/auipc-01.hex, GOLDEN_FILE=benchs/auipc-01.signature, VERBOSE=false]
+
+  sim_compliance_beq_01:
+    << : *sim
+    description: Beq-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/beq-01.hex, GOLDEN_FILE=benchs/beq-01.signature, VERBOSE=false]
+
+  sim_compliance_bge_01:
+    << : *sim
+    description: Bge-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/bge-01.hex, GOLDEN_FILE=benchs/bge-01.signature, VERBOSE=false]
+
+  sim_compliance_bgeu_01:
+    << : *sim
+    description: Bgeu-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/bgeu-01.hex, GOLDEN_FILE=benchs/bgeu-01.signature, VERBOSE=false]
+
+  sim_compliance_blt_01:
+    << : *sim
+    description: Blt-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/blt-01.hex, GOLDEN_FILE=benchs/blt-01.signature, VERBOSE=false]
+
+  sim_compliance_bltu_01:
+    << : *sim
+    description: Bltu-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/bltu-01.hex, GOLDEN_FILE=benchs/bltu-01.signature, VERBOSE=false]
+
+  sim_compliance_bne_01:
+    << : *sim
+    description: Bne-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/bne-01.hex, GOLDEN_FILE=benchs/bne-01.signature, VERBOSE=false]
+
+  sim_compliance_fence_01:
+    << : *sim
+    description: Fence-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/fence-01.hex, GOLDEN_FILE=benchs/fence-01.signature, VERBOSE=false]
+
+  sim_compliance_jal_01:
+    << : *sim
+    description: Jal-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/jal-01.hex, GOLDEN_FILE=benchs/jal-01.signature, VERBOSE=false]
+
+  sim_compliance_jalr_01:
+    << : *sim
+    description: Jalr-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/jalr-01.hex, GOLDEN_FILE=benchs/jalr-01.signature, VERBOSE=false]
+
+  sim_compliance_lb_align_01:
+    << : *sim
+    description: Lb-align-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/lb-align-01.hex, GOLDEN_FILE=benchs/lb-align-01.signature, VERBOSE=false]
+
+  sim_compliance_lbu_align_01:
+    << : *sim
+    description: Lbu-align-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/lbu-align-01.hex, GOLDEN_FILE=benchs/lbu-align-01.signature, VERBOSE=false]
+
+  sim_compliance_lh_align_01:
+    << : *sim
+    description: Lh-align-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/lh-align-01.hex, GOLDEN_FILE=benchs/lh-align-01.signature, VERBOSE=false]
+
+  sim_compliance_lhu_align_01:
+    << : *sim
+    description: Lhu-align-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/lhu-align-01.hex, GOLDEN_FILE=benchs/lhu-align-01.signature, VERBOSE=false]
+
+  sim_compliance_lui_01:
+    << : *sim
+    description: Lui-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/lui-01.hex, GOLDEN_FILE=benchs/lui-01.signature, VERBOSE=false]
+
+  sim_compliance_lw_align_01:
+    << : *sim
+    description: Lw-align-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/lw-align-01.hex, GOLDEN_FILE=benchs/lw-align-01.signature, VERBOSE=false]
+
+  sim_compliance_misalign1_jalr_01:
+    << : *sim
+    description: Misalign1-jalr-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/misalign1-jalr-01.hex, GOLDEN_FILE=benchs/misalign1-jalr-01.signature, VERBOSE=false]
+
+  sim_compliance_or_01:
+    << : *sim
+    description: Or-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/or-01.hex, GOLDEN_FILE=benchs/or-01.signature, VERBOSE=false]
+
+  sim_compliance_ori_01:
+    << : *sim
+    description: Ori-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/ori-01.hex, GOLDEN_FILE=benchs/ori-01.signature, VERBOSE=false]
+
+  sim_compliance_sb_align_01:
+    << : *sim
+    description: Sb-align-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/sb-align-01.hex, GOLDEN_FILE=benchs/sb-align-01.signature, VERBOSE=false]
+
+  sim_compliance_sh_align_01:
+    << : *sim
+    description: Sh-align-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/sh-align-01.hex, GOLDEN_FILE=benchs/sh-align-01.signature, VERBOSE=false]
+
+  sim_compliance_sll_01:
+    << : *sim
+    description: Sll-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/sll-01.hex, GOLDEN_FILE=benchs/sll-01.signature, VERBOSE=false]
+
+  sim_compliance_slli_01:
+    << : *sim
+    description: Slli-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/slli-01.hex, GOLDEN_FILE=benchs/slli-01.signature, VERBOSE=false]
+
+  sim_compliance_slt_01:
+    << : *sim
+    description: Slt-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/slt-01.hex, GOLDEN_FILE=benchs/slt-01.signature, VERBOSE=false]
+
+  sim_compliance_slti_01:
+    << : *sim
+    description: Slti-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/slti-01.hex, GOLDEN_FILE=benchs/slti-01.signature, VERBOSE=false]
+
+  sim_compliance_sltiu_01:
+    << : *sim
+    description: Sltiu-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/sltiu-01.hex, GOLDEN_FILE=benchs/sltiu-01.signature, VERBOSE=false]
+
+  sim_compliance_sltu_01:
+    << : *sim
+    description: Sltu-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/sltu-01.hex, GOLDEN_FILE=benchs/sltu-01.signature, VERBOSE=false]
+
+  sim_compliance_sra_01:
+    << : *sim
+    description: Sra-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/sra-01.hex, GOLDEN_FILE=benchs/sra-01.signature, VERBOSE=false]
+
+  sim_compliance_srai_01:
+    << : *sim
+    description: Srai-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/srai-01.hex, GOLDEN_FILE=benchs/srai-01.signature, VERBOSE=false]
+
+  sim_compliance_srl_01:
+    << : *sim
+    description: Srl-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/srl-01.hex, GOLDEN_FILE=benchs/srl-01.signature, VERBOSE=false]
+
+  sim_compliance_srli_01:
+    << : *sim
+    description: Srli-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/srli-01.hex, GOLDEN_FILE=benchs/srli-01.signature, VERBOSE=false]
+
+  sim_compliance_sub_01:
+    << : *sim
+    description: Sub-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/sub-01.hex, GOLDEN_FILE=benchs/sub-01.signature, VERBOSE=false]
+
+  sim_compliance_sw_align_01:
+    << : *sim
+    description: Sw-align-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/sw-align-01.hex, GOLDEN_FILE=benchs/sw-align-01.signature, VERBOSE=false]
+
+  sim_compliance_xor_01:
+    << : *sim
+    description: Xor-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/xor-01.hex, GOLDEN_FILE=benchs/xor-01.signature, VERBOSE=false]
+
+  sim_compliance_xori_01:
+    << : *sim
+    description: Xori-01 testcase
+    parameters: [FIRMWARE_FILE=benchs/xori-01.hex, GOLDEN_FILE=benchs/benchs/xori-01.signature, VERBOSE=false]
+
+#=========================================
+parameters :
+#=========================================
+
+  FIRMWARE_FILE :
+    description : Firmware
+    datatype    : str
+    default     : firmware.hex
+    paramtype   : generic
+
+  GOLDEN_FILE :
+    description : Golden signature file
+    datatype    : str
+    default     : golden.hex
+    paramtype   : generic
+
+  VERBOSE :
+    description : Verbose mode
+    datatype    : bool
+    default     : true
+    paramtype   : generic
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-processor-WardRV
+  version : asylum-processor-WardRV-0.0.2
+ #version : 2a0eabe67196f67ad9e1ba1363767c191161f6e7
+#<PROVIDER_END>

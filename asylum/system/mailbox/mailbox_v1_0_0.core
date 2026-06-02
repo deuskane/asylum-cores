@@ -1,10 +1,10 @@
 CAPI=2:
 
 #-----------------------------------------------------------------------------
-# Title      : GIC Core file
+# Title      : mailbox Core file
 # Project    : Asylum
 #-----------------------------------------------------------------------------
-# File       : GIC.core
+# File       : mailbox.core
 # Author     : mrosiere
 #-----------------------------------------------------------------------------
 # Description: 
@@ -13,14 +13,11 @@ CAPI=2:
 #-----------------------------------------------------------------------------
 # Revisions  :
 # Date        Version  Author   Description
-# 2025/06/28  1.0.0    mrosiere First Release
-# 2025/07/30  1.1.0    mrosiere Add package
-# 2025/11/22  1.1.1    mrosiere Use sbi instead pbi
-# 2026/01/17  1.2.0    mrosiere Add parameter to enable syncdff
+# 2026/05/25  1.0.0    mrosiere First Release
 #-----------------------------------------------------------------------------
 
-name        : asylum:system:GIC:1.2.0
-description : GIC Module
+name        : asylum:system:mailbox:1.0.0
+description : mailbox Module
 
 #=========================================
 generate:
@@ -31,8 +28,8 @@ generate:
   #---------------------------------------
     generator : regtool
     parameters:
-      file         : hdl/csr/GIC.hjson
-      name         : GIC
+      file         : hdl/csr/mailbox.hjson
+      name         : mailbox
       copy         : hdl/csr
       logical_name : asylum
 
@@ -44,10 +41,8 @@ filesets:
   hdl:
   #---------------------------------------
     files        :
-      - hdl/GIC_pkg.vhd
-      - hdl/it_ctrl.vhd
-      - hdl/GIC_core.vhd
-      - hdl/sbi_GIC.vhd
+      - hdl/mailbox_pkg.vhd
+      - hdl/sbi_mailbox.vhd
     file_type    : vhdlSource
     logical_name : asylum
     depend       :
@@ -65,7 +60,7 @@ targets:
     description     : Default Target
     filesets        :
       - hdl
-    toplevel        : GIC
+    toplevel        : mailbox
     default_tool    : ghdl
     generate        :
       - gen_csr
@@ -76,7 +71,7 @@ targets:
 provider  :
   name    : github
   user    : deuskane
-  repo    : asylum-system-gic
-  version : asylum-system-GIC-1.2.0
- #version : 3d88459acc2d5b64280f94316995a31db7eaed8d
+  repo    : asylum-system-mailbox
+  version : asylum-system-mailbox-1.0.0
+ #version : 41cd4fc15f818b751ff498cb9c94333b8ec751e7
 #<PROVIDER_END>
