@@ -1,10 +1,10 @@
 CAPI=2:
 
 #-----------------------------------------------------------------------------
-# Title      : SPI Core file
+# Title      : mailbox Core file
 # Project    : Asylum
 #-----------------------------------------------------------------------------
-# File       : SPI.core
+# File       : mailbox.core
 # Author     : mrosiere
 #-----------------------------------------------------------------------------
 # Description: 
@@ -13,41 +13,43 @@ CAPI=2:
 #-----------------------------------------------------------------------------
 # Revisions  :
 # Date        Version  Author   Description
-# 2025/06/13  1.0.0    mrosiere First Release
-# 2025/12/30  1.0.1    mrosiere Use IEEE_dummy pakage for vital
+# 2026-05-25  1.0.0    mrosiere First Release
+# 2026-06-06  1.0.1    mrosiere Add Name
 #-----------------------------------------------------------------------------
 
-name        : fmf:memory:flash_nor:1.0.0
-description : SPI Flash NOR
+name        : asylum:system:mailbox:1.0.1
+description : mailbox Module
+
+#=========================================
+generate:
+#=========================================
+
+  #---------------------------------------
+  gen_csr:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : hdl/csr/mailbox.hjson
+      name         : mailbox
+      copy         : hdl/csr
+      logical_name : asylum
 
 #=========================================
 filesets:
 #=========================================
 
   #---------------------------------------
-  pkg_fmf:
+  hdl:
   #---------------------------------------
-    files:
-      - sim/utilities/conversions.vhd
-      - sim/utilities/gen_utils.vhd
-    logical_name : fmf
-    file_type    : vhdlSource-2008
-
-  #---------------------------------------
-  models:
-  #---------------------------------------
-    files:
-      - sim/models/m25p40.vhd
-      - sim/models/m45pe80.vhd
-      - sim/models/s25fl064p.vhd
-      - sim/models/s25fl512s.vhd
-      - sim/models/s35hl256t.vhd
-      - sim/models/memory.mem         : {file_type : user, copyto : memory.mem}
-      - sim/models/memoryOTP.mem      : {file_type : user, copyto : memoryOTP.mem}
-#   logical_name : work
-    file_type    : vhdlSource-2008
+    files        :
+      - hdl/mailbox_pkg.vhd
+      - hdl/sbi_mailbox.vhd
+    file_type    : vhdlSource
+    logical_name : asylum
     depend       :
+      - asylum:utils:generators
       - asylum:utils:pkg
+      - asylum:target:techmap
 
 #=========================================
 targets:
@@ -58,15 +60,19 @@ targets:
   #---------------------------------------
     description     : Default Target
     filesets        :
-      - pkg_fmf
-      - models
+      - hdl
+    toplevel        : mailbox
+    default_tool    : ghdl
+    generate        :
+      - gen_csr
+
 
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
 provider  :
   name    : github
   user    : deuskane
-  repo    : asylum-communication-spi
-  version : fmf-memory-flash_nor-1.0.0
- #version : 70e664ba96ebe76018ffbbadef3fe25a3a2418f0
+  repo    : asylum-system-mailbox
+  version : asylum-system-mailbox-1.0.1
+ #version : fc7bd51588dfd3130f61033128c2591fb757c9d8
 #<PROVIDER_END>
