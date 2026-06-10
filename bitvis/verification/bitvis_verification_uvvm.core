@@ -78,14 +78,14 @@ filesets:
 
       # Compiling Bitvis VIP AXISTREAM
       - bitvis_vip_axistream/axistream_bfm_pkg.vhd                                           : {logical_name : bitvis_vip_axistream} 
-      - bitvis_vip_axistream/transaction_pkg.vhd					     : {logical_name : bitvis_vip_axistream} 
-      - bitvis_vip_axistream/vvc_cmd_pkg.vhd						     : {logical_name : bitvis_vip_axistream} 
-      - uvvm_vvc_framework/src_target_dependent/td_target_support_pkg.vhd		     : {logical_name : bitvis_vip_axistream} 
-      - uvvm_vvc_framework/src_target_dependent/td_vvc_framework_common_methods_pkg.vhd	     : {logical_name : bitvis_vip_axistream} 
-      - bitvis_vip_axistream/vvc_methods_pkg.vhd					     : {logical_name : bitvis_vip_axistream} 
-      - uvvm_vvc_framework/src_target_dependent/td_queue_pkg.vhd			     : {logical_name : bitvis_vip_axistream} 
-      - uvvm_vvc_framework/src_target_dependent/td_vvc_entity_support_pkg.vhd		     : {logical_name : bitvis_vip_axistream} 
-      - bitvis_vip_axistream/axistream_vvc.vhd						     : {logical_name : bitvis_vip_axistream}
+      - bitvis_vip_axistream/transaction_pkg.vhd                                             : {logical_name : bitvis_vip_axistream} 
+      - bitvis_vip_axistream/vvc_cmd_pkg.vhd                                                 : {logical_name : bitvis_vip_axistream} 
+      - uvvm_vvc_framework/src_target_dependent/td_target_support_pkg.vhd                    : {logical_name : bitvis_vip_axistream} 
+      - uvvm_vvc_framework/src_target_dependent/td_vvc_framework_common_methods_pkg.vhd      : {logical_name : bitvis_vip_axistream} 
+      - bitvis_vip_axistream/vvc_methods_pkg.vhd                                             : {logical_name : bitvis_vip_axistream} 
+      - uvvm_vvc_framework/src_target_dependent/td_queue_pkg.vhd                             : {logical_name : bitvis_vip_axistream} 
+      - uvvm_vvc_framework/src_target_dependent/td_vvc_entity_support_pkg.vhd                : {logical_name : bitvis_vip_axistream} 
+      - bitvis_vip_axistream/axistream_vvc.vhd                                               : {logical_name : bitvis_vip_axistream}
       - bitvis_vip_axistream/vvc_context.vhd                                                 : {logical_name : bitvis_vip_axistream} 
 
       # Compiling Bitvis VIP Clock Generator
