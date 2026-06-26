@@ -75,5 +75,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-crc
   version : asylum-component-crc-1.0.2
- #version : 724ff9290b86af720115be7e30a19d8bbb6934f1
+ #version : ab4c88740735fa7be3a2cf7c6c96209a34cf2dd5
 #<PROVIDER_END>

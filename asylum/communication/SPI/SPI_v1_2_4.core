@@ -137,5 +137,5 @@ provider  :
   user    : deuskane
   repo    : asylum-communication-spi
   version : asylum-communication-SPI-1.2.4
- #version : 70e664ba96ebe76018ffbbadef3fe25a3a2418f0
+ #version : 9bedf4c96363ffc65e7a786c5b13423a9465b8f2
 #<PROVIDER_END>

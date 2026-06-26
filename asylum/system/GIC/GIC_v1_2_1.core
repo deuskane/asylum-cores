@@ -79,5 +79,5 @@ provider  :
   user    : deuskane
   repo    : asylum-system-gic
   version : asylum-system-GIC-1.2.1
- #version : 8e4c0fd2d7fd927397339b2b7413146be9d16c53
+ #version : b161bb10bfd15c8643455b106c6e1a5a055b4c2a
 #<PROVIDER_END>

@@ -1,0 +1,125 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : FIFO Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : FIFO.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2025
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2025-07-05  1.0.0    mrosiere First Release
+# 2025-07-28  1.1.0    mrosiere Add flags full/empty in each side
+# 2025-09-06  1.1.1    mrosiere Update depends
+# 2026-06-10  1.2.0    mrosiere Add SYNC_READ and tb
+#-----------------------------------------------------------------------------
+
+name        : asylum:component:fifo:1.2.0
+description : FIFO Module
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  hdl:
+  #---------------------------------------
+    files        :
+      - hdl/fifo_pkg.vhd
+      - hdl/fifo_sync.vhd
+    file_type    : vhdlSource
+    logical_name : asylum
+    depend       :
+      - asylum:utils:pkg
+      - asylum:component:ram
+
+  #---------------------------------------
+  sim_basic:
+  #---------------------------------------
+    files        :
+      - sim/fifo_sync_tb.vhd
+    file_type    : vhdlSource-2008
+    #logical_name : asylum
+    depend       :
+      - bitvis:verification:uvvm   
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target
+    filesets        :
+      - hdl
+
+  #---------------------------------------
+  lint :
+  #---------------------------------------
+    << : *default
+    description     : Simulation of basic unit tests
+    toplevel        : fifo_sync
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall"]
+        
+  #---------------------------------------
+  sim_fifo_sync_read_async:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of basic unit tests with Synchronous FIFO and Asynchronous RAM
+    filesets_append :
+      - sim_basic
+    toplevel        : fifo_sync_tb
+    parameters      :
+      - SYNC_READ=false
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+        
+  #---------------------------------------
+  sim_fifo_sync_read_sync:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of basic unit tests with Synchronous FIFO and Synchronous RAM
+    filesets_append :
+      - sim_basic
+    toplevel        : fifo_sync_tb
+    parameters      :
+      - SYNC_READ=true
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+#=========================================
+parameters :
+#=========================================
+
+  SYNC_READ :
+    description : Synchronoys Read
+    datatype    : bool
+    default     : false
+    paramtype   : generic
+
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-component-fifo
+  version : asylum-component-fifo-1.2.0
+ #version : b2603d59041ea8b9d41043739a3cccd9a99e7e1f
+#<PROVIDER_END>
