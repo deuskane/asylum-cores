@@ -98,6 +98,19 @@ filesets:
       - bitvis_vip_clock_generator/src/clock_generator_vvc.vhd                               : {logical_name : bitvis_vip_clock_generator}
       - bitvis_vip_clock_generator/src/vvc_context.vhd                                       : {logical_name : bitvis_vip_clock_generator}
 
+      # Compiling Bitvis VIP GPIO
+      - bitvis_vip_gpio/src/transaction_pkg.vhd                                              : {logical_name : bitvis_vip_gpio}      
+      - bitvis_vip_gpio/src/gpio_bfm_pkg.vhd                                                 : {logical_name : bitvis_vip_gpio}
+      - bitvis_vip_gpio/src/vvc_cmd_pkg.vhd                                                  : {logical_name : bitvis_vip_gpio}
+      - uvvm_vvc_framework/src_target_dependent/td_target_support_pkg.vhd                    : {logical_name : bitvis_vip_gpio}
+      - uvvm_vvc_framework/src_target_dependent/td_vvc_framework_common_methods_pkg.vhd      : {logical_name : bitvis_vip_gpio}
+      - bitvis_vip_gpio/src/vvc_sb_pkg.vhd                                                   : {logical_name : bitvis_vip_gpio}
+      - bitvis_vip_gpio/src/vvc_methods_pkg.vhd                                              : {logical_name : bitvis_vip_gpio}
+      - uvvm_vvc_framework/src_target_dependent/td_queue_pkg.vhd                             : {logical_name : bitvis_vip_gpio}
+      - uvvm_vvc_framework/src_target_dependent/td_vvc_entity_support_pkg.vhd                : {logical_name : bitvis_vip_gpio}
+      - bitvis_vip_gpio/src/gpio_vvc.vhd                                                     : {logical_name : bitvis_vip_gpio}
+      - bitvis_vip_gpio/src/vvc_context.vhd                                                  : {logical_name : bitvis_vip_gpio}
+
     file_type   : vhdlSource-2008
     logical_name: uvvm_util
 
