@@ -74,5 +74,5 @@ provider  :
   user    : deuskane
   repo    : asylum-system-mailbox
   version : asylum-system-mailbox-1.0.1
- #version : 5f80002c3ed544da480ee8383fd07ac6626bdf24
+ #version : fd2c87f00e9ad271c2a0489809a0e5535bc2007e
 #<PROVIDER_END>

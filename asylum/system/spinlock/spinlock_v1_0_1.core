@@ -74,5 +74,5 @@ provider  :
   user    : deuskane
   repo    : asylum-system-spinlock
   version : asylum-system-spinlock-1.0.1
- #version : c8463d11caed2ddd692d0597db814684796ab7c2
+ #version : f2c8e96a13a3f90acf728f40ba5b88612b238f7c
 #<PROVIDER_END>

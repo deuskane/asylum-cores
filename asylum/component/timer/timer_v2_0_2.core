@@ -54,6 +54,7 @@ filesets:
     file_type    : vhdlSource-2008
     logical_name : asylum
     depend       :
+      - asylum:system:GIC
       - asylum:utils:generators
       - asylum:utils:pkg
       
@@ -128,5 +129,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-timer
   version : asylum-component-timer-2.0.2
- #version : 4a49f6369b3c7f7a012b9cf195ccc1390602cb2d
+ #version : 3caa36aa23263d423399f4dcc47618244d92cc54
 #<PROVIDER_END>

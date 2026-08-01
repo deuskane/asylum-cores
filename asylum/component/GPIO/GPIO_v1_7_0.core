@@ -1,0 +1,155 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : GPIO Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : GPIO.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2021-10-26  1.0.0    mrosiere Created
+# 2022-03-31  1.1.0    mrosiere Update source code
+# 2025-03-01  1.2.0    mrosiere Add CSR
+# 2025-03-08  1.3.0    mrosiere Use unconstraint pbi
+# 2025-03-22  1.4.0    mrosiere Use pbi instead reg interface for csr
+# 2025-04-02  1.5.0    mrosiere Remove pbi_target_wrapper
+# 2025-05-14  1.6.0    mrosiere Delete parameters DATA_OE_FORCE,
+#                               csr use DATA_OE_INIT
+# 2025-09-05  1.6.1    mrosiere Add Package
+# 2025-11-22  1.6.2    mrosiere Use sbi instead pbi
+# 2026-06-06  1.6.3    mrosiere Add Name
+# 2026-07-20  1.7.0    mrosiere Add Interruption
+#                               Use uvvm for testbench
+#-----------------------------------------------------------------------------
+
+name        : asylum:component:GPIO:1.7.0
+description : GPIO Module
+
+#=========================================
+generate:
+#=========================================
+
+  #---------------------------------------
+  gen_csr:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : hdl/csr/GPIO.hjson
+      name         : GPIO
+      copy         : hdl/csr
+      logical_name : asylum
+
+  #---------------------------------------
+  gen_csr_irq:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : hdl/csr/GPIO_irq.hjson
+      name         : GPIO_irq
+      copy         : hdl/csr
+      logical_name : asylum
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  hdl:
+  #---------------------------------------
+    files        :
+      - hdl/gpio_pkg.vhd
+      - hdl/GPIO_core.vhd
+      - hdl/sbi_GPIO.vhd
+      - hdl/GPIO_irq_core.vhd
+      - hdl/sbi_GPIO_irq.vhd
+    file_type    : vhdlSource
+    logical_name : asylum
+    depend       :
+      - asylum:system:GIC
+      - asylum:utils:generators
+      - asylum:utils:pkg
+
+  #---------------------------------------
+  sim:
+  #---------------------------------------
+    files:
+      - hdl/legacy/GPIO_v1.vhd : {logical_name : asylum}
+      - sim/tb_GPIO_vs_v1.vhd
+      - sim/tb_GPIO.vhd
+      - sim/tb_GPIO_irq.vhd
+    file_type : vhdlSource-2008
+    depend       :
+      - bitvis:verification:uvvm      
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target
+    filesets        :
+      - hdl
+    toplevel        : GPIO
+    default_tool    : ghdl
+    generate        :
+      - gen_csr
+      - gen_csr_irq
+
+  #---------------------------------------
+  sim_testcase_vs_v1:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of sb_GPIO against GPIO_v1
+    filesets_append :
+      - sim
+    toplevel        : tb_GPIO_vs_v1
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        run_options : ["--vcd=dut.vcd"]
+
+  #---------------------------------------
+  sim_testcase:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of sbi_GPIO with VIP
+    filesets_append :
+      - sim
+    toplevel        : tb_GPIO
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+  #---------------------------------------
+  sim_testcase_irq:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of sbi_GPIO_irq with VIP
+    filesets_append :
+      - sim
+    toplevel        : tb_GPIO_irq
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-component-gpio
+  version : asylum-component-GPIO-1.7.0
+ #version : ecb0a0c21fa628cb76c62c30eb19602ed12bf93d
+#<PROVIDER_END>
