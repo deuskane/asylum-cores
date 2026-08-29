@@ -113,5 +113,5 @@ provider  :
   user    : deuskane
   repo    : asylum-communication-uart
   version : asylum-communication-uart-1.10.4
- #version : 85a220267fc35829fcb66281228a628e5619bd3a
+ #version : baf5c94dc649801df2346d8b5455096a9fd5a44b
 #<PROVIDER_END>

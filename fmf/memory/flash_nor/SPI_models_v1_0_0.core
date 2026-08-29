@@ -28,8 +28,8 @@ filesets:
   pkg_fmf:
   #---------------------------------------
     files:
-      - sim/utilities/conversions.vhd
-      - sim/utilities/gen_utils.vhd
+      - models/utilities/conversions.vhd
+      - models/utilities/gen_utils.vhd
     logical_name : fmf
     file_type    : vhdlSource-2008
 
@@ -37,13 +37,17 @@ filesets:
   models:
   #---------------------------------------
     files:
-      - sim/models/m25p40.vhd
-      - sim/models/m45pe80.vhd
-      - sim/models/s25fl064p.vhd
-      - sim/models/s25fl512s.vhd
-      - sim/models/s35hl256t.vhd
-      - sim/models/memory.mem         : {file_type : user, copyto : memory.mem}
-      - sim/models/memoryOTP.mem      : {file_type : user, copyto : memoryOTP.mem}
+      - models/at25df161.vhd
+      - models/cy15b104qs.vhd
+      - models/cy15v104qs.vhd
+      - models/m25p40.vhd
+      - models/m45pe80.vhd
+      - models/s25fl064p.vhd
+      - models/s25fl512s.vhd
+      - models/s35hl256t.vhd
+#      - models/memory.mem         : {file_type : user, copyto : memory.mem   }
+#      - models/memoryOTP.mem      : {file_type : user, copyto : memoryOTP.mem}
+#      - models/none               : {file_type : user, copyto : none         }
 #   logical_name : work
     file_type    : vhdlSource-2008
     depend       :
@@ -68,5 +72,5 @@ provider  :
   user    : deuskane
   repo    : asylum-communication-spi
   version : fmf-memory-flash_nor-1.0.0
- #version : 6e051b75e613471750033e1961eff806e82c6bfc
+ #version : f109bc28a96d8988c9e067709f4f13ed3a77fd5f
 #<PROVIDER_END>

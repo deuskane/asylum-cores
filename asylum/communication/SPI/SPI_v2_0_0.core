@@ -1,0 +1,214 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : SPI Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : SPI.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2025
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2025-06-13  1.0.0    mrosiere First Release
+# 2025-06-21  1.0.1    mrosiere Dump FIFO activity in file
+# 2025-06-25  1.1.0    mrosiere Add STOP special case
+# 2025-07-09  1.2.0    mrosiere Configure FIFO Depth
+# 2025-09-05  1.2.1    mrosiere Add Package
+# 2025-11-22  1.2.2    mrosiere Use sbi instead pbi
+# 2026-01-17  1.2.3    mrosiere Move loopback from sbi_SPI to spi_master
+# 2026-06-06  1.2.4    mrosiere Add Name
+# 2026-08-02  1.2.5    mrosiere Testbench : use UVVM sbi, dut is sbi_spi instead spi_master
+# 2026-08-17  2.0.0    mrosiere Add multiple data
+#-----------------------------------------------------------------------------
+
+name        : asylum:communication:SPI:2.0.0
+description : SPI Module
+
+#=========================================
+generate:
+#=========================================
+
+  #---------------------------------------
+  gen_csr:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : hdl/csr/SPI.hjson
+      name         : SPI
+      copy         : hdl/csr
+      logical_name : asylum
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  hdl:
+  #---------------------------------------
+    files        :
+      - hdl/spi_pkg.vhd
+      - hdl/spi_master.vhd
+      - hdl/sbi_SPI.vhd
+    file_type    : vhdlSource
+    logical_name : asylum
+    depend       :
+      - asylum:utils:generators
+      - asylum:utils:pkg
+
+  #---------------------------------------
+  sim_basic:
+  #---------------------------------------
+    files:
+      - sim/basic/tb_SPI.vhd
+      - sim/basic/tb_SPI_pkg.vhd
+#    logical_name : work
+    file_type : vhdlSource-2008
+
+  #---------------------------------------
+  models:
+  #---------------------------------------
+    files:
+      - sim/basic/tb_SPI_pkg.vhd
+      - sim/models/tb_SPI.vhd
+      - sim/models/mem/memory_1KB.mem    : {file_type : user, copyto : memory.mem   }
+      - sim/models/mem/memoryOTP.mem     : {file_type : user, copyto : memoryOTP.mem}
+      - sim/models/mem/none              : {file_type : user, copyto : none         }
+#    logical_name : work
+    file_type    : vhdlSource-2008
+    depend       :
+      - asylum:target:techmap
+      - bitvis:verification:uvvm 
+      - fmf:memory:flash_nor
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target
+    filesets        :
+      - hdl
+    toplevel        : SPI
+    default_tool    : ghdl
+    generate        :
+      - gen_csr
+
+  #---------------------------------------
+  default_sim: &default_sim
+  #---------------------------------------
+    << : *default
+    description     : Default Target for simulation
+    filesets_append :
+      - models
+    toplevel        : tb
+    parameters      :
+      - MODEL=m25p40
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-frelaxed","--no-vital-checks","-Wno-shared","-Wno-hide","-Wno-pure"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+
+  #---------------------------------------
+  sim_basic:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of basic unit tests
+    filesets_append :
+      - sim_basic
+    toplevel        : tb
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall"]
+        run_options     : ["--fst=dut.fst"]
+
+
+  #---------------------------------------
+  sim_at25df161:
+  #---------------------------------------
+    << : *default_sim
+    description     : Simulation of at25df161
+    parameters      :
+      - MODEL=at25df161
+
+  #---------------------------------------
+  sim_cy15b104qs:
+  #---------------------------------------
+    << : *default_sim
+    description     : Simulation of cy15b104qs
+    parameters      :
+      - MODEL=cy15b104qs
+
+  #---------------------------------------
+  sim_cy15v104qs:
+  #---------------------------------------
+    << : *default_sim
+    description     : Simulation of cy15v104qs
+    parameters      :
+      - MODEL=cy15v104qs      
+
+  #---------------------------------------
+  sim_m25p40:
+  #---------------------------------------
+    << : *default_sim
+    description     : Simulation of m25p40
+    parameters      :
+      - MODEL=m25p40
+
+  #---------------------------------------
+  sim_m45pe80:
+  #---------------------------------------
+    << : *default_sim
+    description     : Simulation of m45pe80
+    parameters      :
+      - MODEL=m45pe80
+
+  #---------------------------------------
+  sim_s25fl064p:
+  #---------------------------------------
+    << : *default_sim
+    description     : Simulation of s25fl064p
+    parameters      :
+      - MODEL=s25fl064p
+
+  #---------------------------------------
+  sim_s25fl512s:
+  #---------------------------------------
+    << : *default_sim
+    description     : Simulation of s25fl512s
+    parameters      :
+      - MODEL=s25fl512s
+
+  #---------------------------------------
+  sim_s35hl256t:
+  #---------------------------------------
+    << : *default_sim
+    description     : Simulation of s35hl256t
+    parameters      :
+      - MODEL=s35hl256t
+#=========================================
+parameters :
+#=========================================
+
+  MODEL :
+    description : SPI Memory Model
+    datatype    : str
+    default     : m25p40
+    paramtype   : generic
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-communication-spi
+  version : asylum-communication-SPI-2.0.0
+ #version : f109bc28a96d8988c9e067709f4f13ed3a77fd5f
+#<PROVIDER_END>
