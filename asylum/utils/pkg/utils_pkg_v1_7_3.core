@@ -1,0 +1,252 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : VHDL Package Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : utils_pkg.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2021-10-26  1.0.0    mrosiere math_pkg   : Created
+#                               pbi_pkg    : Created
+# 2025-01-11  1.1.0    mrosiere pbi_pkg    : Surcharge and / or
+# 2025-03-08  1.2.0    mrosiere pbi_pkg    : Use unconstrainted pbi
+# 2025-03-19  1.3.0    mrosiere logic_pkg  : Created
+#                               string_pkg : Created
+# 2025-03-26  1.4.0    mrosiere pbi_pkg    : Add type for unconstrainted array
+# 2025-04-05  1.5.0    mrosiere convert_pkg: Add convertion one hot to  integer
+# 2025-11-22  1.5.1    mrosiere sbi_pkg    : Add sbi pkg (replace pbi busy with ready)
+# 2025-11-29  1.5.2    mrosiere logic_pkg  : Add mux2 and reverse_bits
+# 2025-12-06  1.5.3    mrosiere logic_pkg  : override mux2 for natural
+# 2025-12-30  1.6.0    mrosiere IEEE_dummy : add fake vital
+# 2026-01-18  1.6.1    mrosiere sbi_pkg    : Add info record
+# 2026-06-05  1.6.2    mrosiere convert_pkg: Add to_slv function
+# 2026-06-16  1.6.3    mrosiere sbi_pkg    : Add null function
+#                               logic_pkg  : Add count_ones
+# 2026-07-09  1.7.0    mrosiere ft_pkg     : Add fault tolerant package
+# 2026-07-29  1.7.1    mrosiere string_pkg : Add to_string
+# 2026-09-05  1.7.2    mrosiere ft_pkg     : Add testbench
+# 2026-09-19  1.7.3    mrosiere ft_pkg     : Add testbench (ecc32)
+#                                            Add Synthesis top
+#-----------------------------------------------------------------------------
+
+name        : asylum:utils:pkg:1.7.3
+description : VHDL Utility Package
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  # Source Files
+  #---------------------------------------
+
+  #---------------------------------------
+  hdl:
+  #---------------------------------------
+    files:
+      - hdl/convert_pkg.vhd
+      - hdl/logic_pkg.vhd
+      - hdl/math_pkg.vhd
+      - hdl/pbi_pkg.vhd
+      - hdl/sbi_pkg.vhd
+      - hdl/string_pkg.vhd
+      - hdl/ft_pkg.vhd
+      - hdl/ft_pkg_body.vhd
+
+      - hdl/ft_enc.vhd
+      - hdl/ft_dec.vhd
+      - hdl/ft_dff.vhd
+      
+    file_type    : vhdlSource-2008
+    logical_name : asylum
+
+  #---------------------------------------
+  pkg_ieee_dummy:
+  #---------------------------------------
+    files:
+      - hdl/vital/vital_timing.vhdl
+      - hdl/vital/vital_timing-body.vhdl
+      - hdl/vital/vital_primitives.vhdl
+      - hdl/vital/vital_primitives-body.vhdl
+    logical_name : IEEE_dummy
+    file_type    : vhdlSource-2008    
+
+  #---------------------------------------
+  sim:
+  #---------------------------------------
+    files:
+      - sim/tb_ft_none.vhd
+      - sim/tb_ft_parity_odd.vhd
+      - sim/tb_ft_parity_even.vhd
+      - sim/tb_ft_tmr.vhd
+      - sim/tb_ft_ecc4.vhd
+      - sim/tb_ft_ecc32.vhd
+    file_type : vhdlSource-2008
+    depend       :
+      - bitvis:verification:uvvm 
+
+  #---------------------------------------
+  syn:
+  #---------------------------------------
+    files:
+      - syn/top_ft_dff.vhd
+      - syn/constraints/options.py : {file_type : nx_options}
+
+    file_type : vhdlSource-2008
+    logical_name : asylum
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description : Default Target
+    filesets    :
+      - hdl
+      - pkg_ieee_dummy
+
+  #---------------------------------------
+  sim: &sim
+  #---------------------------------------
+    << : *default
+    description     : Default Target for Simulation
+    filesets_append :
+      - sim
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-frelaxed"]
+        run_options     : ["--fst=dut.fst"]
+
+  #---------------------------------------
+  sim_ft_none:
+  #---------------------------------------
+    << : *sim
+    description     : Unit test for NONE algorithm
+    toplevel        : tb_ft_none
+
+  #---------------------------------------
+  sim_ft_parity_odd:
+  #---------------------------------------
+    << : *sim
+    description     : Unit test for parity odd algorithm
+    toplevel        : tb_ft_parity_odd
+
+  #---------------------------------------
+  sim_ft_parity_even:
+  #---------------------------------------
+    << : *sim
+    description     : Unit test for parity even algorithm
+    toplevel        : tb_ft_parity_even
+
+  #---------------------------------------
+  sim_ft_tmr:
+  #---------------------------------------
+    << : *sim
+    description     : Unit test for TMR algorithm
+    toplevel        : tb_ft_tmr
+
+  #---------------------------------------
+  sim_ft_ecc4:
+  #---------------------------------------
+    << : *sim
+    description     : Unit test for ECC algorithm (4b)
+    toplevel        : tb_ft_ecc4
+
+  #---------------------------------------
+  sim_ft_ecc32:
+  #---------------------------------------
+    << : *sim
+    description     : Unit test for ECC algorithm (32b)
+    toplevel        : tb_ft_ecc32
+
+  #---------------------------------------
+  emu_ng_medium_ft_dff_none : &emu_ng_medium_ft_dff_none
+  #---------------------------------------
+    << : *default
+    description  : NanoXplore NG_MEDIUM with tf_dff none
+    default_tool : nxmap
+    filesets_append :
+      - syn
+    parameters   :
+      - WIDTH=32
+      - FT_ALGO=0
+      - SELF_REFRESH=false
+    tools:
+      nxmap:
+        fpga         : NG-MEDIUM-EMBEDDED
+        program      : False
+        logical_name : asylum
+    toplevel : top_ft_dff
+
+  #---------------------------------------
+  emu_ng_medium_ft_dff_parity_odd:
+  #---------------------------------------
+    << : *emu_ng_medium_ft_dff_none
+    description  : NanoXplore NG_MEDIUM with tf_dff parity_odd
+    parameters_append   :
+      - FT_ALGO=1
+
+  #---------------------------------------
+  emu_ng_medium_ft_dff_parity_even:
+  #---------------------------------------
+    << : *emu_ng_medium_ft_dff_none
+    description  : NanoXplore NG_MEDIUM with tf_dff parity_even
+    parameters_append   :
+      - FT_ALGO=2
+
+  #---------------------------------------
+  emu_ng_medium_ft_dff_tmr:
+  #---------------------------------------
+    << : *emu_ng_medium_ft_dff_none
+    description  : NanoXplore NG_MEDIUM with tf_dff tmr
+    parameters_append   :
+      - FT_ALGO=3
+
+  #---------------------------------------
+  emu_ng_medium_ft_dff_ecc:
+  #---------------------------------------
+    << : *emu_ng_medium_ft_dff_none
+    description  : NanoXplore NG_MEDIUM with tf_dff ecc
+    parameters_append   :
+      - FT_ALGO=4
+
+#=========================================
+parameters :
+#=========================================
+
+  WIDTH :
+    description : Data Width
+    datatype    : int
+    default     : 32
+    paramtype   : generic
+
+  FT_ALGO :
+    description : Fault Tolerant Algo
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+  SELF_REFRESH :
+    description : Rewrite in DFF
+    datatype    : bool
+    default     : false
+    paramtype   : generic
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-utils-pkg
+  version : asylum-utils-pkg-1.7.3
+ #version : 186bd5f773a1d62480dc62cad14fb45ae43864ab
+#<PROVIDER_END>
