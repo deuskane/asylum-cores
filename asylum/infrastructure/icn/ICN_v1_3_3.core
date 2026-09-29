@@ -98,5 +98,5 @@ provider  :
   user    : deuskane
   repo    : asylum-infrastructure_icn
   version : asylum-infrastructure-icn-1.3.3
- #version : 410db19915c075794ef78109c7bfdb70ee7427f6
+ #version : b43fa52c5d297fc0a60df1f4546574c7d743815c
 #<PROVIDER_END>

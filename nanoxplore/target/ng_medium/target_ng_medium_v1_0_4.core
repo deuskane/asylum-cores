@@ -60,5 +60,5 @@ provider  :
   user    : deuskane
   repo    : asylum-target-techmap
   version : nanoxplore-target-ng_medium-1.0.4
- #version : c8f60146d0e8e94ed7522ec35047a072eecf81ed
+ #version : 6cff7156d5f6e66e78a8d47b2b63f2adda7554e3
 #<PROVIDER_END>
