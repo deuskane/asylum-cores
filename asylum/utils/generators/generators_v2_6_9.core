@@ -48,7 +48,8 @@ CAPI=2:
 # 2026-07-30  2.6.6    mrosiere regtool      : add address in csr pkg and use it in csr module
 # 2026-08-02  2.6.7    mrosiere Add default target for deps
 # 2026-08-21  2.6.8    mrosiere regtool      : Add enum
-# 2026è09-28  2.6.9    mrosiere rvcc         : Update check condition for zicsr
+# 2026-09-28  2.6.9    mrosiere rvcc         : Update check condition for zicsr
+#                               regtool      : Move copy in Makefile
 #-----------------------------------------------------------------------------
 
 name       : asylum:utils:generators:2.6.9
@@ -184,5 +185,5 @@ provider  :
   user    : deuskane
   repo    : asylum-utils-generators
   version : asylum-utils-generators-2.6.9
- #version : 31bdd0e15c4acbc634d3b29c900cc0b7d04759cb
+ #version : 3081565f6a353eca2e572a93ec025c78deba3a34
 #<PROVIDER_END>
