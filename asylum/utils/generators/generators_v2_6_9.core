@@ -50,6 +50,7 @@ CAPI=2:
 # 2026-08-21  2.6.8    mrosiere regtool      : Add enum
 # 2026-09-28  2.6.9    mrosiere rvcc         : Update check condition for zicsr
 #                               regtool      : Move copy in Makefile
+#                               pbcc         : Move rom generation in Makefile
 #-----------------------------------------------------------------------------
 
 name       : asylum:utils:generators:2.6.9
@@ -185,5 +186,5 @@ provider  :
   user    : deuskane
   repo    : asylum-utils-generators
   version : asylum-utils-generators-2.6.9
- #version : 8fd6c5847acb240ede35a5e15d7f347ccd12dfe5
+ #version : 51eabc71d5abfcd4710d18a2f28cf0303d4c1b5c
 #<PROVIDER_END>
