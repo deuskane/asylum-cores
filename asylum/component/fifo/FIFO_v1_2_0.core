@@ -121,5 +121,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-fifo
   version : asylum-component-fifo-1.2.0
- #version : bc0300e68e20b9b6949d39020e68400f28d5003e
+ #version : e5d98c8901eb5d9ae03389cc539214850ae4a9ab
 #<PROVIDER_END>

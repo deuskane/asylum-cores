@@ -129,5 +129,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-timer
   version : asylum-component-timer-2.0.2
- #version : d9e306e9dcb26b61a221ec997a60e4df600d609e
+ #version : ed67de7f47c6f4d7b7db91df92912d63dc5d9b6a
 #<PROVIDER_END>
