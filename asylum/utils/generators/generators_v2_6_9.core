@@ -185,5 +185,5 @@ provider  :
   user    : deuskane
   repo    : asylum-utils-generators
   version : asylum-utils-generators-2.6.9
- #version : 8c8ffcac79c124edb4ca0492042df8821be316b1
+ #version : 1315f2f71171ff7b119171b93dd0d7590af0b049
 #<PROVIDER_END>
