@@ -112,9 +112,16 @@ targets:
     default_tool    : ghdl
     tools :
       ghdl :
-        analyze_options : ["-frelaxed","--no-vital-checks","-Wno-shared","-Wno-hide","-Wno-pure"]
-        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
-
+        analyze_options :
+          - "$(GHDL_ANALYZE_OPTION)"
+          - "-frelaxed"
+          - "--no-vital-checks"
+          - "-Wno-shared"
+          - "-Wno-hide"
+          - "-Wno-pure"
+        run_options     : 
+          - "$(GHDL_RUN_OPTION)"
+          - "--ieee-asserts=disable"
 
   #---------------------------------------
   sim_basic:
@@ -127,8 +134,11 @@ targets:
     default_tool    : ghdl
     tools :
       ghdl :
-        analyze_options : ["-Wall"]
-        run_options     : ["--fst=dut.fst"]
+        analyze_options :
+          - "$(GHDL_ANALYZE_OPTION)"
+          - "-Wall"
+        run_options     :
+          - "$(GHDL_RUN_OPTION)"
 
 
   #---------------------------------------
@@ -210,5 +220,5 @@ provider  :
   user    : deuskane
   repo    : asylum-communication-spi
   version : asylum-communication-SPI-2.0.0
- #version : d5da3f95e5d2311034a74a1478b14d6038c7db82
+ #version : 086c39af63fb6a1ac71fbba406ecc2711de916b4
 #<PROVIDER_END>

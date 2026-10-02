@@ -72,5 +72,5 @@ provider  :
   user    : deuskane
   repo    : asylum-communication-spi
   version : fmf-memory-flash_nor-1.0.0
- #version : d5da3f95e5d2311034a74a1478b14d6038c7db82
+ #version : 086c39af63fb6a1ac71fbba406ecc2711de916b4
 #<PROVIDER_END>
