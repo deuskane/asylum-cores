@@ -93,5 +93,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-ram
   version : asylum-component-ram-1.2.2
- #version : e2baa0c271ffb568a29c2d9d41d25a52de0f1e23
+ #version : a371526a3fa41b158cce322b3c0d188ab2b895f8
 #<PROVIDER_END>
