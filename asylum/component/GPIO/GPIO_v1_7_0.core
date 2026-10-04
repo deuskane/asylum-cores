@@ -151,5 +151,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-gpio
   version : asylum-component-GPIO-1.7.0
- #version : ba02b35a73b45d1a3f5f0e2fc17c451017de3e7c
+ #version : cc49f0050a6e63cd680dd6a1158e23e63f7b0026
 #<PROVIDER_END>

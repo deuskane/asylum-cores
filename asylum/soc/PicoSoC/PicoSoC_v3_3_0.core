@@ -2389,5 +2389,5 @@ provider  :
   user    : deuskane
   repo    : asylum-soc-picosoc
   version : asylum-soc-PicoSoC-3.3.0
- #version : 79229b92989dd2508a1322f1609bf0dc4d0138d9
+ #version : 52ac6543d6e94c6638964b15c1763584e9041b5c
 #<PROVIDER_END>
