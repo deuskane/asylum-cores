@@ -224,5 +224,5 @@ provider  :
   user    : deuskane
   repo    : asylum-communication-spi
   version : asylum-communication-SPI-2.0.1
- #version : 2dbe11dd7501f7ac8467836ebbf79b3482e8d341
+ #version : 85d980931a3c8e1ccce9791b8262e41b3477acf5
 #<PROVIDER_END>

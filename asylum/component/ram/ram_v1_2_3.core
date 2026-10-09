@@ -157,5 +157,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-ram
   version : asylum-component-ram-1.2.3
- #version : 6f57cf6e036b04699101aace409005c9d8f15775
+ #version : c0b50c3c6a9272d07ea6c3a0c2bb778d11c07f75
 #<PROVIDER_END>

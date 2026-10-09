@@ -83,5 +83,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-clock_divider
   version : asylum-component-clock_divider-2.0.3
- #version : d61072918fe5f30a1951a35aebd36ad2922536b0
+ #version : 494f311e4294f8a3206290c75c224bb34dd84e5c
 #<PROVIDER_END>

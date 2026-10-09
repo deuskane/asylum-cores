@@ -365,5 +365,5 @@ provider  :
   user    : deuskane
   repo    : asylum-processor-WardRV
   version : asylum-processor-WardRV-0.0.4
- #version : 26e4da8da39fd1695511d7bea807a71d3a39d1d6
+ #version : 723cca6638ad92d36798e822cc9e50137ee35828
 #<PROVIDER_END>

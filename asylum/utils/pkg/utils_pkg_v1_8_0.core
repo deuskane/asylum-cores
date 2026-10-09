@@ -272,5 +272,5 @@ provider  :
   user    : deuskane
   repo    : asylum-utils-pkg
   version : asylum-utils-pkg-1.8.0
- #version : 19556a7a24b3decf45b74392528190d6eaaf6671
+ #version : 4b052e3f4abfba8bcad6f1c6bf7b8255b46d4324
 #<PROVIDER_END>
