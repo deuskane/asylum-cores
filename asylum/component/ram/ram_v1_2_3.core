@@ -1,0 +1,161 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : Ram Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : ram.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2021-10-26  1.0.0    mrosiere Created
+# 2025-08-01  1.1.0    mrosiere Add option to have asynchronous or synchronous read port
+# 2025-09-05  1.1.1    mrosiere Add Package
+# 2026-05-16  1.2.0    mrosiere Add ram_1rw and sbi_ram_1rw
+# 2026-06-06  1.2.1    mrosiere Add Name
+# 2026-09-15  1.2.2    mrosiere Add ram_2r1w
+# 2026-10-05  1.2.3    mrosiere Remove unused std.textio, assert DEPTH power of 2
+#                               UVVM testbench of all the RAMs (replaces
+#                               tb_ram_1r1w), targets use WIDTH/DEPTH/SYNC_READ
+#-----------------------------------------------------------------------------
+
+name        : asylum:component:ram:1.2.3
+description : RAM with 1 read port and 1 write port
+
+filesets:
+
+  #---------------------------------------
+  # Source Files
+  #---------------------------------------
+  files_hdl:
+    files:
+      - hdl/ram_pkg.vhd
+      - hdl/ram_1r1w.vhd
+      - hdl/ram_2r1w.vhd
+      - hdl/ram_1rw.vhd
+      - hdl/sbi_ram.vhd
+    file_type    : vhdlSource
+    logical_name : asylum
+    depend :
+      - asylum:utils:pkg
+      
+  #---------------------------------------
+  # Testbench Files
+  #---------------------------------------
+  files_sim:
+    files:
+      - sim/tb_ram.vhd
+    file_type : vhdlSource-2008
+    depend    :
+      - bitvis:verification:uvvm
+
+targets:
+
+  #---------------------------------------
+  # Default Target
+  #---------------------------------------
+  default: &default
+    description     : Default Target
+    filesets        :
+      - files_hdl
+    toplevel        : ram_1r1w
+    default_tool    : ghdl
+
+  sim_16x8b_sync_read:
+    << : *default
+    description     : All RAMs and sbi_ram, asynchronous read (WIDTH=8, DEPTH=16)
+    filesets_append :
+      - files_sim
+    toplevel        : tb_ram
+    parameters      :
+      - WIDTH=8
+      - DEPTH=16
+      - SYNC_READ=false
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+  sim_16x8b_async_read:
+    << : *default
+    description     : All RAMs and sbi_ram, synchronous read (WIDTH=8, DEPTH=16)
+    filesets_append :
+      - files_sim
+    toplevel        : tb_ram
+    parameters      :
+      - WIDTH=8
+      - DEPTH=16
+      - SYNC_READ=true
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+  sim_64x32b_sync_read:
+    << : *default
+    description     : All RAMs and sbi_ram, asynchronous read (WIDTH=32, DEPTH=64)
+    filesets_append :
+      - files_sim
+    toplevel        : tb_ram
+    parameters      :
+      - WIDTH=32
+      - DEPTH=64
+      - SYNC_READ=false
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+  sim_64x32b_async_read:
+    << : *default
+    description     : All RAMs and sbi_ram, synchronous read (WIDTH=32, DEPTH=64)
+    filesets_append :
+      - files_sim
+    toplevel        : tb_ram
+    parameters      :
+      - WIDTH=32
+      - DEPTH=64
+      - SYNC_READ=true
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+parameters :
+
+  WIDTH :
+    description : Word width
+    datatype    : int
+    default     : 8
+    paramtype   : generic
+
+  DEPTH :
+    description : Number of words (power of 2, >= 16 for the testbench)
+    datatype    : int
+    default     : 16
+    paramtype   : generic
+
+  SYNC_READ :
+    description : Synchronous (registered) read
+    datatype    : bool
+    default     : false
+    paramtype   : generic
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-component-ram
+  version : asylum-component-ram-1.2.3
+ #version : 6f57cf6e036b04699101aace409005c9d8f15775
+#<PROVIDER_END>

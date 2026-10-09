@@ -1,0 +1,193 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : mailbox Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : mailbox.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2025
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2026-05-25  1.0.0    mrosiere First Release
+# 2026-06-06  1.0.1    mrosiere Add Name
+# 2026-10-05  1.0.2    mrosiere Fix default target toplevel (sbi_mailbox), assert that a
+#                               channel has a non-zero depth, add UVVM testbench
+#                               (incl. single-word FIFOs, needs fifo >= 1.2.1)
+#-----------------------------------------------------------------------------
+
+name        : asylum:system:mailbox:1.0.2
+description : mailbox Module
+
+#=========================================
+generate:
+#=========================================
+
+  #---------------------------------------
+  gen_csr:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : hdl/csr/mailbox.hjson
+      name         : mailbox
+      copy         : hdl/csr
+      logical_name : asylum
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  hdl:
+  #---------------------------------------
+    files        :
+      - hdl/mailbox_pkg.vhd
+      - hdl/sbi_mailbox.vhd
+    file_type    : vhdlSource
+    logical_name : asylum
+    depend       :
+      - asylum:utils:generators
+      - asylum:utils:pkg
+      - asylum:target:techmap
+
+  #---------------------------------------
+  sim:
+  #---------------------------------------
+    files:
+      - sim/tb_mailbox.vhd
+    file_type : vhdlSource-2008
+    depend       :
+      - bitvis:verification:uvvm
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target
+    filesets        :
+      - hdl
+    toplevel        : sbi_mailbox
+    default_tool    : ghdl
+    generate        :
+      - gen_csr
+
+  #---------------------------------------
+  sim_mailbox_4_4:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of sbi_mailbox with VIP - FIFO0 TX 4 / RX 4, FIFO1 TX 4 / RX 4 (PicoSoC configuration)
+    filesets_append :
+      - sim
+    toplevel        : tb_mailbox
+    parameters      :
+      - FIFO0_DEPTH_TX=4
+      - FIFO0_DEPTH_RX=4
+      - FIFO1_DEPTH_TX=4
+      - FIFO1_DEPTH_RX=4
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+  #---------------------------------------
+  sim_mailbox_depth0:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of sbi_mailbox with VIP - FIFO0 TX 0 / RX 4, FIFO1 TX 2 / RX 0 (one FIFO bypassed per channel)
+    filesets_append :
+      - sim
+    toplevel        : tb_mailbox
+    parameters      :
+      - FIFO0_DEPTH_TX=0
+      - FIFO0_DEPTH_RX=4
+      - FIFO1_DEPTH_TX=2
+      - FIFO1_DEPTH_RX=0
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+  #---------------------------------------
+  sim_mailbox_2_8:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of sbi_mailbox with VIP - FIFO0 TX 2 / RX 2, FIFO1 TX 8 / RX 2
+    filesets_append :
+      - sim
+    toplevel        : tb_mailbox
+    parameters      :
+      - FIFO0_DEPTH_TX=2
+      - FIFO0_DEPTH_RX=2
+      - FIFO1_DEPTH_TX=8
+      - FIFO1_DEPTH_RX=2
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+  #---------------------------------------
+  sim_mailbox_depth1:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of sbi_mailbox with VIP - FIFO0 TX 1 / RX 1, FIFO1 TX 1 / RX 0 (single-word FIFOs)
+    filesets_append :
+      - sim
+    toplevel        : tb_mailbox
+    parameters      :
+      - FIFO0_DEPTH_TX=1
+      - FIFO0_DEPTH_RX=1
+      - FIFO1_DEPTH_TX=1
+      - FIFO1_DEPTH_RX=0
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+#=========================================
+parameters :
+#=========================================
+
+  FIFO0_DEPTH_TX :
+    description : FIFO0 Depth of FIFO TX (SW2HW)
+    datatype    : int
+    default     : 4
+    paramtype   : generic
+
+  FIFO0_DEPTH_RX :
+    description : FIFO0 Depth of FIFO RX (HW2SW)
+    datatype    : int
+    default     : 4
+    paramtype   : generic
+
+  FIFO1_DEPTH_TX :
+    description : FIFO1 Depth of FIFO TX (SW2HW)
+    datatype    : int
+    default     : 4
+    paramtype   : generic
+
+  FIFO1_DEPTH_RX :
+    description : FIFO1 Depth of FIFO RX (HW2SW)
+    datatype    : int
+    default     : 4
+    paramtype   : generic
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-system-mailbox
+  version : asylum-system-mailbox-1.0.2
+ #version : 4fae0b7d036cac377414281d0bee6ef09d60ef2e
+#<PROVIDER_END>

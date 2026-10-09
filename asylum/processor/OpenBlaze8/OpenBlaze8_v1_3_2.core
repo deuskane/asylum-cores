@@ -708,5 +708,5 @@ provider  :
   user    : deuskane
   repo    : asylum-processor-OpenBlaze8
   version : asylum-processor-OpenBlaze8-1.3.2
- #version : 8cfaec93afd7f8169586ee501cb1a32408b34ce0
+ #version : fd5ba200d91be3f758b4fa693f5760774d6a6c69
 #<PROVIDER_END>

@@ -1,0 +1,121 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : Stack Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : stack.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2021-10-26  1.0.0    mrosiere Created
+# 2025-09-06  1.0.1    mrosiere Update deps
+# 2026-10-05  1.0.2    mrosiere UVVM testbench, OVERWRITE parameter type int,
+#                               add sim_overwrite target
+#-----------------------------------------------------------------------------
+
+name : asylum:component:stack:1.0.2
+description : Stack
+
+filesets:
+
+  #---------------------------------------
+  # Source Files
+  #---------------------------------------
+  files_hdl:
+    files        :
+      - hdl/stack_pkg.vhd
+      - hdl/stack.vhd
+    file_type    : vhdlSource
+    logical_name : asylum
+    depend       :
+      - ">=asylum:component:ram:1.0.0"
+      
+  #---------------------------------------
+  # Testbench Files
+  #---------------------------------------
+  files_sim:
+    files:
+      - sim/tb_stack.vhd
+    file_type : vhdlSource-2008
+    depend    :
+      - bitvis:verification:uvvm
+
+targets:
+
+  #---------------------------------------
+  # Default Target
+  #---------------------------------------
+  default: &default
+    description     : Default Target
+    filesets        :
+      - files_hdl
+    toplevel        : stack
+    default_tool    : ghdl
+
+  sim_basic:
+    << : *default
+    description     : Simulation of all cases (OVERWRITE = 0)
+    filesets_append :
+      - files_sim
+    toplevel        : tb_stack
+    parameters      :
+      - WIDTH=8
+      - DEPTH=8
+      - OVERWRITE=0
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+  sim_overwrite:
+    << : *default
+    description     : Simulation of all cases (OVERWRITE = 1)
+    filesets_append :
+      - files_sim
+    toplevel        : tb_stack
+    parameters      :
+      - WIDTH=16
+      - DEPTH=4
+      - OVERWRITE=1
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+parameters :
+
+  WIDTH :
+    description : Word width
+    datatype    : int
+    default     : 8
+    paramtype   : generic
+
+  DEPTH :
+    description : Number of words
+    datatype    : int
+    default     : 8
+    paramtype   : generic
+
+  OVERWRITE :
+    description : Allow the write if the stack is full (0 = no, /= 0 = yes)
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-component-stack
+  version : asylum-component-stack-1.0.2
+ #version : ffdd8e4f14fe6b63805e1ba89b3909a503f21c5c
+#<PROVIDER_END>

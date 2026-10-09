@@ -1,0 +1,261 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : crc Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : crc.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2025
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2025-11-26  1.0.0    mrosiere Created
+# 2025-11-29  1.0.1    mrosiere Add Generic SHIFT_LEFT, LSB_FIRST, REVERSE, REFLECT and XOR
+# 2026-06-06  1.0.2    mrosiere Add Name
+# 2026-10-05  1.1.0    mrosiere Fix multi-word CRC with REFLECT_OUT/XOR_OUT (raw register
+#                               in sbi_crc, crc0/crc1 ext CSR, crc_core port crc_o),
+#                               add UVVM testbench and sim targets
+#-----------------------------------------------------------------------------
+
+name        : asylum:component:crc:1.1.0
+description : CRC Module
+
+#=========================================
+generate:
+#=========================================
+
+  #---------------------------------------
+  gen_csr:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : hdl/csr/crc.hjson
+      name         : crc
+      copy         : hdl/csr
+      logical_name : asylum
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  hdl:
+  #---------------------------------------
+    files        :
+      - hdl/crc_pkg.vhd
+      - hdl/crc_core.vhd
+      - hdl/sbi_crc.vhd
+    file_type    : vhdlSource-2008
+    logical_name : asylum
+    depend       :
+      - asylum:utils:generators
+      - asylum:utils:pkg
+
+  #---------------------------------------
+  sim:
+  #---------------------------------------
+    files:
+      - sim/tb_crc_pkg.vhd
+      - sim/tb_crc.vhd
+    file_type : vhdlSource-2008
+    depend       :
+      - bitvis:verification:uvvm
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target
+    filesets        :
+      - hdl
+    toplevel        : sbi_crc
+    default_tool    : ghdl
+    generate        :
+      - gen_csr
+
+  #---------------------------------------
+  sim_crc8_smbus:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of sbi_crc with VIP - CRC-8/SMBUS (poly 0x07)
+    filesets_append :
+      - sim
+    toplevel        : tb_crc
+    parameters      :
+      - CFG=0
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+  #---------------------------------------
+  sim_crc8_i432:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of sbi_crc with VIP - CRC-8/I-432-1 (poly 0x07, XOR_OUT 0x55)
+    filesets_append :
+      - sim
+    toplevel        : tb_crc
+    parameters      :
+      - CFG=1
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+  #---------------------------------------
+  sim_crc16_ccitt_false:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of sbi_crc with VIP - CRC-16/CCITT-FALSE (poly 0x1021, init 0xFFFF)
+    filesets_append :
+      - sim
+    toplevel        : tb_crc
+    parameters      :
+      - CFG=2
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+  #---------------------------------------
+  sim_crc16_genibus:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of sbi_crc with VIP - CRC-16/GENIBUS (poly 0x1021, init 0xFFFF, XOR_OUT 0xFFFF)
+    filesets_append :
+      - sim
+    toplevel        : tb_crc
+    parameters      :
+      - CFG=3
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+  #---------------------------------------
+  sim_crc16_arc:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of sbi_crc with VIP - CRC-16/ARC (poly 0x8005, shift left, REFLECT_IN/OUT)
+    filesets_append :
+      - sim
+    toplevel        : tb_crc
+    parameters      :
+      - CFG=4
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+  #---------------------------------------
+  sim_crc16_x25:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of sbi_crc with VIP - CRC-16/X-25 (poly 0x1021, REFLECT_IN/OUT, XOR_OUT 0xFFFF)
+    filesets_append :
+      - sim
+    toplevel        : tb_crc
+    parameters      :
+      - CFG=5
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+  #---------------------------------------
+  sim_crc16_modbus:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of sbi_crc with VIP - CRC-16/MODBUS (poly 0xA001, shift right, LSB first - PicoSoC config)
+    filesets_append :
+      - sim
+    toplevel        : tb_crc
+    parameters      :
+      - CFG=6
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+  #---------------------------------------
+  sim_crc16_arc_shift_right:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of sbi_crc with VIP - CRC-16/ARC (poly 0x8005 reversed, shift right, REFLECT_IN)
+    filesets_append :
+      - sim
+    toplevel        : tb_crc
+    parameters      :
+      - CFG=7
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+  #---------------------------------------
+  sim_crc5_usb:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of sbi_crc with VIP - CRC-5/USB (WIDTH_CRC 5, REFLECT_IN/OUT, XOR_OUT 0x1F)
+    filesets_append :
+      - sim
+    toplevel        : tb_crc
+    parameters      :
+      - CFG=8
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+  #---------------------------------------
+  sim_crc16_xmodem_data16:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of sbi_crc with VIP - CRC-16/XMODEM with WIDTH_DATA 16
+    filesets_append :
+      - sim
+    toplevel        : tb_crc
+    parameters      :
+      - CFG=9
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+#=========================================
+parameters :
+#=========================================
+
+  CFG :
+    description : Index of the sbi_crc configuration in tb_crc_pkg.C_CRC_CFG
+    datatype    : int
+    default     : 2
+    paramtype   : generic
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-component-crc
+  version : asylum-component-crc-1.1.0
+ #version : c264a597e2157d282e6fb53ef61cdffbfa7ae5bf
+#<PROVIDER_END>

@@ -1,0 +1,177 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : GIC Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : GIC.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2025
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2025-06-28  1.0.0    mrosiere First Release
+# 2025-07-30  1.1.0    mrosiere Add package
+# 2025-11-22  1.1.1    mrosiere Use sbi instead pbi
+# 2026-01-17  1.2.0    mrosiere Add parameter to enable syncdff
+# 2026-06-06  1.2.1    mrosiere Add Name
+# 2026-10-05  1.2.2    mrosiere Fix default target toplevel (sbi_GIC), assert number of
+#                               lines, add UVVM testbench
+#-----------------------------------------------------------------------------
+
+name        : asylum:system:GIC:1.2.2
+description : GIC Module
+
+#=========================================
+generate:
+#=========================================
+
+  #---------------------------------------
+  gen_csr:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : hdl/csr/GIC.hjson
+      name         : GIC
+      copy         : hdl/csr
+      logical_name : asylum
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  hdl:
+  #---------------------------------------
+    files        :
+      - hdl/GIC_pkg.vhd
+      - hdl/it_ctrl.vhd
+      - hdl/GIC_core.vhd
+      - hdl/sbi_GIC.vhd
+    file_type    : vhdlSource
+    logical_name : asylum
+    depend       :
+      - asylum:utils:generators
+      - asylum:utils:pkg
+      - asylum:target:techmap
+
+  #---------------------------------------
+  sim:
+  #---------------------------------------
+    files:
+      - sim/tb_GIC.vhd
+    file_type : vhdlSource-2008
+    depend       :
+      - bitvis:verification:uvvm
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target
+    filesets        :
+      - hdl
+    toplevel        : sbi_GIC
+    default_tool    : ghdl
+    generate        :
+      - gen_csr
+
+  #---------------------------------------
+  sim_gic_8_nosync:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of sbi_GIC with VIP - 8 lines, no synchronizer
+    filesets_append :
+      - sim
+    toplevel        : tb_GIC
+    parameters      :
+      - NB_LINES=8
+      - SYNC_MASK=0
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+  #---------------------------------------
+  sim_gic_8_sync:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of sbi_GIC with VIP - 8 lines, synchronizer on every line
+    filesets_append :
+      - sim
+    toplevel        : tb_GIC
+    parameters      :
+      - NB_LINES=8
+      - SYNC_MASK=255
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+  #---------------------------------------
+  sim_gic_3_mixed:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of sbi_GIC with VIP - 3 lines, synchronizer on lines 0 and 2
+    filesets_append :
+      - sim
+    toplevel        : tb_GIC
+    parameters      :
+      - NB_LINES=3
+      - SYNC_MASK=5
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+  #---------------------------------------
+  sim_gic_1_sync:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of sbi_GIC with VIP - 1 line with synchronizer
+    filesets_append :
+      - sim
+    toplevel        : tb_GIC
+    parameters      :
+      - NB_LINES=1
+      - SYNC_MASK=1
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+#=========================================
+parameters :
+#=========================================
+
+  NB_LINES :
+    description : Number of interrupt lines of the testbench (1 to 8)
+    datatype    : int
+    default     : 8
+    paramtype   : generic
+
+  SYNC_MASK :
+    description : ITS_SYNC_ENABLE of the testbench, bit i = synchronizer on line i
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-system-gic
+  version : asylum-system-GIC-1.2.2
+ #version : eaf1398aedd37d0484caaf1532172f4e768a0976
+#<PROVIDER_END>

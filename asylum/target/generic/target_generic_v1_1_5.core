@@ -1,0 +1,110 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : 
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : target_generic.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: Inferred Technology Cells
+#-----------------------------------------------------------------------------
+# Copyright (c) 2025
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2025-01-06  1.0.0    mrosiere Created
+# 2025-08-11  1.1.0    mrosiere Add cbufg
+# 2025-09-06  1.1.1    mrosiere Add package
+# 2026-08-02  1.1.2    mrosiere Add iobuf
+# 2026-08-24  1.1.3    mrosiere Add ibuf and obuf
+# 2026-09-19  1.1.4    mrosiere Move package from generic to common
+# 2026-10-05  1.1.5    mrosiere Add UVVM testbench tb_techmap (sim_techmap)
+#                               Rename lint target to lint_generic
+#                               ibuf : drive 'Z' on buf_io
+#-----------------------------------------------------------------------------
+
+name        : asylum:target:generic:1.1.5
+description : Inferred Technology Cells
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  hdl:
+  #---------------------------------------
+    files:
+      - hdl/common/techmap_pkg.vhd
+      - hdl/generic/cbufg.vhd
+      - hdl/generic/cgate.vhd
+      - hdl/generic/sync2dff.vhd
+      - hdl/generic/sync2dffrn.vhd
+      - hdl/generic/iobuf.vhd
+      - hdl/generic/obuf.vhd
+      - hdl/generic/ibuf.vhd
+    file_type    : vhdlSource
+    logical_name : asylum
+
+  #---------------------------------------
+  sim:
+  #---------------------------------------
+    files:
+      - sim/src/tb_dummy.vhd
+    file_type : vhdlSource
+
+  #---------------------------------------
+  sim_uvvm:
+  #---------------------------------------
+    files:
+      - sim/src/tb_techmap.vhd
+    file_type : vhdlSource-2008
+    depend       :
+      - bitvis:verification:uvvm
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target (DON'T RUN)
+    filesets        :
+      - hdl
+    default_tool    : ghdl
+
+  #---------------------------------------
+  lint_generic: &lint_generic
+  #---------------------------------------
+    << : *default
+    description     : Lint (elaboration of every generic cell)
+    default_tool    : ghdl
+    toplevel        : tb_dummy
+    filesets_append :
+      - sim
+    tools :
+      ghdl :
+        analyze_options : ["-fsynopsys"]
+
+  #---------------------------------------
+  sim_techmap:
+  #---------------------------------------
+    << : *default
+    description     : Self-checking UVVM testbench of the generic cells
+    toplevel        : tb_techmap
+    filesets_append :
+      - sim_uvvm
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-frelaxed"]
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-target-techmap
+  version : asylum-target-generic-1.1.5
+ #version : ac2c0c40252e1dab0e024643653afcc408aea5ba
+#<PROVIDER_END>

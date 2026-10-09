@@ -1,0 +1,102 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : spinlock Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : spinlock.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2025
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2026-05-25  1.0.0    mrosiere First Release
+# 2026-06-06  1.0.1    mrosiere Add Name
+# 2026-10-05  1.0.2    mrosiere Fix default target toplevel (sbi_spinlock), fix lock value
+#                               description (0xFF when taken), add UVVM testbench
+#-----------------------------------------------------------------------------
+
+name        : asylum:system:spinlock:1.0.2
+description : spinlock Module
+
+#=========================================
+generate:
+#=========================================
+
+  #---------------------------------------
+  gen_csr:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : hdl/csr/spinlock.hjson
+      name         : spinlock
+      copy         : hdl/csr
+      logical_name : asylum
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  hdl:
+  #---------------------------------------
+    files        :
+      - hdl/spinlock_pkg.vhd
+      - hdl/sbi_spinlock.vhd
+    file_type    : vhdlSource
+    logical_name : asylum
+    depend       :
+      - asylum:utils:generators
+      - asylum:utils:pkg
+      - asylum:target:techmap
+
+  #---------------------------------------
+  sim:
+  #---------------------------------------
+    files:
+      - sim/tb_spinlock.vhd
+    file_type : vhdlSource-2008
+    depend       :
+      - bitvis:verification:uvvm
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target
+    filesets        :
+      - hdl
+    toplevel        : sbi_spinlock
+    default_tool    : ghdl
+    generate        :
+      - gen_csr
+
+  #---------------------------------------
+  sim_spinlock:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of sbi_spinlock with VIP
+    filesets_append :
+      - sim
+    toplevel        : tb_spinlock
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-system-spinlock
+  version : asylum-system-spinlock-1.0.2
+ #version : 0e0a37074e3165cffbc8993f8bee75d793684b08
+#<PROVIDER_END>

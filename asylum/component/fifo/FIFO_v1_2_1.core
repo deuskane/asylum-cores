@@ -1,0 +1,171 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : FIFO Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : FIFO.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2025
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2025-07-05  1.0.0    mrosiere First Release
+# 2025-07-28  1.1.0    mrosiere Add flags full/empty in each side
+# 2025-09-06  1.1.1    mrosiere Update depends
+# 2026-06-10  1.2.0    mrosiere Add SYNC_READ and tb
+# 2026-10-05  1.2.1    mrosiere Fix SYNC_READ push+pop with one word stored
+#                               Skip nb_elt assertion before reset
+#                               Fix empty/full flags with DEPTH=1
+#                               Add simultaneous push/pop tests
+#                               Rename lint target to lint_ghdl
+#-----------------------------------------------------------------------------
+
+name        : asylum:component:fifo:1.2.1
+description : FIFO Module
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  hdl:
+  #---------------------------------------
+    files        :
+      - hdl/fifo_pkg.vhd
+      - hdl/fifo_sync.vhd
+    file_type    : vhdlSource
+    logical_name : asylum
+    depend       :
+      - asylum:utils:pkg
+      - asylum:component:ram
+
+  #---------------------------------------
+  sim_basic:
+  #---------------------------------------
+    files        :
+      - sim/fifo_sync_tb.vhd
+    file_type    : vhdlSource-2008
+    #logical_name : asylum
+    depend       :
+      - bitvis:verification:uvvm   
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target
+    filesets        :
+      - hdl
+
+  #---------------------------------------
+  lint_ghdl :
+  #---------------------------------------
+    << : *default
+    description     : Lint with GHDL (-Wall analysis and elaboration of fifo_sync)
+    toplevel        : asylum.fifo_sync
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-Werror"]
+        
+  #---------------------------------------
+  sim_fifo_depth8_read_async:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of basic unit tests with Synchronous FIFO and Asynchronous RAM
+    filesets_append :
+      - sim_basic
+    toplevel        : fifo_sync_tb
+    parameters      :
+      - SYNC_READ=false
+      - DEPTH=8
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+        
+  #---------------------------------------
+  sim_fifo_depth8_read_sync:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of basic unit tests with Synchronous FIFO and Synchronous RAM
+    filesets_append :
+      - sim_basic
+    toplevel        : fifo_sync_tb
+    parameters      :
+      - SYNC_READ=true
+      - DEPTH=8
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+  #---------------------------------------
+  sim_fifo_depth1_read_async:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of basic unit tests with DEPTH=1 and Asynchronous RAM
+    filesets_append :
+      - sim_basic
+    toplevel        : fifo_sync_tb
+    parameters      :
+      - SYNC_READ=false
+      - DEPTH=1
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+  #---------------------------------------
+  sim_fifo_depth1_read_sync:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of basic unit tests with DEPTH=1 and Synchronous RAM
+    filesets_append :
+      - sim_basic
+    toplevel        : fifo_sync_tb
+    parameters      :
+      - SYNC_READ=true
+      - DEPTH=1
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+#=========================================
+parameters :
+#=========================================
+
+  SYNC_READ :
+    description : Synchronoys Read
+    datatype    : bool
+    default     : false
+    paramtype   : generic
+
+  DEPTH :
+    description : FIFO depth (power of 2)
+    datatype    : int
+    default     : 16
+    paramtype   : generic
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-component-fifo
+  version : asylum-component-fifo-1.2.1
+ #version : 158bbd1a1986295d64e2e3329823bced413cd252
+#<PROVIDER_END>

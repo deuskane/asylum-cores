@@ -1,0 +1,111 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : Timer Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : timer.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2021-10-26  1.0.0    mrosiere Created
+# 2021-11-20  1.1.0    mrosiere Fix timer_event_r clear condition
+# 2025-09-05  1.1.1    mrosiere Add Package
+# 2025-11-01  2.0.0    mrosiere Add CSR, core rework
+# 2025-11-22  2.0.1    mrosiere Use sbi instead pbi
+# 2026-06-06  2.0.2    mrosiere Add Name
+# 2026-10-05  2.0.3    mrosiere Self-checking UVVM bench of sbi_timer (sim_sbi_timer)
+#                               replaces the legacy timer_v1 bench, remove unused
+#                               parameters section
+#-----------------------------------------------------------------------------
+
+name        : asylum:component:timer:2.0.3
+description : Timer
+
+#=========================================
+generate:
+#=========================================
+
+  #---------------------------------------
+  gen_csr:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : hdl/csr/timer.hjson
+      name         : timer
+      copy         : hdl/csr
+      logical_name : asylum
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  # Source Files
+  #---------------------------------------
+  files_hdl:
+    files        :
+      - hdl/timer_pkg.vhd
+      - hdl/sbi_timer.vhd
+      - hdl/timer_core.vhd
+      - hdl/timer_v1.vhd
+    file_type    : vhdlSource-2008
+    logical_name : asylum
+    depend       :
+      - asylum:system:GIC
+      - asylum:utils:generators
+      - asylum:utils:pkg
+      
+  #---------------------------------------
+  # Testbench Files
+  #---------------------------------------
+  files_sim:
+    files:
+      - sim/tb_sbi_timer.vhd
+    file_type : vhdlSource-2008
+    depend       :
+      - bitvis:verification:uvvm
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target
+    filesets        :
+      - files_hdl
+    toplevel        : timer
+    default_tool    : ghdl
+    generate        :
+      - gen_csr
+
+  #---------------------------------------
+  sim_sbi_timer:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of sbi_timer with SBI VIP
+    filesets_append :
+      - files_sim
+    toplevel        : tb_sbi_timer
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-component-timer
+  version : asylum-component-timer-2.0.3
+ #version : 61225aa0f44b10ac89403fdd754af25309013cd9
+#<PROVIDER_END>
