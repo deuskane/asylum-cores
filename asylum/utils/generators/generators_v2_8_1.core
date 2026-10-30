@@ -1,0 +1,441 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : Generators Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : generators.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2021-11-03  1.0.0    mrosiere Created
+# 2025-01-12  1.1.0    mrosiere Generators   : Add cflags arguments
+# 2025-01-15  1.2.0    mrosiere picoasm      : dump rom style
+# 2025-01-21  1.3.0    mrosiere pbcc         : fix global variable save after restore context
+# 2025-02-05  1.4.0    mrosiere pbcc         : use sdcc 3.1.0
+# 2025-02-20  2.0.0    mrosiere regtool
+# 2025-03-08  2.0.1    mrosiere regtool      : don't force logical name if unset
+# 2025-03-15  2.1.0    mrosiere regtool      : fix field management
+# 2025-03-22  2.2.0    mrosiere regtool      : Select interface between reg or pbi
+# 2025-04-02  2.2.1    mrosiere regtool      : Select range
+# 2025-04-17  2.2.2    mrosiere regtool      : Header C copy into workdir
+# 2025-06-16  2.3.0    mrosiere pbcc         : support -I
+# 2025-07-09  2.4.0    mrosiere regtool      : Add FIFO in csr_fifo
+# 2025-07-27  2.4.1    mrosiere regtool      : Add flags
+# 2025-08-12  2.4.2    mrosiere Generators   : Use cache type
+# 2025-09-06  2.4.3    mrosiere regtool      : Add component for csr and in package
+# 2025-06-07  2.4.4    mrosiere pbcc         : add logical name option
+# 2025-09-22  2.5.0    mrosiere pbcc/regtool : use Makefile
+# 2025-11-02  2.5.1    mrosiere regtool      : fix init value
+# 2025-11-05  2.5.2    mrosiere Generators   : Use logger
+# 2025-11-22  2.5.3    mrosiere regtool      : support sbi interface
+# 2025-11-27  2.5.3    mrosiere regtool      : crs_reg fix connection sw2hw re/we
+# 2025-12-30  2.5.4    mrosiere picoasm      : update for gcc 13.3
+#                               pbcc         : update for gcc 13.3
+# 2026-01-18  2.5.5    mrosiere regtool      : use info record for sbi
+# 2026-05-12  2.6.0    mrosiere rvcc         : Add tools
+# 2026-05-17  2.6.1    mrosiere pbcc/rvcc    : Generate ROM package
+# 2026-05-27  2.6.2    mrosiere regtool      : Manage empty record and add rsw1c register
+# 2026-06-06  2.6.3    mrosiere regtool      : Add Name
+# 2026-06-25  2.6.4    mrosiere pbcc/rvcc    : Add *gen_csr* in include path
+#                               rvcc         : fix stack in linker script
+# 2026-07-16  2.6.5    mrosiere component.py : add file filter
+# 2026-07-30  2.6.6    mrosiere regtool      : add address in csr pkg and use it in csr module
+# 2026-08-02  2.6.7    mrosiere Add default target for deps
+# 2026-08-21  2.6.8    mrosiere regtool      : Add enum
+# 2026-09-28  2.6.9    mrosiere rvcc         : Update check condition for zicsr
+#                               regtool      : Move copy in Makefile
+#                               pbcc         : Move rom generation in Makefile
+# 2026-10-02  2.7.0    mrosiere rvcc/pbcc/regtool : Use lock for run and write
+# 2026-10-05  2.7.1    mrosiere regtool      : Makefile outputs depend on the regtool sources
+#                                              ($(shell find), was always empty)
+#                               csr_reg      : Add "wo" model
+#                               gen_rom      : Exit with status 1 on error
+# 2026-10-21  2.8.0    mrosiere ghdl         : add script and Makefile to generate ghdl synth option
+# 2026-10-30  2.8.1    mrosiere ghdl         : files moved in the core asylum:utils:ghdl_synth
+#                                              (no dependency), generators depends on it
+#-----------------------------------------------------------------------------
+
+name       : asylum:utils:generators:2.8.1
+description: A collection of useful generators
+
+#=========================================
+generators:
+#=========================================
+
+  #---------------------------------------
+  pbcc_gen:
+  #---------------------------------------
+    interpreter: python3
+    command    : generators/pbcc/pbcc.py
+    description: ROM Generator
+    cache_type : generator
+    usage: |
+      This generator translate a source file (C or Assembler) in ROM
+
+      The generator requires the following parameters:
+
+        file         : (Mandatory)
+                       Source file
+            
+        type         : (Mandatory)
+                       Type of source file
+                       "c"         : c file
+                       "kcpsm3"    : assembler file with kcpsm3 syntax
+                       "pblazeide" : assembler file with kcpsm3 syntax
+
+        entity       : (Optional)
+                       Entity Name
+                       Default     : OpenBlaze8_ROM
+
+        model        : (Optional)
+                       ROM Model 
+                       "generic"   : Generic implementation
+                       "xilinx"    : Xilinx  implementation
+                       Default     : "generic"
+
+        cflags       : (Optional)
+                       Compilation options for C file
+
+        logical_name : (Optional)
+                       Default : work
+
+  #---------------------------------------
+  rvcc_gen:
+  #---------------------------------------
+    interpreter: python3
+    command    : generators/rvcc/rvcc.py
+    description: RISC-V ROM Generator
+    cache_type : generator
+    usage: |
+      This generator translate a source file (C, Assembler or ELF) in ROM
+
+      The generator requires the following parameters:
+
+        file         : (Mandatory)
+                       Source file
+            
+        type         : (Mandatory)
+                       Type of source file
+                       "c"         : c file
+                       "s"         : assembler file
+                       "elf"       : elf file
+
+        entity       : (Optional)
+                       Entity Name
+                       Default     : WardRV_ROM
+
+        model        : (Optional)
+                       ROM Model 
+                       "generic"   : Generic implementation
+                       "xilinx"    : Xilinx  implementation
+                       Default     : "generic"
+
+        addr_width   : (Optional)
+                       ROM address width (ROM of 2**addr_width 32-bit words)
+                       Default     : 10
+
+        cflags       : (Optional)
+                       Compilation options for C file
+
+        stack_size   : (Optional)
+                       Stack size in bytes, reserved in the RAM by link.ld
+                       Default     : 128
+
+        logical_name : (Optional)
+                       Default : work
+
+  #---------------------------------------
+  regtool:
+  #---------------------------------------
+    interpreter: python3
+    command    : generators/regtool/regtool.py
+    description: CSR Generator
+    cache_type : generator
+    usage: |
+      This generator create module with register
+
+      The generator requires the following parameters:
+
+        file         : (Mandatory)
+                       Hjson description file
+
+        name         : (Mandatory)
+                       Name prefix
+
+        copy         : (Optional)
+                       Default : None
+
+        logical_name : (Optional)
+                       Default : work
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  deps:
+  #---------------------------------------
+    depend       :
+      - asylum:component:fifo
+      # ghdl_synth.sh / ghdl_synth.mk of the lint_ghdl_synth_* targets
+      - asylum:utils:ghdl_synth
+
+  #---------------------------------------
+  # regtool building blocks (added by regtool to the calling core)
+  #---------------------------------------
+  regtool_hdl:
+    files:
+      - tools/regtool/hdl/csr_pkg.vhd
+      - tools/regtool/hdl/csr_reg.vhd
+      - tools/regtool/hdl/csr_ext.vhd
+      - tools/regtool/hdl/csr_fifo.vhd
+    file_type    : vhdlSource
+    logical_name : asylum
+
+  #---------------------------------------
+  syn:
+  #---------------------------------------
+    files        :
+      - syn/csr_wrapper.vhd
+    file_type    : vhdlSource-2008
+    logical_name : asylum
+
+#=========================================
+generate:
+#=========================================
+
+  #---------------------------------------
+  gen_csr_example1:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : tools/regtool/examples/example1.hjson
+      name         : example1
+      logical_name : asylum
+
+  #---------------------------------------
+  gen_csr_example2:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : tools/regtool/examples/example2.hjson
+      name         : example2
+      logical_name : asylum
+
+  #---------------------------------------
+  gen_csr_example3:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : tools/regtool/examples/example3.hjson
+      name         : example3
+      logical_name : asylum
+
+  #---------------------------------------
+  gen_csr_example4:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : tools/regtool/examples/example4.hjson
+      name         : example4
+      logical_name : asylum
+
+#=========================================
+parameters:
+#=========================================
+
+  REG1_ENABLE :
+    datatype    : bool
+    description : Enable the register reg1 of example1
+    paramtype   : generic
+
+  #---------------------------------------
+  # Generics of csr_wrapper (lint_ghdl_synth_*)
+  #---------------------------------------
+  WIDTH :
+    description : Register width
+    datatype    : int
+    default     : 8
+    paramtype   : generic
+
+  INIT :
+    description : Register reset value (WIDTH-bit string)
+    datatype    : str
+    default     : "00000000"
+    paramtype   : generic
+
+  BLOCKING_READ :
+    description : csr_fifo, blocking read
+    datatype    : bool
+    default     : false
+    paramtype   : generic
+
+  BLOCKING_WRITE :
+    description : csr_fifo, blocking write
+    datatype    : bool
+    default     : true
+    paramtype   : generic
+
+  DEPTH_SW2HW :
+    description : csr_fifo, depth of the SW to HW FIFO (0 = no FIFO)
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+  DEPTH_HW2SW :
+    description : csr_fifo, depth of the HW to SW FIFO (0 = no FIFO)
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target
+    filesets        :
+      - deps
+
+  #---------------------------------------
+  # Lint : -Wall analysis and elaboration (empty simulation)
+  #---------------------------------------
+  lint_ghdl : &lint_ghdl
+    << : *default
+    description     : Lint with GHDL (-Wall analysis and elaboration of csr_wrapper)
+    toplevel        : asylum.csr_wrapper
+    filesets_append : [regtool_hdl, syn]
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall"]
+
+  #---------------------------------------
+  # Synthesis check : -Wall analysis, ghdl --synth -Wall and elaboration
+  # (no simulation) of csr_wrapper with the generics of the target.
+  # The pre_run hook (ghdl_synth.sh of asylum:utils:generators) adds
+  # ghdl_synth.mk to the edalize Makefile.
+  # FuseSoC merges tools in depth : analyze_options comes from lint_ghdl.
+  #---------------------------------------
+  lint_ghdl_synth_default : &lint_ghdl_synth
+    << : *lint_ghdl
+    description     : Synthesis check of csr_wrapper, default generics
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [ghdl_synth]
+
+  #---------------------------------------
+  lint_ghdl_synth_width1_init1 :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of csr_wrapper, WIDTH 1, INIT "1"
+    parameters      :
+      - WIDTH=1
+      - INIT=1
+
+  #---------------------------------------
+  lint_ghdl_synth_init_a5 :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of csr_wrapper, INIT x"A5"
+    parameters      :
+      - INIT=10100101
+
+  #---------------------------------------
+  lint_ghdl_synth_fifo_blocking :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of csr_wrapper, csr_fifo with FIFOs, blocking read
+    parameters      :
+      - DEPTH_SW2HW=4
+      - DEPTH_HW2SW=4
+      - BLOCKING_READ=true
+
+  #---------------------------------------
+  lint_ghdl_synth_fifo_nonblocking :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of csr_wrapper, csr_fifo with FIFOs, non-blocking write
+    parameters      :
+      - DEPTH_SW2HW=2
+      - DEPTH_HW2SW=8
+      - BLOCKING_WRITE=false
+
+  #---------------------------------------
+  sim: &sim
+  #---------------------------------------
+    << : *default
+    description     : default run rule
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall"]
+        run_options     : ["--ieee-asserts=disable"]
+
+  #---------------------------------------
+  sim_regtool_example1:
+  #---------------------------------------
+    << : *sim
+    description     : Generate the CSR of regtool example1, analyze and elaborate them with GHDL
+    generate        :
+      - gen_csr_example1
+    toplevel        : asylum.example1_registers
+    parameters      :
+      - REG1_ENABLE=true
+
+#  #---------------------------------------
+#  sim_regtool_example2:
+#  #---------------------------------------
+#    << : *sim
+#    description     : Generate the CSR of regtool example2, analyze and elaborate them with GHDL
+#    generate        :
+#      - gen_csr_example2
+#    toplevel        : asylum.example2_registers
+#
+#  #---------------------------------------
+#  sim_regtool_example3:
+#  #---------------------------------------
+#    << : *sim
+#    description     : Generate the CSR of regtool example3, analyze and elaborate them with GHDL
+#    generate        :
+#      - gen_csr_example3
+#    toplevel        : asylum.example3_registers
+#
+#  #---------------------------------------
+#  sim_regtool_example4:
+#  #---------------------------------------
+#    << : *sim
+#    description     : Generate the CSR of regtool example4, analyze and elaborate them with GHDL
+#    generate        :
+#      - gen_csr_example4
+#    toplevel        : asylum.example4_registers
+
+#=========================================
+scripts:
+#=========================================
+
+  #---------------------------------------
+  # pre_run hook of lint_ghdl_synth_* (cwd = work_root)
+  #---------------------------------------
+  ghdl_synth :
+    cmd : [bash, ghdl_synth.sh]
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-utils-generators
+  version : asylum-utils-generators-2.8.1
+ #version : f0f785b73d523947a510e87b34b92bf940ea3bdc
+#<PROVIDER_END>

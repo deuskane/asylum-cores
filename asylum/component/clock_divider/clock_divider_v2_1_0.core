@@ -1,0 +1,187 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : Clock Divider Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : clock_divider.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description#
+# 2021-10-26  1.0.0    mrosiere Created
+# 2022-02-11  1.1.0    mrosiere Ratio parameter is string, delete GATED_CLOCK
+# 2022-02-27  2.0.0    mrosiere Create real 50% duty cycle
+# 2025-08-13  2.0.1    mrosiere Instanciate Clock Buffer after clock divider
+# 2025-09-05  2.0.2    mrosiere Add Package
+# 2026-10-05  2.0.3    mrosiere Fix 50% period for odd RATIO, assert on invalid
+#                               ALGO, UVVM self-checking testbench, remove
+#                               unused parameters
+# 2026-10-22  2.1.0    mrosiere Add BYPASS_CBUFG generic (no clock buffer)
+#-----------------------------------------------------------------------------
+
+name : asylum:component:clock_divider:2.1.0
+description : Clock Divider Cell
+
+filesets:
+
+  #---------------------------------------
+  # Source Files
+  #---------------------------------------
+  files_hdl:
+    files:
+      - hdl/clock_divider_pkg.vhd
+      - hdl/clock_divider.vhd
+    file_type    : vhdlSource
+    logical_name : asylum
+    depend       :
+      - asylum:utils:pkg
+      - asylum:target:techmap
+      
+  #---------------------------------------
+  # Testbench Files
+  #---------------------------------------
+  files_sim:
+    files:
+      - sim/tb_clock_divider.vhd
+    file_type : vhdlSource-2008
+    depend    :
+      - bitvis:verification:uvvm
+
+  #---------------------------------------
+  syn:
+  #---------------------------------------
+    files        :
+      - syn/clock_divider_wrapper.vhd
+    file_type    : vhdlSource
+    logical_name : asylum
+    depend       :
+      - ">=asylum:utils:generators:2.8.0"
+
+targets:
+
+  #---------------------------------------
+  # Default Target
+  #---------------------------------------
+  default: &default
+    description     : Default Target
+    filesets        :
+      - files_hdl
+    toplevel        : clock_divider
+    default_tool    : ghdl
+
+  #---------------------------------------
+  # Lint : -Wall analysis and elaboration (empty simulation)
+  #---------------------------------------
+  lint_ghdl : &lint_ghdl
+    << : *default
+    description     : Lint with GHDL (-Wall analysis and elaboration of clock_divider_wrapper)
+    toplevel        : asylum.clock_divider_wrapper
+    filesets_append : [syn]
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall"]
+
+  #---------------------------------------
+  # Synthesis check : -Wall analysis, ghdl --synth -Wall and elaboration
+  # (no simulation) of clock_divider_wrapper with the generics of the target.
+  # The pre_run hook (ghdl_synth.sh of asylum:utils:generators) adds
+  # ghdl_synth.mk to the edalize Makefile.
+  # FuseSoC merges tools in depth : analyze_options comes from lint_ghdl.
+  #---------------------------------------
+  lint_ghdl_synth_default : &lint_ghdl_synth
+    << : *lint_ghdl
+    description     : Synthesis check of clock_divider_wrapper, default generics
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [ghdl_synth]
+
+  #---------------------------------------
+  lint_ghdl_synth_pulse_ratio1 :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of clock_divider_wrapper, pulse, RATIO 1
+    parameters      :
+      - RATIO=1
+
+  #---------------------------------------
+  lint_ghdl_synth_pulse_ratio5 :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of clock_divider_wrapper, pulse, RATIO 5
+    parameters      :
+      - RATIO=5
+
+  #---------------------------------------
+  lint_ghdl_synth_duty50_ratio4 :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of clock_divider_wrapper, 50% duty cycle, RATIO 4
+    parameters      :
+      - RATIO=4
+      - ALGO_50=true
+
+  #---------------------------------------
+  lint_ghdl_synth_duty50_ratio5 :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of clock_divider_wrapper, 50% duty cycle, RATIO 5
+    parameters      :
+      - RATIO=5
+      - ALGO_50=true
+
+  sim_basic:
+    << : *default
+    description     : Simulation of all RATIO / ALGO cases (UVVM, self-checking)
+    filesets_append :
+      - files_sim
+    toplevel        : tb_clock_divider
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+scripts:
+
+  #---------------------------------------
+  # pre_run hook of lint_ghdl_synth_* (cwd = work_root)
+  #---------------------------------------
+  ghdl_synth :
+    cmd : [bash, ghdl_synth.sh]
+
+#=========================================
+parameters :
+#=========================================
+
+  #---------------------------------------
+  # Generics of clock_divider_wrapper (lint_ghdl_synth_*)
+  #---------------------------------------
+  RATIO :
+    description : Static ratio
+    datatype    : int
+    default     : 2
+    paramtype   : generic
+
+  ALGO_50 :
+    description : false, pulse ; true, 50% duty cycle (ALGO of clock_divider)
+    datatype    : bool
+    default     : false
+    paramtype   : generic
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-component-clock_divider
+  version : asylum-component-clock_divider-2.1.0
+ #version : 51eb0c3992839c9ee858722eee3d567e1e806676
+#<PROVIDER_END>

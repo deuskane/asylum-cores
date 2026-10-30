@@ -37,7 +37,7 @@ filesets:
     files        :
       - hdl/fifo_pkg.vhd
       - hdl/fifo_sync.vhd
-    file_type    : vhdlSource
+    file_type    : vhdlSource-2008
     logical_name : asylum
     depend       :
       - asylum:utils:pkg
@@ -167,5 +167,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-fifo
   version : asylum-component-fifo-1.2.1
- #version : 926192a2a22c0cbc29a1f38bacbea7d104221358
+ #version : 57b28f5827a0adf6f0c155712d6bb403aeb009db
 #<PROVIDER_END>

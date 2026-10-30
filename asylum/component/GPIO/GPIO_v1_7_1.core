@@ -75,6 +75,7 @@ filesets:
       - asylum:system:GIC
       - asylum:utils:generators
       - asylum:utils:pkg
+      - asylum:target:techmap
 
   #---------------------------------------
   sim:
@@ -152,5 +153,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-gpio
   version : asylum-component-GPIO-1.7.1
- #version : a9c0b96fe755745ff6f44483b5d78710aa3658b0
+ #version : 5ef55b8d195a92942f3817d53a8c2d420271666f
 #<PROVIDER_END>

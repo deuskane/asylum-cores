@@ -1,0 +1,391 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : I2C Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : I2C.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: I2C master / slave with CSR access over the SBI bus
+#-----------------------------------------------------------------------------
+# Copyright (c) 2026
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2026-10-22  1.0.0    mrosiere First Release
+#                               One target per verification scenario
+#                               (sim_<scenario>), sim_multi_slave
+#-----------------------------------------------------------------------------
+
+name        : asylum:communication:I2C:1.0.0
+description : I2C Master / Slave Module
+
+#=========================================
+generate:
+#=========================================
+
+  #---------------------------------------
+  gen_csr:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : hdl/csr/I2C.hjson
+      name         : I2C
+      copy         : hdl/csr
+      logical_name : asylum
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  hdl:
+  #---------------------------------------
+    files        :
+      - hdl/i2c_pkg.vhd
+      - hdl/i2c_master.vhd
+      - hdl/i2c_slave.vhd
+      - hdl/i2c_core.vhd
+      - hdl/sbi_I2C.vhd
+    file_type    : vhdlSource
+    logical_name : asylum
+    depend       :
+      - ">=asylum:utils:generators:2.8.0"
+      - asylum:utils:pkg
+      - asylum:target:techmap
+
+  #---------------------------------------
+  sim_basic:
+  #---------------------------------------
+    files        :
+      - sim/basic/tb_I2C.vhd
+    file_type    : vhdlSource-2008
+    depend       :
+      - bitvis:verification:uvvm
+
+  #---------------------------------------
+  sim_multi:
+  #---------------------------------------
+    files        :
+      - sim/multi/tb_I2C_multi.vhd
+    file_type    : vhdlSource-2008
+    depend       :
+      - bitvis:verification:uvvm
+
+  #---------------------------------------
+  # Lint Files (pre_run hook of lint_ghdl_synth_*)
+  #---------------------------------------
+  syn:
+    files:
+      - syn/sbi_I2C_wrapper.vhd
+    file_type    : vhdlSource-2008
+    logical_name : asylum
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target
+    filesets        :
+      - hdl
+    toplevel        : sbi_I2C
+    default_tool    : ghdl
+    generate        :
+      - gen_csr
+
+  #---------------------------------------
+  # Lint : -Wall analysis and elaboration (empty simulation)
+  #---------------------------------------
+  lint_ghdl : &lint_ghdl
+    << : *default
+    description     : Lint with GHDL (-Wall analysis and elaboration of sbi_I2C_wrapper)
+    toplevel        : asylum.sbi_I2C_wrapper
+    filesets_append : [syn]
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall"]
+
+  #---------------------------------------
+  # Synthesis check : -Wall analysis, ghdl --synth -Wall and elaboration
+  # (no simulation) of sbi_I2C_wrapper with the generics of the target.
+  # The pre_run hook adds syn/ghdl/ghdl_synth.mk to the edalize Makefile.
+  # FuseSoC merges tools in depth : analyze_options comes from lint_ghdl.
+  #---------------------------------------
+  lint_ghdl_synth_default : &lint_ghdl_synth
+    << : *lint_ghdl
+    description     : Synthesis check of sbi_I2C_wrapper, default generics
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [ghdl_synth]
+
+  #---------------------------------------
+  lint_ghdl_synth_sim :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi_I2C_wrapper, generics of the sim_* targets
+    parameters      :
+      - DEPTH_CMD=4
+      - DEPTH_TX=8
+      - DEPTH_RX=8
+
+  #---------------------------------------
+  lint_ghdl_synth_master_only :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi_I2C_wrapper, master only
+    parameters      :
+      - SLAVE_ENABLE=false
+
+  #---------------------------------------
+  lint_ghdl_synth_slave_only :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi_I2C_wrapper, slave only (no cmd register)
+    parameters      :
+      - MASTER_ENABLE=false
+
+  #---------------------------------------
+  lint_ghdl_synth_fixed_prescaler :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi_I2C_wrapper, fixed prescaler
+    parameters      :
+      - USER_DEFINE_PRESCALER=false
+      - PRESCALER_RATIO=00011000
+
+  #---------------------------------------
+  # Simulation : tb_I2C, one scenario (TEST) per target
+  #---------------------------------------
+  default_sim: &default_sim
+    << : *default
+    description     : Default Target for simulation (tb_I2C, TEST=master_write)
+    filesets_append :
+      - sim_basic
+    toplevel        : tb_I2C
+    parameters      :
+      - TEST=master_write
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options :
+          - "$(GHDL_ANALYZE_OPTION)"
+          - "-Wall"
+          - "-frelaxed"
+        run_options     :
+          - "$(GHDL_RUN_OPTION)"
+          - "--ieee-asserts=disable"
+
+  #---------------------------------------
+  sim_reset_values:
+  #---------------------------------------
+    << : *default_sim
+    description     : Reset values of the registers
+    parameters      :
+      - TEST=reset_values
+
+  #---------------------------------------
+  sim_master_write:
+  #---------------------------------------
+    << : *default_sim
+    description     : DUT master writes to the BFM slave, SCL period (prescaler 4)
+    parameters      :
+      - TEST=master_write
+
+  #---------------------------------------
+  sim_master_read:
+  #---------------------------------------
+    << : *default_sim
+    description     : DUT master reads from the BFM slave
+    parameters      :
+      - TEST=master_read
+
+  #---------------------------------------
+  sim_master_write_read:
+  #---------------------------------------
+    << : *default_sim
+    description     : DUT master write + repeated START + read (register read)
+    parameters      :
+      - TEST=master_write_read
+
+  #---------------------------------------
+  sim_master_nack:
+  #---------------------------------------
+    << : *default_sim
+    description     : DUT master writes to an absent slave (NACK)
+    parameters      :
+      - TEST=master_nack
+
+  #---------------------------------------
+  sim_master_stretch:
+  #---------------------------------------
+    << : *default_sim
+    description     : DUT master write with SCL stretched by the bench
+    parameters      :
+      - TEST=master_stretch
+
+  #---------------------------------------
+  sim_master_prescaler:
+  #---------------------------------------
+    << : *default_sim
+    description     : DUT master SCL period with prescaler 9
+    parameters      :
+      - TEST=master_prescaler
+
+  #---------------------------------------
+  sim_slave_write:
+  #---------------------------------------
+    << : *default_sim
+    description     : BFM master writes to the DUT slave
+    parameters      :
+      - TEST=slave_write
+
+  #---------------------------------------
+  sim_slave_read:
+  #---------------------------------------
+    << : *default_sim
+    description     : BFM master reads from the DUT slave
+    parameters      :
+      - TEST=slave_read
+
+  #---------------------------------------
+  sim_slave_stretch:
+  #---------------------------------------
+    << : *default_sim
+    description     : BFM master reads from the DUT slave, TX FIFO empty (clock stretching)
+    parameters      :
+      - TEST=slave_stretch
+
+  #---------------------------------------
+  sim_slave_write_read:
+  #---------------------------------------
+    << : *default_sim
+    description     : BFM master write + repeated START + read from the DUT slave
+    parameters      :
+      - TEST=slave_write_read
+
+  #---------------------------------------
+  sim_slave_wrong_address:
+  #---------------------------------------
+    << : *default_sim
+    description     : BFM master addresses an other slave (NACK)
+    parameters      :
+      - TEST=slave_wrong_address
+
+  #---------------------------------------
+  sim_slave_disabled:
+  #---------------------------------------
+    << : *default_sim
+    description     : BFM master addresses a disabled slave (NACK)
+    parameters      :
+      - TEST=slave_disabled
+
+  #---------------------------------------
+  sim_disabled:
+  #---------------------------------------
+    << : *default_sim
+    description     : BFM master addresses a disabled I2C (NACK, pads released)
+    parameters      :
+      - TEST=disabled
+
+  #---------------------------------------
+  # Simulation : tb_I2C_multi, one master and NB_SLAVE slaves
+  #---------------------------------------
+  sim_multi_slave:
+    << : *default_sim
+    description     : One master and 3 slaves sbi_I2C on the same bus
+    filesets_append :
+      - sim_multi
+    toplevel        : tb_I2C_multi
+    parameters      :
+      - NB_SLAVE=3
+
+#=========================================
+scripts:
+#=========================================
+
+  #---------------------------------------
+  # pre_run hook of lint_ghdl_synth_* (cwd = work_root)
+  #---------------------------------------
+  ghdl_synth :
+    cmd : [bash, ghdl_synth.sh]
+
+#=========================================
+parameters :
+#=========================================
+
+  #---------------------------------------
+  # Generics of the testbenches (sim_*)
+  #---------------------------------------
+  TEST :
+    description : Scenario of tb_I2C (see sim/basic/tb_I2C.vhd)
+    datatype    : str
+    default     : master_write
+    paramtype   : generic
+
+  NB_SLAVE :
+    description : Number of slave instances of tb_I2C_multi (1 to 3)
+    datatype    : int
+    default     : 3
+    paramtype   : generic
+
+  #---------------------------------------
+  # Generics of sbi_I2C_wrapper (lint_ghdl_synth_*)
+  #---------------------------------------
+  USER_DEFINE_PRESCALER :
+    description : true, prescaler register writable by software ; false, ratio fixed to PRESCALER_RATIO
+    datatype    : bool
+    default     : true
+    paramtype   : generic
+
+  PRESCALER_RATIO :
+    description : Reset / fixed value of the prescaler ratio (8-bit string)
+    datatype    : str
+    default     : "01111100"
+    paramtype   : generic
+
+  MASTER_ENABLE :
+    description : true, master implemented (and cmd register)
+    datatype    : bool
+    default     : true
+    paramtype   : generic
+
+  SLAVE_ENABLE :
+    description : true, slave implemented
+    datatype    : bool
+    default     : true
+    paramtype   : generic
+
+  DEPTH_CMD :
+    description : Depth of the command FIFO (0 = no FIFO)
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+  DEPTH_TX :
+    description : Depth of the TX FIFO (0 = no FIFO)
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+  DEPTH_RX :
+    description : Depth of the RX FIFO (0 = no FIFO)
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-communication-i2c
+  version : asylum-communication-I2C-1.0.0
+ #version : 3e2fc01dedc4231c7ae2e13ec4e587a9178ae3e9
+#<PROVIDER_END>

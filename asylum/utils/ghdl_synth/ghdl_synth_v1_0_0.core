@@ -1,0 +1,57 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : GHDL synthesis check Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : ghdl_synth.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: ghdl_synth.sh / ghdl_synth.mk (pre_run hook of the
+#              lint_ghdl_synth_* targets), without any dependency : usable by
+#              the cores that asylum:utils:generators depends on (fifo, ram,
+#              utils:pkg) without a dependency cycle.
+#-----------------------------------------------------------------------------
+# Copyright (c) 2026
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2026-10-30  1.0.0    mrosiere Created, from the files_ghdl fileset of
+#                               asylum:utils:generators 2.8.0
+#-----------------------------------------------------------------------------
+
+name       : asylum:utils:ghdl_synth:1.0.0
+description: ghdl --synth check of the lint_ghdl_synth_* targets
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  files_ghdl:
+  #---------------------------------------
+    files:
+      - tools/ghdl/ghdl_synth.sh : {file_type : user, copyto : ghdl_synth.sh}
+      - tools/ghdl/ghdl_synth.mk : {file_type : user, copyto : ghdl_synth.mk}
+    file_type : user
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default:
+  #---------------------------------------
+    description     : Default Target
+    filesets        :
+      - "tool_ghdl?(files_ghdl)"
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-utils-generators
+  version : asylum-utils-ghdl_synth-1.0.0
+ #version : f0f785b73d523947a510e87b34b92bf940ea3bdc
+#<PROVIDER_END>

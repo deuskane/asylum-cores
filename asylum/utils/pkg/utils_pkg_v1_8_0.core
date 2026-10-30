@@ -96,7 +96,10 @@ filesets:
       - sim/tb_ft_tmr.vhd
       - sim/tb_ft_ecc4.vhd
       - sim/tb_ft_ecc32.vhd
+      - sim/tb_ft_dff_inj_pkg.vhd
+      - sim/tb_ft_enc_inj.vhd
       - sim/tb_ft_dff.vhd
+      - sim/tb_ft_dff_cfg.vhd
       - sim/tb_logic_pkg.vhd
     file_type : vhdlSource-2008
     depend       :
@@ -184,7 +187,7 @@ targets:
   #---------------------------------------
     << : *sim
     description     : Unit test for ft_dff (all algorithms, reset, self refresh)
-    toplevel        : tb_ft_dff
+    toplevel        : tb_ft_dff_cfg
 
   #---------------------------------------
   sim_logic_pkg:
@@ -272,5 +275,5 @@ provider  :
   user    : deuskane
   repo    : asylum-utils-pkg
   version : asylum-utils-pkg-1.8.0
- #version : 4b052e3f4abfba8bcad6f1c6bf7b8255b46d4324
+ #version : 097c8e478ca8af985b6c8c819152fb039994a7b1
 #<PROVIDER_END>
