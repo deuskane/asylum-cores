@@ -62,6 +62,17 @@ filesets:
     depend       :
       - bitvis:verification:uvvm
 
+  #---------------------------------------
+  syn:
+  #---------------------------------------
+    files        :
+      - syn/techmap_wrapper.vhd
+    file_type    : vhdlSource
+    logical_name : asylum
+    # ghdl_synth.sh / ghdl_synth.mk (pre_run hook of lint_ghdl_synth_*)
+    depend       :
+      - asylum:utils:ghdl_synth
+
 #=========================================
 targets:
 #=========================================
@@ -88,6 +99,63 @@ targets:
         analyze_options : ["-fsynopsys"]
 
   #---------------------------------------
+  # Lint : -Wall analysis and elaboration (empty simulation)
+  #---------------------------------------
+  lint_ghdl : &lint_ghdl
+    << : *default
+    description     : Lint with GHDL (-Wall analysis and elaboration of techmap_wrapper)
+    toplevel        : asylum.techmap_wrapper
+    filesets_append : [syn]
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall"]
+
+  #---------------------------------------
+  # Synthesis check : -Wall analysis, ghdl --synth -Wall and elaboration
+  # (no simulation) of techmap_wrapper with the generics of the target.
+  # The pre_run hook (ghdl_synth.sh of asylum:utils:ghdl_synth) adds
+  # ghdl_synth.mk to the edalize Makefile.
+  # FuseSoC merges tools in depth : analyze_options comes from lint_ghdl.
+  #---------------------------------------
+  lint_ghdl_synth_no_cgate : &lint_ghdl_synth
+    << : *lint_ghdl
+    description     : Synthesis check of techmap_wrapper, without cgate
+    parameters      :
+      - WITH_CGATE=false
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [ghdl_synth]
+
+  #---------------------------------------
+  lint_ghdl_synth_no_cgate_inverted :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of techmap_wrapper, without cgate, I/O buffer generics at 1
+    parameters      :
+      - WITH_CGATE=false
+      - INPUT_VALUE_DISABLED=1
+      - INVERT_D_I=1
+      - INVERT_D_O=1
+      - INVERT_OE_I=1
+      - INVERT_IE_I=1
+
+  #---------------------------------------
+  # cgate latches its clock enable by design : every cell, ghdl --synth
+  # with --latches (GHDL_SYNTH_OPTIONS added by ghdl_synth_latches)
+  #---------------------------------------
+  lint_ghdl_synth_cgate_latch :
+    << : *lint_ghdl
+    description     : Synthesis check of techmap_wrapper, every cell, latches allowed (cgate)
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [ghdl_synth, ghdl_synth_latches]
+
+  #---------------------------------------
   sim_techmap:
   #---------------------------------------
     << : *default
@@ -99,6 +167,65 @@ targets:
       ghdl :
         analyze_options : ["-Wall","-frelaxed"]
 
+#=========================================
+scripts:
+#=========================================
+
+  #---------------------------------------
+  # pre_run hook of lint_ghdl_synth_* (cwd = work_root)
+  #---------------------------------------
+  ghdl_synth :
+    cmd : [bash, ghdl_synth.sh]
+
+  #---------------------------------------
+  # pre_run hook of lint_ghdl_synth_cgate_latch : ghdl --synth --latches
+  #---------------------------------------
+  ghdl_synth_latches :
+    cmd : [sh, -c, "echo GHDL_SYNTH_OPTIONS=--latches >> Makefile"]
+
+#=========================================
+parameters :
+#=========================================
+
+  #---------------------------------------
+  # Generics of techmap_wrapper (lint_ghdl_synth_*)
+  #---------------------------------------
+  WITH_CGATE :
+    description : true, cgate instantiated (it latches its clock enable)
+    datatype    : bool
+    default     : true
+    paramtype   : generic
+
+  INPUT_VALUE_DISABLED :
+    description : I/O buffers, input value when disabled (0 / 1)
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+  INVERT_D_I :
+    description : I/O buffers, invert d_i (0 / 1)
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+  INVERT_D_O :
+    description : I/O buffers, invert d_o (0 / 1)
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+  INVERT_OE_I :
+    description : I/O buffers, invert oe_i (0 / 1)
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+  INVERT_IE_I :
+    description : I/O buffers, invert ie_i (0 / 1)
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
 provider  :
@@ -106,5 +233,5 @@ provider  :
   user    : deuskane
   repo    : asylum-target-techmap
   version : asylum-target-generic-1.1.5
- #version : c4bc304f4c051788898907cfebdeb9e52e6626e2
+ #version : 5fcb7f5b6cc504d5ccaecaebcaaeae6c864c24dc
 #<PROVIDER_END>
