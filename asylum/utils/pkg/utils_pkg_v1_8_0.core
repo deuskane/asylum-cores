@@ -115,6 +115,20 @@ filesets:
     file_type : vhdlSource-2008
     logical_name : asylum
 
+  #---------------------------------------
+  # Lint / synthesis check : wrapper, and ghdl_synth.sh / ghdl_synth.mk
+  # (pre_run hook of lint_ghdl_synth_*) of asylum:utils:ghdl_synth, a core
+  # without dependency (utils_pkg cannot depend on generators : cycle
+  # generators -> fifo -> ram -> pkg)
+  #---------------------------------------
+  syn_ghdl:
+    files        :
+      - syn/ft_wrapper.vhd
+    file_type    : vhdlSource-2008
+    logical_name : asylum
+    depend       :
+      - asylum:utils:ghdl_synth
+
 #=========================================
 targets:
 #=========================================
@@ -126,6 +140,69 @@ targets:
     filesets    :
       - hdl
       - pkg_ieee_dummy
+
+  #---------------------------------------
+  # Lint : -Wall analysis and elaboration (empty simulation)
+  #---------------------------------------
+  lint_ghdl : &lint_ghdl
+    << : *default
+    description     : Lint with GHDL (-Wall analysis and elaboration of ft_wrapper)
+    toplevel        : asylum.ft_wrapper
+    filesets_append : [syn_ghdl]
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall"]
+
+  #---------------------------------------
+  # Synthesis check : -Wall analysis, ghdl --synth -Wall and elaboration
+  # (no simulation) of ft_wrapper with the generics of the target.
+  # The pre_run hook (ghdl_synth.sh of asylum:utils:ghdl_synth) adds
+  # ghdl_synth.mk to the edalize Makefile.
+  # FuseSoC merges tools in depth : analyze_options comes from lint_ghdl.
+  #---------------------------------------
+  lint_ghdl_synth_default : &lint_ghdl_synth
+    << : *lint_ghdl
+    description     : Synthesis check of ft_wrapper, USE_NONE, 32 bits (default generics)
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [ghdl_synth]
+
+  #---------------------------------------
+  lint_ghdl_synth_parity_odd :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of ft_wrapper, USE_PARITY_ODD
+    parameters      :
+      - FT_ALGO=USE_PARITY_ODD
+
+  #---------------------------------------
+  lint_ghdl_synth_tmr :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of ft_wrapper, USE_TMR
+    parameters      :
+      - FT_ALGO=USE_TMR
+
+  #---------------------------------------
+  lint_ghdl_synth_ecc :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of ft_wrapper, USE_ECC
+    parameters      :
+      - FT_ALGO=USE_ECC
+
+  #---------------------------------------
+  lint_ghdl_synth_ecc_self_refresh :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of ft_wrapper, USE_ECC with SELF_REFRESH, 4 bits
+    parameters      :
+      - FT_ALGO=USE_ECC
+      - SELF_REFRESH=true
+      - WIDTH=4
 
   #---------------------------------------
   sim: &sim
@@ -248,6 +325,16 @@ targets:
       - FT_ALGO=USE_ECC
 
 #=========================================
+scripts:
+#=========================================
+
+  #---------------------------------------
+  # pre_run hook of lint_ghdl_synth_* (cwd = work_root)
+  #---------------------------------------
+  ghdl_synth :
+    cmd : [bash, ghdl_synth.sh]
+
+#=========================================
 parameters :
 #=========================================
 
@@ -268,6 +355,7 @@ parameters :
     datatype    : bool
     default     : false
     paramtype   : generic
+
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
 provider  :
@@ -275,5 +363,5 @@ provider  :
   user    : deuskane
   repo    : asylum-utils-pkg
   version : asylum-utils-pkg-1.8.0
- #version : 097c8e478ca8af985b6c8c819152fb039994a7b1
+ #version : e2d437791267a1a82404a6d19ae7b700b815d25b
 #<PROVIDER_END>
