@@ -1,0 +1,383 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : SPI Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : SPI.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2025
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2025-06-13  1.0.0    mrosiere First Release
+# 2025-06-21  1.0.1    mrosiere Dump FIFO activity in file
+# 2025-06-25  1.1.0    mrosiere Add STOP special case
+# 2025-07-09  1.2.0    mrosiere Configure FIFO Depth
+# 2025-09-05  1.2.1    mrosiere Add Package
+# 2025-11-22  1.2.2    mrosiere Use sbi instead pbi
+# 2026-01-17  1.2.3    mrosiere Move loopback from sbi_SPI to spi_master
+# 2026-06-06  1.2.4    mrosiere Add Name
+# 2026-08-02  1.2.5    mrosiere Testbench : use UVVM sbi, dut is sbi_spi instead spi_master
+# 2026-08-17  2.0.0    mrosiere Add multiple data
+# 2026-10-05  2.0.1    mrosiere Update sim_basic
+# 2026-10-27  2.1.0    mrosiere Update after review
+# 2026-11-16  2.2.0    mrosiere spi_enable = 0 drives CS# / SCLK and flushes the FIFOs,
+#                               RX_LATE_SAMPLE (input registers, late RX sampling)
+#-----------------------------------------------------------------------------
+
+name        : asylum:communication:SPI:2.2.0
+description : SPI Module
+
+#=========================================
+generate:
+#=========================================
+
+  #---------------------------------------
+  gen_csr:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : hdl/csr/SPI.hjson
+      name         : SPI
+      copy         : hdl/csr
+      logical_name : asylum
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  hdl:
+  #---------------------------------------
+    files        :
+      - hdl/spi_pkg.vhd
+      - hdl/spi_master.vhd
+      - hdl/sbi_SPI.vhd
+    file_type    : vhdlSource
+    logical_name : asylum
+    depend       :
+      - ">=asylum:utils:generators:2.8.0"
+      - asylum:utils:pkg
+
+  #---------------------------------------
+  syn:
+  #---------------------------------------
+    files        :
+      - syn/sbi_SPI_wrapper.vhd
+    file_type    : vhdlSource
+    logical_name : asylum
+    # ghdl_synth.sh / ghdl_synth.mk (pre_run hook of lint_ghdl_synth_*)
+    depend       :
+      - asylum:utils:pkg
+      - asylum:utils:ghdl_synth
+
+  #---------------------------------------
+  sim_basic:
+  #---------------------------------------
+    files:
+      - sim/basic/tb_SPI.vhd
+#    logical_name : work
+    file_type : vhdlSource-2008
+    depend       :
+      - bitvis:verification:uvvm
+
+  #---------------------------------------
+  models:
+  #---------------------------------------
+    files:
+      - sim/basic/tb_SPI_pkg.vhd
+      - sim/models/tb_SPI.vhd
+      - sim/models/mem/memory_1KB.mem    : {file_type : user, copyto : memory.mem   }
+      - sim/models/mem/memoryOTP.mem     : {file_type : user, copyto : memoryOTP.mem}
+      - sim/models/mem/none              : {file_type : user, copyto : none         }
+#    logical_name : work
+    file_type    : vhdlSource-2008
+    depend       :
+      - asylum:target:techmap
+      - bitvis:verification:uvvm 
+      - fmf:memory:flash_nor
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target
+    filesets        :
+      - hdl
+    toplevel        : asylum.sbi_SPI
+    default_tool    : ghdl
+    generate        :
+      - gen_csr
+
+  #---------------------------------------
+  # Lint : -Wall analysis and elaboration (empty simulation)
+  #---------------------------------------
+  lint_ghdl : &lint_ghdl
+    << : *default
+    description     : Lint with GHDL (-Wall analysis and elaboration of sbi_SPI_wrapper)
+    toplevel        : asylum.sbi_SPI_wrapper
+    filesets_append : [syn]
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall"]
+
+  #---------------------------------------
+  # Synthesis check : -Wall analysis, ghdl --synth -Wall and elaboration
+  # (no simulation) of sbi_SPI_wrapper with the generics of the target.
+  # The pre_run hook (ghdl_synth.sh of asylum:utils:ghdl_synth) adds
+  # ghdl_synth.mk to the edalize Makefile.
+  # FuseSoC merges tools in depth : analyze_options comes from lint_ghdl.
+  #---------------------------------------
+  lint_ghdl_synth_default : &lint_ghdl_synth
+    << : *lint_ghdl
+    description     : Synthesis check of sbi_SPI_wrapper, default generics (PicoSoC)
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [ghdl_synth]
+
+  #---------------------------------------
+  lint_ghdl_synth_sim_basic :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi_SPI_wrapper, generics of sim_basic
+    parameters      :
+      - PRESCALER_RATIO=00001111
+      - DEPTH_CMD=4
+      - DEPTH_TX=8
+      - DEPTH_RX=8
+      - HANDLE_HOLD_WP=false
+
+  #---------------------------------------
+  lint_ghdl_synth_sim_models :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi_SPI_wrapper, generics of the model testbenches
+    parameters      :
+      - PRESCALER_RATIO=00001111
+      - DEPTH_CMD=4
+      - DEPTH_TX=4
+      - DEPTH_RX=4
+
+  #---------------------------------------
+  lint_ghdl_synth_fixed_prescaler :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi_SPI_wrapper, fixed prescaler
+    parameters      :
+      - USER_DEFINE_PRESCALER=false
+      - PRESCALER_RATIO=00001111
+
+  #---------------------------------------
+  lint_ghdl_synth_rx_late_sample :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi_SPI_wrapper, late RX sampling (input registers)
+    parameters      :
+      - RX_LATE_SAMPLE=true
+
+  #---------------------------------------
+  default_sim: &default_sim
+  #---------------------------------------
+    << : *default
+    description     : Default Target for simulation
+    filesets_append :
+      - models
+    toplevel        : tb
+    parameters      :
+      - MODEL=m25p40
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options :
+          - "$(GHDL_ANALYZE_OPTION)"
+          - "-frelaxed"
+          - "--no-vital-checks"
+          - "-Wno-shared"
+          - "-Wno-hide"
+          - "-Wno-pure"
+        run_options     : 
+          - "$(GHDL_RUN_OPTION)"
+          - "--ieee-asserts=disable"
+
+  #---------------------------------------
+  sim_basic: &sim_basic
+  #---------------------------------------
+    << : *default
+    description     : Simulation of sbi_SPI with a SPI slave model (UVVM)
+    filesets_append :
+      - sim_basic
+    toplevel        : tb_SPI
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options :
+          - "$(GHDL_ANALYZE_OPTION)"
+          - "-Wall"
+          - "-frelaxed"
+        run_options     :
+          - "$(GHDL_RUN_OPTION)"
+          - "--ieee-asserts=disable"
+
+  #---------------------------------------
+  sim_basic_late:
+  #---------------------------------------
+    << : *sim_basic
+    description     : Simulation of sbi_SPI with RX_LATE_SAMPLE and a slave output valid time longer than half a SCLK period (UVVM)
+    parameters      :
+      - RX_LATE_SAMPLE=true
+      - SLAVE_TV_NS=25
+
+  #---------------------------------------
+  sim_at25df161:
+  #---------------------------------------
+    << : *default_sim
+    description     : Simulation of at25df161
+    parameters      :
+      - MODEL=at25df161
+
+  #---------------------------------------
+  sim_cy15b104qs:
+  #---------------------------------------
+    << : *default_sim
+    description     : Simulation of cy15b104qs
+    parameters      :
+      - MODEL=cy15b104qs
+
+  #---------------------------------------
+  sim_cy15v104qs:
+  #---------------------------------------
+    << : *default_sim
+    description     : Simulation of cy15v104qs
+    parameters      :
+      - MODEL=cy15v104qs      
+
+  #---------------------------------------
+  sim_m25p40:
+  #---------------------------------------
+    << : *default_sim
+    description     : Simulation of m25p40
+    parameters      :
+      - MODEL=m25p40
+
+  #---------------------------------------
+  sim_m45pe80:
+  #---------------------------------------
+    << : *default_sim
+    description     : Simulation of m45pe80
+    parameters      :
+      - MODEL=m45pe80
+
+  #---------------------------------------
+  sim_s25fl064p:
+  #---------------------------------------
+    << : *default_sim
+    description     : Simulation of s25fl064p
+    parameters      :
+      - MODEL=s25fl064p
+
+  #---------------------------------------
+  sim_s25fl512s:
+  #---------------------------------------
+    << : *default_sim
+    description     : Simulation of s25fl512s
+    parameters      :
+      - MODEL=s25fl512s
+
+  #---------------------------------------
+  sim_s35hl256t:
+  #---------------------------------------
+    << : *default_sim
+    description     : Simulation of s35hl256t
+    parameters      :
+      - MODEL=s35hl256t
+
+#=========================================
+scripts:
+#=========================================
+
+  #---------------------------------------
+  # pre_run hook of lint_ghdl_synth_* (cwd = work_root)
+  #---------------------------------------
+  ghdl_synth :
+    cmd : [bash, ghdl_synth.sh]
+
+#=========================================
+parameters :
+#=========================================
+
+  MODEL :
+    description : SPI Memory Model
+    datatype    : str
+    default     : m25p40
+    paramtype   : generic
+
+  #---------------------------------------
+  # Generics of sbi_SPI_wrapper (lint_ghdl_synth_*)
+  #---------------------------------------
+  USER_DEFINE_PRESCALER :
+    description : true, prescaler register writable by software ; false, ratio fixed to PRESCALER_RATIO
+    datatype    : bool
+    default     : true
+    paramtype   : generic
+
+  PRESCALER_RATIO :
+    description : Reset / fixed value of the prescaler ratio (8-bit string)
+    datatype    : str
+    default     : "00000000"
+    paramtype   : generic
+
+  DEPTH_CMD :
+    description : Depth of the command FIFO (0 = no FIFO)
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+  DEPTH_TX :
+    description : Depth of the TX FIFO (0 = no FIFO)
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+  DEPTH_RX :
+    description : Depth of the RX FIFO (0 = no FIFO)
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+  HANDLE_HOLD_WP :
+    description : true, io(2) (WP#) and io(3) (HOLD#) driven by the SPI master
+    datatype    : bool
+    default     : true
+    paramtype   : generic
+
+  RX_LATE_SAMPLE :
+    description : true, io_i registered and sampled one SCLK period after its sample edge (sbi_SPI_wrapper and tb_SPI basic)
+    datatype    : bool
+    default     : false
+    paramtype   : generic
+
+  SLAVE_TV_NS :
+    description : Output valid time of the SPI slave model in ns (tb_SPI basic)
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-communication-spi
+  version : asylum-communication-SPI-2.2.0
+ #version : ab4e7daf371e9e45556000f78cbee0d30e34b7bb
+#<PROVIDER_END>

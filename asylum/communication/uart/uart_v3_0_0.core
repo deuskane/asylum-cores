@@ -1,0 +1,307 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : UART
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : uart.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2025
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2025-01-21  1.0.0    mrosiere Created
+# 2025-02-05  1.1.0    mrosiere UART RX + check with loopback
+# 2025-03-09  1.2.0    mrosiere use unconstrained pbi
+# 2025-03-12  1.3.0    mrosiere Add CSR
+# 2025-03-22  1.4.0    mrosiere Use pbi instead reg interface for csr
+# 2025-04-02  1.5.0    mrosiere Remove pbi_target_wrapper
+# 2025-05-14  1.6.0    mrosiere Add parameter USER_DEFINE_BAUD_TICK and default value
+# 2025-06-21  1.6.1    mrosiere Dump FIFO activity in file
+# 2025-07-09  1.7.0    mrosiere Configure FIFO Depth
+# 2025-07-27  1.8.0    mrosiere Add Interruption
+# 2025-08-02  1.9.0    mrosiere Add CTS/RTS ports
+# 2025-09-05  1.9.1    mrosiere Add Package
+# 2025-11-10  1.10.0   mrosiere Update counter with shift register
+# 2025-11-22  1.10.1   mrosiere Use sbi instead pbi
+# 2026-05-30  1.10.2   mrosiere Generate 2 dumps file : one raw, one debug
+# 2026-06-06  1.10.3   mrosiere Add Name
+# 2026-06-10  1.10.4   mrosiere Add state in rx to support start glitch
+# 2026-09-21  1.10.5   mrosiere Move cts_b sync2dff from to to sbi_uart
+# 2026-10-05  1.11.0   mrosiere Fix RX data bit 0 lost with parity, restore RX
+#                               parity check (debug_o.uart_rx.parity_error),
+#                               default toplevel sbi_UART, depend on generators,
+#                               parity tests in tb_uart
+# 2026-11-15  2.0.0    mrosiere asylum:system:GIC >= 2.0.0 : isr records the masked
+#                               sources too (polling), imr only masks it_o
+# 2026-11-16  3.0.0    mrosiere isr / imr source 0 : TX FIFO empty (was TX FIFO
+#                               not empty), isr read wait state (polling,
+#                               generators >= 2.10.0), new sources : RX
+#                               overrun (4), framing error (5), parity
+#                               error (6), break (7), RTS# at DEPTH_RX-2,
+#                               generic RX_PARITY_ERROR (byte with a parity
+#                               error : "keep", "drop", or "halt" : stored,
+#                               then RX halted until isr bit 6 is cleared),
+#                               targets sim_rx_parity_drop,
+#                               sim_rx_parity_halt,
+#                               lint_ghdl_synth_parity_drop and
+#                               lint_ghdl_synth_parity_halt
+#-----------------------------------------------------------------------------
+
+name        : asylum:communication:uart:3.0.0
+description : UART TX and RX
+
+#=========================================
+generate:
+#=========================================
+
+  #---------------------------------------
+  gen_csr:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : hdl/csr/UART.hjson
+      name         : UART
+      copy         : hdl/csr
+      logical_name : asylum
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  rtl:
+  #---------------------------------------
+    files:
+      - hdl/uart_pkg.vhd
+      - hdl/uart_baud_rate_gen.vhd
+      - hdl/uart_rx_axis.vhd
+      - hdl/uart_tx_axis.vhd
+      - hdl/sbi_uart.vhd
+    file_type    : vhdlSource
+    logical_name : asylum
+    depend :
+      - asylum:utils:pkg
+      - asylum:component:fifo
+      - ">=asylum:system:GIC:2.0.0"
+      - asylum:target:techmap
+      - ">=asylum:utils:generators:2.10.0"
+
+  #---------------------------------------
+  sim_basic:
+  #---------------------------------------
+    files        :
+      - sim/tb_uart.vhd
+    file_type    : vhdlSource-2008
+    #logical_name : asylum
+    depend       :
+      - bitvis:verification:uvvm      
+
+  #---------------------------------------
+  syn:
+  #---------------------------------------
+    files        :
+      - syn/sbi_UART_wrapper.vhd
+    file_type    : vhdlSource-2008
+    logical_name : asylum
+    # ghdl_synth.sh / ghdl_synth.mk (pre_run hook of lint_ghdl_synth_*)
+    depend       :
+      - asylum:utils:ghdl_synth
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target
+    filesets        :
+      - rtl
+    toplevel        : sbi_UART
+    generate        :
+      - gen_csr
+
+  #---------------------------------------
+  # Lint : -Wall analysis and elaboration (empty simulation)
+  #---------------------------------------
+  lint_ghdl : &lint_ghdl
+    << : *default
+    description     : Lint with GHDL (-Wall analysis and elaboration of sbi_UART_wrapper)
+    toplevel        : asylum.sbi_UART_wrapper
+    filesets_append : [syn]
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall"]
+
+  #---------------------------------------
+  # Synthesis check : -Wall analysis, ghdl --synth -Wall and elaboration
+  # (no simulation) of sbi_UART_wrapper with the generics of the target.
+  # The pre_run hook (ghdl_synth.sh of asylum:utils:ghdl_synth) adds
+  # ghdl_synth.mk to the edalize Makefile.
+  # FuseSoC merges tools in depth : analyze_options comes from lint_ghdl.
+  #---------------------------------------
+  lint_ghdl_synth_default : &lint_ghdl_synth
+    << : *lint_ghdl
+    description     : Synthesis check of sbi_UART_wrapper, default generics (PicoSoC)
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [ghdl_synth]
+
+  #---------------------------------------
+  lint_ghdl_synth_fifo16 :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi_UART_wrapper, FIFO depths 16 (tb_uart)
+    parameters      :
+      - DEPTH_TX=16
+      - DEPTH_RX=16
+
+  #---------------------------------------
+  lint_ghdl_synth_tx_only :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi_UART_wrapper, TX only
+    parameters      :
+      - UART_RX_ENABLE=false
+      - DEPTH_TX=4
+
+  #---------------------------------------
+  lint_ghdl_synth_rx_only :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi_UART_wrapper, RX only
+    parameters      :
+      - UART_TX_ENABLE=false
+      - DEPTH_RX=4
+
+  #---------------------------------------
+  lint_ghdl_synth_fixed_baud :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi_UART_wrapper, fixed baud tick
+    parameters      :
+      - USER_DEFINE_BAUD_TICK=false
+
+  #---------------------------------------
+  lint_ghdl_synth_parity_drop :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi_UART_wrapper, bytes with a parity error dropped
+    parameters      :
+      - RX_PARITY_ERROR=drop
+
+  #---------------------------------------
+  lint_ghdl_synth_parity_halt :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi_UART_wrapper, RX halted after a byte with a parity error
+    parameters      :
+      - RX_PARITY_ERROR=halt
+
+  #---------------------------------------
+  sim_basic: &sim_basic
+  #---------------------------------------
+    << : *default
+    description     : Simulation of basic unit tests
+    filesets_append :
+      - sim_basic
+    toplevel        : tb_uart
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+  #---------------------------------------
+  # Same scenario, bytes received with a parity error dropped
+  # (RX_PARITY_ERROR generic of tb_uart, set at run time)
+  #---------------------------------------
+  sim_rx_parity_drop:
+    << : *sim_basic
+    description     : Simulation of basic unit tests, bytes with a parity error dropped
+    parameters      :
+      - RX_PARITY_ERROR=drop
+
+  #---------------------------------------
+  # Same scenario, RX halted after a byte received with a parity error
+  # until isr bit 6 is cleared (RX_PARITY_ERROR generic of tb_uart, set at
+  # run time)
+  #---------------------------------------
+  sim_rx_parity_halt:
+    << : *sim_basic
+    description     : Simulation of basic unit tests, RX halted after a byte with a parity error
+    parameters      :
+      - RX_PARITY_ERROR=halt
+
+#=========================================
+scripts:
+#=========================================
+
+  #---------------------------------------
+  # pre_run hook of lint_ghdl_synth_* (cwd = work_root)
+  #---------------------------------------
+  ghdl_synth :
+    cmd : [bash, ghdl_synth.sh]
+
+#=========================================
+parameters :
+#=========================================
+
+  #---------------------------------------
+  # Generics of sbi_UART_wrapper (lint_ghdl_synth_*)
+  #---------------------------------------
+  UART_TX_ENABLE :
+    description : true, UART TX instantiated
+    datatype    : bool
+    default     : true
+    paramtype   : generic
+
+  UART_RX_ENABLE :
+    description : true, UART RX instantiated
+    datatype    : bool
+    default     : true
+    paramtype   : generic
+
+  USER_DEFINE_BAUD_TICK :
+    description : true, baud tick register writable by software ; false, fixed baud tick
+    datatype    : bool
+    default     : true
+    paramtype   : generic
+
+  DEPTH_TX :
+    description : Depth of the TX FIFO (0 = no FIFO)
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+  DEPTH_RX :
+    description : Depth of the RX FIFO (0 = no FIFO)
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+  #---------------------------------------
+  # Generic of sbi_UART_wrapper (lint_ghdl_synth_*) and tb_uart (sim_*)
+  #---------------------------------------
+  RX_PARITY_ERROR :
+    description : byte received with a parity error, keep (stored in the RX FIFO), drop, or halt (stored, then RX halted until isr bit 6 is cleared)
+    datatype    : str
+    default     : keep
+    paramtype   : generic
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-communication-uart
+  version : asylum-communication-uart-3.0.0
+ #version : 536647538c703fb3d2e13ed9d84d91e9eb97cd8f
+#<PROVIDER_END>

@@ -53,6 +53,16 @@ filesets:
     depend       :
       - bitvis:verification:uvvm   
 
+  #---------------------------------------
+  # Lint / synthesis check : asylum:utils:ghdl_synth, a core without
+  # dependency (fifo cannot depend on generators : cycle
+  # generators -> fifo -> ram -> pkg)
+  #---------------------------------------
+  syn:
+    # ghdl_synth.sh / ghdl_synth.mk (pre_run hook of lint_ghdl_synth_*)
+    depend       :
+      - asylum:utils:ghdl_synth
+
 #=========================================
 targets:
 #=========================================
@@ -65,16 +75,67 @@ targets:
       - hdl
 
   #---------------------------------------
-  lint_ghdl :
+  lint_ghdl : &lint_ghdl
   #---------------------------------------
     << : *default
     description     : Lint with GHDL (-Wall analysis and elaboration of fifo_sync)
     toplevel        : asylum.fifo_sync
+    filesets_append : [syn]
     default_tool    : ghdl
     tools :
       ghdl :
         analyze_options : ["-Wall","-Werror"]
-        
+
+  #---------------------------------------
+  # Synthesis check : -Wall analysis, ghdl --synth -Wall and elaboration
+  # (no simulation) of fifo_sync with the generics of the target.
+  # The pre_run hook (ghdl_synth.sh of asylum:utils:ghdl_synth) adds
+  # ghdl_synth.mk to the edalize Makefile.
+  # FuseSoC merges tools in depth : analyze_options comes from lint_ghdl.
+  #---------------------------------------
+  lint_ghdl_synth_default : &lint_ghdl_synth
+    << : *lint_ghdl
+    description     : Synthesis check of fifo_sync, default generics
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [ghdl_synth]
+
+  #---------------------------------------
+  lint_ghdl_synth_depth1_read_async :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of fifo_sync, DEPTH 1, asynchronous read
+    parameters      :
+      - DEPTH=1
+
+  #---------------------------------------
+  lint_ghdl_synth_depth1_read_sync :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of fifo_sync, DEPTH 1, synchronous read
+    parameters      :
+      - DEPTH=1
+      - SYNC_READ=true
+
+  #---------------------------------------
+  lint_ghdl_synth_depth8_read_async :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of fifo_sync, DEPTH 8, asynchronous read
+    parameters      :
+      - DEPTH=8
+
+  #---------------------------------------
+  lint_ghdl_synth_depth8_read_sync :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of fifo_sync, DEPTH 8, synchronous read
+    parameters      :
+      - DEPTH=8
+      - SYNC_READ=true
+
   #---------------------------------------
   sim_fifo_depth8_read_async:
   #---------------------------------------
@@ -145,6 +206,16 @@ targets:
         run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
 
 #=========================================
+scripts :
+#=========================================
+
+  #---------------------------------------
+  # pre_run hook of lint_ghdl_synth_* (cwd = work_root)
+  #---------------------------------------
+  ghdl_synth :
+    cmd : [bash, ghdl_synth.sh]
+
+#=========================================
 parameters :
 #=========================================
 
@@ -167,5 +238,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-fifo
   version : asylum-component-fifo-1.2.1
- #version : 57b28f5827a0adf6f0c155712d6bb403aeb009db
+ #version : 4f092fb99dc77f03cb3d473379f707992c78c3ca
 #<PROVIDER_END>

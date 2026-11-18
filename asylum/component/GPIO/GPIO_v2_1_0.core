@@ -1,0 +1,262 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : GPIO Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : GPIO.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2021-10-26  1.0.0    mrosiere Created
+# 2022-03-31  1.1.0    mrosiere Update source code
+# 2025-03-01  1.2.0    mrosiere Add CSR
+# 2025-03-08  1.3.0    mrosiere Use unconstraint pbi
+# 2025-03-22  1.4.0    mrosiere Use pbi instead reg interface for csr
+# 2025-04-02  1.5.0    mrosiere Remove pbi_target_wrapper
+# 2025-05-14  1.6.0    mrosiere Delete parameters DATA_OE_FORCE,
+#                               csr use DATA_OE_INIT
+# 2025-09-05  1.6.1    mrosiere Add Package
+# 2025-11-22  1.6.2    mrosiere Use sbi instead pbi
+# 2026-06-06  1.6.3    mrosiere Add Name
+# 2026-07-20  1.7.0    mrosiere Add Interruption
+#                               Use uvvm for testbench
+# 2026-10-05  1.7.1    mrosiere Fix default target toplevel (sbi_GPIO)
+# 2026-11-15  2.0.0    mrosiere asylum:system:GIC >= 2.0.0 : isr records the edges of the
+#                               masked lines too (polling), imr only masks it_o
+# 2026-11-16  2.1.0    mrosiere No edge interrupt on output lines (GPIO_irq),
+#                               HDL fileset VHDL-2008, doc of the data write
+#-----------------------------------------------------------------------------
+
+name        : asylum:component:GPIO:2.1.0
+description : GPIO Module
+
+#=========================================
+generate:
+#=========================================
+
+  #---------------------------------------
+  gen_csr:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : hdl/csr/GPIO.hjson
+      name         : GPIO
+      copy         : hdl/csr
+      logical_name : asylum
+
+  #---------------------------------------
+  gen_csr_irq:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : hdl/csr/GPIO_irq.hjson
+      name         : GPIO_irq
+      copy         : hdl/csr
+      logical_name : asylum
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  hdl:
+  #---------------------------------------
+    files        :
+      - hdl/gpio_pkg.vhd
+      - hdl/GPIO_core.vhd
+      - hdl/sbi_GPIO.vhd
+      - hdl/GPIO_irq_core.vhd
+      - hdl/sbi_GPIO_irq.vhd
+    file_type    : vhdlSource-2008
+    logical_name : asylum
+    depend       :
+      - ">=asylum:system:GIC:2.0.0"
+      - ">=asylum:utils:generators:2.8.0"
+      - asylum:utils:pkg
+      - asylum:target:techmap
+
+  #---------------------------------------
+  sim:
+  #---------------------------------------
+    files:
+      - hdl/legacy/GPIO_v1.vhd : {logical_name : asylum}
+      - sim/tb_GPIO_vs_v1.vhd
+      - sim/tb_GPIO.vhd
+      - sim/tb_GPIO_irq.vhd
+    file_type : vhdlSource-2008
+    depend       :
+      - bitvis:verification:uvvm      
+
+  #---------------------------------------
+  syn:
+  #---------------------------------------
+    files        :
+      - syn/sbi_GPIO_wrapper.vhd
+    file_type    : vhdlSource-2008
+    logical_name : asylum
+    # ghdl_synth.sh / ghdl_synth.mk (pre_run hook of lint_ghdl_synth_*)
+    depend       :
+      - asylum:utils:ghdl_synth
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target
+    filesets        :
+      - hdl
+    toplevel        : sbi_GPIO
+    default_tool    : ghdl
+    generate        :
+      - gen_csr
+      - gen_csr_irq
+
+  #---------------------------------------
+  # Lint : -Wall analysis and elaboration (empty simulation)
+  #---------------------------------------
+  lint_ghdl : &lint_ghdl
+    << : *default
+    description     : Lint with GHDL (-Wall analysis and elaboration of sbi_GPIO_wrapper)
+    toplevel        : asylum.sbi_GPIO_wrapper
+    filesets_append : [syn]
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall"]
+
+  #---------------------------------------
+  # Synthesis check : -Wall analysis, ghdl --synth -Wall and elaboration
+  # (no simulation) of sbi_GPIO_wrapper with the generics of the target.
+  # The pre_run hook (ghdl_synth.sh of asylum:utils:ghdl_synth) adds
+  # ghdl_synth.mk to the edalize Makefile.
+  # FuseSoC merges tools in depth : analyze_options comes from lint_ghdl.
+  #---------------------------------------
+  lint_ghdl_synth_default : &lint_ghdl_synth
+    << : *lint_ghdl
+    description     : Synthesis check of sbi_GPIO_wrapper, default generics (PicoSoC switches)
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [ghdl_synth]
+
+  #---------------------------------------
+  lint_ghdl_synth_led :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi_GPIO_wrapper, PicoSoC LEDs
+    parameters      :
+      - DATA_OE_INIT=11111111
+      - IRQ_POSEDGE=00000000
+      - IRQ_NEGEDGE=00000000
+
+  #---------------------------------------
+  lint_ghdl_synth_nb_io4 :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi_GPIO_wrapper, NB_IO 4 with the edges of tb_GPIO_irq
+    parameters      :
+      - NB_IO=4
+      - IRQ_POSEDGE=00001010
+      - IRQ_NEGEDGE=00001100
+
+  #---------------------------------------
+  sim_testcase_vs_v1:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of sb_GPIO against GPIO_v1
+    filesets_append :
+      - sim
+    toplevel        : tb_GPIO_vs_v1
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        run_options : ["--vcd=dut.vcd"]
+
+  #---------------------------------------
+  sim_testcase:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of sbi_GPIO with VIP
+    filesets_append :
+      - sim
+    toplevel        : tb_GPIO
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+  #---------------------------------------
+  sim_testcase_irq:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of sbi_GPIO_irq with VIP
+    filesets_append :
+      - sim
+    toplevel        : tb_GPIO_irq
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+#=========================================
+scripts:
+#=========================================
+
+  #---------------------------------------
+  # pre_run hook of lint_ghdl_synth_* (cwd = work_root)
+  #---------------------------------------
+  ghdl_synth :
+    cmd : [bash, ghdl_synth.sh]
+
+#=========================================
+parameters :
+#=========================================
+
+  #---------------------------------------
+  # Generics of sbi_GPIO_wrapper (lint_ghdl_synth_*)
+  #---------------------------------------
+  NB_IO :
+    description : Number of IOs
+    datatype    : int
+    default     : 8
+    paramtype   : generic
+
+  DATA_OE_INIT :
+    description : Reset value of the output enable register (8-bit string)
+    datatype    : str
+    default     : "00000000"
+    paramtype   : generic
+
+  IRQ_POSEDGE :
+    description : Interrupt on rising edge, one bit per IO (8-bit string)
+    datatype    : str
+    default     : "11111111"
+    paramtype   : generic
+
+  IRQ_NEGEDGE :
+    description : Interrupt on falling edge, one bit per IO (8-bit string)
+    datatype    : str
+    default     : "11111111"
+    paramtype   : generic
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-component-gpio
+  version : asylum-component-GPIO-2.1.0
+ #version : ef5526c127df9dfb6fcda93abe6c2e35d1475b62
+#<PROVIDER_END>

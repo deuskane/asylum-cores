@@ -1,0 +1,342 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : ICN Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : ICN.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2025
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2025-03-22  1.0.0    mrosiere Created
+# 2025-04-05  1.1.0    mrosiere Add Algo
+# 2025-05-08  1.2.0    mrosiere Change to into downto
+# 2025-09-05  1.2.1    mrosiere Add Package
+# 2025-11-22  1.2.2    mrosiere Use sbi instead pbi
+# 2026-01-18  1.2.3    mrosiere Use info record of sbi
+# 2026-05-22  1.3.0    mrosiere Add explicit default slave
+# 2026-06-02  1.3.1    mrosiere Fix multi driver
+# 2026-06-05  1.3.2    mrosiere Add default slave dedicated port option
+# 2026-08-16  1.3.3    mrosiere Fix default slave dedicated port
+#                               Add name in all instances
+# 2026-10-05  1.3.4    mrosiere Fix reset condition of sbi_pipe protocol check
+#                               Add sim_pipe target (sbi_pipe on all ports)
+# 2026-11-17  1.4.0    mrosiere sbi_icn_mux_mst releases the bus when the granted
+#                               master drops cs, one-hot overlap check, 0-bit
+#                               address width targets, arbitration and SoC
+#                               configuration tests (sim_soc, sim_one_hot)
+#-----------------------------------------------------------------------------
+
+name        : asylum:infrastructure:icn:1.4.0
+description : Interconnection
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  hdl:
+  #---------------------------------------
+    files        :
+      - hdl/icn_pkg.vhd
+      - hdl/sbi_default_slave.vhd
+      - hdl/sbi_pipe.vhd
+      - hdl/sbi_icn_mux_mst.vhd
+      - hdl/sbi_icn_mux_tgt.vhd
+      - hdl/sbi_icn.vhd
+      - hdl/sbi_wrapper_target.vhd
+    file_type    : vhdlSource-2008
+    logical_name : asylum
+    depend       :
+      - asylum:utils:pkg
+
+
+  #---------------------------------------
+  sim_basic:
+  #---------------------------------------
+    files        :
+      - sim/tb_sbi_icn_pkg.vhd
+      - sim/tb_sbi_icn_tc1_pkg.vhd
+      - sim/tb_sbi_icn_tc2_pkg.vhd
+      - sim/tb_sbi_icn_tc3_pkg.vhd
+      - sim/tb_sbi_icn_tc4_pkg.vhd
+      - sim/tb_sbi_icn_tc5_pkg.vhd
+      - sim/tb_sbi_icn_suite_pkg.vhd
+      - sim/tb_sbi_icn.vhd
+    file_type    : vhdlSource-2008
+    #logical_name : asylum
+    depend       :
+      - bitvis:verification:uvvm
+
+
+  #---------------------------------------
+  syn:
+  #---------------------------------------
+    files        :
+      - syn/sbi_icn_wrapper.vhd
+    file_type    : vhdlSource-2008
+    logical_name : asylum
+    # ghdl_synth.sh / ghdl_synth.mk (pre_run hook of lint_ghdl_synth_*)
+    depend       :
+      - asylum:utils:ghdl_synth
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target
+    filesets        :
+      - hdl
+
+  #---------------------------------------
+  # Lint : -Wall analysis and elaboration (empty simulation)
+  #---------------------------------------
+  lint_ghdl : &lint_ghdl
+    << : *default
+    description     : Lint with GHDL (-Wall analysis and elaboration of sbi_icn_wrapper)
+    toplevel        : asylum.sbi_icn_wrapper
+    filesets_append : [syn]
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall"]
+
+  #---------------------------------------
+  # Synthesis check : -Wall analysis, ghdl --synth -Wall and elaboration
+  # (no simulation) of sbi_icn_wrapper with the generics of the target.
+  # The pre_run hook (ghdl_synth.sh of asylum:utils:ghdl_synth) adds
+  # ghdl_synth.mk to the edalize Makefile.
+  # FuseSoC merges tools in depth : analyze_options comes from lint_ghdl.
+  #---------------------------------------
+  lint_ghdl_synth_default : &lint_ghdl_synth
+    << : *lint_ghdl
+    description     : Synthesis check of sbi_icn_wrapper, PicoSoC ICN2 (default generics)
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [ghdl_synth]
+
+  #---------------------------------------
+  lint_ghdl_synth_picosoc_icn1 :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi_icn_wrapper, PicoSoC ICN1
+    parameters      :
+      - ADDR_MAP=picosoc_icn1
+      - INTERNAL_DEFAULT_SLAVE=false
+
+  #---------------------------------------
+  lint_ghdl_synth_picosoc_rr :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi_icn_wrapper, PicoSoC ICN2 with 2 masters roundrobin
+    parameters      :
+      - NB_MASTER=2
+      - MASTER_SEL=roundrobin
+
+  #---------------------------------------
+  lint_ghdl_synth_tb :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi_icn_wrapper, address map of tb_sbi_icn
+    parameters      :
+      - NB_MASTER=2
+      - MASTER_SEL=roundrobin
+      - TARGET_SEL=mux
+      - ADDR_MAP=tb
+
+  #---------------------------------------
+  lint_ghdl_synth_tb_pipe :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi_icn_wrapper, address map of tb_sbi_icn with sbi_pipe
+    parameters      :
+      - NB_MASTER=2
+      - MASTER_SEL=roundrobin
+      - TARGET_SEL=mux
+      - ADDR_MAP=tb
+      - PIPEIN=true
+      - PIPEOUT=true
+
+  #---------------------------------------
+  lint_ghdl_synth_one_hot :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi_icn_wrapper, 3 masters, 4 targets one_hot
+    parameters      :
+      - NB_MASTER=3
+      - ADDR_MAP=one_hot
+
+  #---------------------------------------
+  lint_ghdl_width0 :
+  #---------------------------------------
+    << : *lint_ghdl
+    description     : Lint with GHDL of sbi_icn_wrapper, single-register targets (0-bit address width), configuration checks run
+    parameters      :
+      - ADDR_MAP=width0
+
+  #---------------------------------------
+  lint_ghdl_synth_width0 :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi_icn_wrapper, single-register targets (0-bit address width)
+    parameters      :
+      - ADDR_MAP=width0
+
+  #---------------------------------------
+  sim_basic:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of basic unit tests
+    filesets_append :
+      - sim_basic
+    toplevel        : tb_sbi_icn
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable","--assert-level=error"]
+
+  #---------------------------------------
+  sim_pipe:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of basic unit tests with sbi_pipe on all master and target ports
+    filesets_append :
+      - sim_basic
+    toplevel        : tb_sbi_icn
+    parameters      :
+      - PIPEIN=true
+      - PIPEOUT=true
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable","--assert-level=error"]
+
+  #---------------------------------------
+  sim_soc:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of basic unit tests with the SoC configuration (fix, or, external default slave, wait states)
+    filesets_append :
+      - sim_basic
+    toplevel        : tb_sbi_icn
+    parameters      :
+      - MASTER_SEL=fix
+      - TARGET_SEL=or
+      - INTERNAL_DEFAULT_SLAVE=false
+      - WAIT_STATES=2
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable","--assert-level=error"]
+
+  #---------------------------------------
+  sim_one_hot:
+  #---------------------------------------
+    << : *default
+    description     : Simulation of basic unit tests with one-hot address decoding (roundrobin, or, wait states)
+    filesets_append :
+      - sim_basic
+    toplevel        : tb_sbi_icn
+    parameters      :
+      - TARGET_ADDR_ENCODING=one_hot
+      - TARGET_SEL=or
+      - WAIT_STATES=1
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable","--assert-level=error"]
+
+#=========================================
+scripts:
+#=========================================
+
+  #---------------------------------------
+  # pre_run hook of lint_ghdl_synth_* (cwd = work_root)
+  #---------------------------------------
+  ghdl_synth :
+    cmd : [bash, ghdl_synth.sh]
+
+#=========================================
+parameters :
+#=========================================
+
+  PIPEIN :
+    description : Testbench only, insert an sbi_pipe stage on every master port
+    datatype    : bool
+    default     : false
+    paramtype   : generic
+
+  PIPEOUT :
+    description : Testbench only, insert an sbi_pipe stage on every target port
+    datatype    : bool
+    default     : false
+    paramtype   : generic
+
+  #---------------------------------------
+  # Generics of sbi_icn_wrapper (lint_ghdl_synth_*) and of the testbench (sim_*)
+  #---------------------------------------
+  NB_MASTER :
+    description : Number of masters
+    datatype    : int
+    default     : 1
+    paramtype   : generic
+
+  MASTER_SEL :
+    description : Master arbitration (fix / roundrobin), wrapper and testbench
+    datatype    : str
+    default     : fix
+    paramtype   : generic
+
+  TARGET_SEL :
+    description : Target read data selection (or / mux), wrapper and testbench
+    datatype    : str
+    default     : or
+    paramtype   : generic
+
+  ADDR_MAP :
+    description : Address map of sbi_icn_wrapper (picosoc_icn2 / picosoc_icn1 / tb / one_hot / width0)
+    datatype    : str
+    default     : picosoc_icn2
+    paramtype   : generic
+
+  INTERNAL_DEFAULT_SLAVE :
+    description : true, internal default slave (testbench with false, the default slave memory model is on the last target port)
+    datatype    : bool
+    default     : true
+    paramtype   : generic
+
+  TARGET_ADDR_ENCODING :
+    description : Testbench only, address decoding of the interconnect ("binary" / "one_hot")
+    datatype    : str
+    default     : binary
+    paramtype   : generic
+
+  WAIT_STATES :
+    description : Testbench only, target i answers after WAIT_STATES*i cycles
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-infrastructure_icn
+  version : asylum-infrastructure-icn-1.4.0
+ #version : de0a2dbbe6ecfa3da26c4e40bdeb1521f2511e30
+#<PROVIDER_END>

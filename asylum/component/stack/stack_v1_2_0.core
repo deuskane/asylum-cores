@@ -1,0 +1,232 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : Stack Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : stack.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2021-10-26  1.0.0    mrosiere Created
+# 2025-09-06  1.0.1    mrosiere Update deps
+# 2026-10-05  1.0.2    mrosiere UVVM testbench, OVERWRITE parameter type int,
+#                               add sim_overwrite target
+# 2026-11-16  1.1.0    mrosiere arstn_i asynchronous reset, CYCLIC_PTR generic
+#                               (KCPSM3 cyclic pointer), lint_ghdl targets
+# 2026-11-16  1.2.0    mrosiere Synchronous reset srst_i (OpenBlaze8 / KCPSM3)
+#-----------------------------------------------------------------------------
+
+name : asylum:component:stack:1.2.0
+description : Stack
+
+filesets:
+
+  #---------------------------------------
+  # Source Files
+  #---------------------------------------
+  files_hdl:
+    files        :
+      - hdl/stack_pkg.vhd
+      - hdl/stack.vhd
+    file_type    : vhdlSource
+    logical_name : asylum
+    depend       :
+      - ">=asylum:component:ram:1.0.0"
+      
+  #---------------------------------------
+  # Testbench Files
+  #---------------------------------------
+  files_sim:
+    files:
+      - sim/tb_stack.vhd
+    file_type : vhdlSource-2008
+    depend    :
+      - bitvis:verification:uvvm
+
+  #---------------------------------------
+  # Lint / synthesis check : ghdl_synth.sh / ghdl_synth.mk (pre_run
+  # hook of lint_ghdl_synth_*) of asylum:utils:ghdl_synth
+  #---------------------------------------
+  syn:
+    depend       :
+      - asylum:utils:ghdl_synth
+
+targets:
+
+  #---------------------------------------
+  # Default Target
+  #---------------------------------------
+  default: &default
+    description     : Default Target
+    filesets        :
+      - files_hdl
+    toplevel        : stack
+    default_tool    : ghdl
+
+  #---------------------------------------
+  # Lint : -Wall analysis and elaboration (empty simulation)
+  #---------------------------------------
+  lint_ghdl : &lint_ghdl
+    << : *default
+    description     : Lint with GHDL (-Wall analysis and elaboration of stack)
+    toplevel        : asylum.stack
+    filesets_append : [syn]
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall"]
+
+  #---------------------------------------
+  # Synthesis check : -Wall analysis, ghdl --synth -Wall and elaboration
+  # (no simulation) of stack with the generics of the target.
+  # The pre_run hook (ghdl_synth.sh of asylum:utils:ghdl_synth) adds
+  # ghdl_synth.mk to the edalize Makefile.
+  # FuseSoC merges tools in depth : analyze_options comes from lint_ghdl.
+  #---------------------------------------
+  lint_ghdl_synth_default : &lint_ghdl_synth
+    << : *lint_ghdl
+    description     : Synthesis check of stack, default generics
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [ghdl_synth]
+
+  #---------------------------------------
+  lint_ghdl_synth_8x8b :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of stack, 8x8 bits
+    parameters      :
+      - WIDTH=8
+      - DEPTH=8
+
+  #---------------------------------------
+  lint_ghdl_synth_4x16b_overwrite :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of stack, 4x16 bits, overwrite
+    parameters      :
+      - WIDTH=16
+      - DEPTH=4
+      - OVERWRITE=1
+
+  #---------------------------------------
+  lint_ghdl_synth_openblaze8 :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of stack, call stack of OpenBlaze8
+    parameters      :
+      - WIDTH=10
+      - DEPTH=32
+      - OVERWRITE=1
+
+  #---------------------------------------
+  lint_ghdl_synth_cyclic :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of stack, call stack of OpenBlaze8 with a cyclic pointer (KCPSM3)
+    parameters      :
+      - WIDTH=10
+      - DEPTH=32
+      - OVERWRITE=1
+      - CYCLIC_PTR=true
+
+  sim_basic:
+    << : *default
+    description     : Simulation of all cases (OVERWRITE = 0)
+    filesets_append :
+      - files_sim
+    toplevel        : tb_stack
+    parameters      :
+      - WIDTH=8
+      - DEPTH=8
+      - OVERWRITE=0
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+  sim_overwrite:
+    << : *default
+    description     : Simulation of all cases (OVERWRITE = 1)
+    filesets_append :
+      - files_sim
+    toplevel        : tb_stack
+    parameters      :
+      - WIDTH=16
+      - DEPTH=4
+      - OVERWRITE=1
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+  sim_cyclic:
+    << : *default
+    description     : Simulation of all cases (OVERWRITE = 1, CYCLIC_PTR = true)
+    filesets_append :
+      - files_sim
+    toplevel        : tb_stack
+    parameters      :
+      - WIDTH=10
+      - DEPTH=8
+      - OVERWRITE=1
+      - CYCLIC_PTR=true
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+scripts:
+
+  #---------------------------------------
+  # pre_run hook of lint_ghdl_synth_* (cwd = work_root)
+  #---------------------------------------
+  ghdl_synth :
+    cmd : [bash, ghdl_synth.sh]
+
+parameters :
+
+  WIDTH :
+    description : Word width
+    datatype    : int
+    default     : 8
+    paramtype   : generic
+
+  DEPTH :
+    description : Number of words
+    datatype    : int
+    default     : 8
+    paramtype   : generic
+
+  OVERWRITE :
+    description : Allow the write if the stack is full (0 = no, /= 0 = yes)
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+  CYCLIC_PTR :
+    description : Purely cyclic pointer, a pop on an empty stack moves the pointer (KCPSM3)
+    datatype    : bool
+    default     : false
+    paramtype   : generic
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-component-stack
+  version : asylum-component-stack-1.2.0
+ #version : d3d87f6c7056301050e063b1e5f0346ad541ec6f
+#<PROVIDER_END>

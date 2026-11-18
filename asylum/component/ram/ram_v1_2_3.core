@@ -39,7 +39,7 @@ filesets:
       - hdl/ram_2r1w.vhd
       - hdl/ram_1rw.vhd
       - hdl/sbi_ram.vhd
-    file_type    : vhdlSource
+    file_type    : vhdlSource-2008
     logical_name : asylum
     depend :
       - asylum:utils:pkg
@@ -54,6 +54,20 @@ filesets:
     depend    :
       - bitvis:verification:uvvm
 
+  #---------------------------------------
+  # Lint / synthesis check : wrapper, and ghdl_synth.sh / ghdl_synth.mk
+  # (pre_run hook of lint_ghdl_synth_*) of asylum:utils:ghdl_synth, a core
+  # without dependency (ram cannot depend on generators : cycle
+  # generators -> fifo -> ram -> pkg)
+  #---------------------------------------
+  syn:
+    files        :
+      - syn/ram_wrapper.vhd
+    file_type    : vhdlSource-2008
+    logical_name : asylum
+    depend       :
+      - asylum:utils:ghdl_synth
+
 targets:
 
   #---------------------------------------
@@ -66,23 +80,73 @@ targets:
     toplevel        : ram_1r1w
     default_tool    : ghdl
 
-  sim_16x8b_sync_read:
+  #---------------------------------------
+  # Lint : -Wall analysis and elaboration (empty simulation)
+  #---------------------------------------
+  lint_ghdl : &lint_ghdl
     << : *default
-    description     : All RAMs and sbi_ram, asynchronous read (WIDTH=8, DEPTH=16)
-    filesets_append :
-      - files_sim
-    toplevel        : tb_ram
-    parameters      :
-      - WIDTH=8
-      - DEPTH=16
-      - SYNC_READ=false
+    description     : Lint with GHDL (-Wall analysis and elaboration of ram_wrapper, all RAMs)
+    toplevel        : asylum.ram_wrapper
+    filesets_append : [syn]
     default_tool    : ghdl
     tools :
       ghdl :
-        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
-        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+        analyze_options : ["-Wall"]
 
-  sim_16x8b_async_read:
+  #---------------------------------------
+  # Synthesis check : -Wall analysis, ghdl --synth -Wall and elaboration
+  # (no simulation) of ram_wrapper with the generics of the target.
+  # The pre_run hook (ghdl_synth.sh of asylum:utils:ghdl_synth) adds
+  # ghdl_synth.mk to the edalize Makefile.
+  # FuseSoC merges tools in depth : analyze_options comes from lint_ghdl.
+  #---------------------------------------
+  lint_ghdl_synth_default : &lint_ghdl_synth
+    << : *lint_ghdl
+    description     : Synthesis check of ram_wrapper, 32x32 bits, asynchronous read (default generics)
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [ghdl_synth]
+
+  #---------------------------------------
+  lint_ghdl_synth_32x32b_read_sync :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of ram_wrapper, 32x32 bits, synchronous read
+    parameters      :
+      - SYNC_READ=true
+
+  #---------------------------------------
+  lint_ghdl_synth_16x8b_read_async :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of ram_wrapper, 16x8 bits, asynchronous read
+    parameters      :
+      - WIDTH=8
+      - DEPTH=16
+
+  #---------------------------------------
+  lint_ghdl_synth_16x8b_read_sync :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of ram_wrapper, 16x8 bits, synchronous read
+    parameters      :
+      - WIDTH=8
+      - DEPTH=16
+      - SYNC_READ=true
+
+  #---------------------------------------
+  lint_ghdl_synth_256x8b_read_sync :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of ram_wrapper, 256x8 bits, synchronous read
+    parameters      :
+      - WIDTH=8
+      - DEPTH=256
+      - SYNC_READ=true
+
+  sim_16x8b_sync_read:
     << : *default
     description     : All RAMs and sbi_ram, synchronous read (WIDTH=8, DEPTH=16)
     filesets_append :
@@ -98,7 +162,39 @@ targets:
         analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
         run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
 
+  sim_16x8b_async_read:
+    << : *default
+    description     : All RAMs and sbi_ram, asynchronous read (WIDTH=8, DEPTH=16)
+    filesets_append :
+      - files_sim
+    toplevel        : tb_ram
+    parameters      :
+      - WIDTH=8
+      - DEPTH=16
+      - SYNC_READ=false
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
   sim_64x32b_sync_read:
+    << : *default
+    description     : All RAMs and sbi_ram, synchronous read (WIDTH=32, DEPTH=64)
+    filesets_append :
+      - files_sim
+    toplevel        : tb_ram
+    parameters      :
+      - WIDTH=32
+      - DEPTH=64
+      - SYNC_READ=true
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
+        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+
+  sim_64x32b_async_read:
     << : *default
     description     : All RAMs and sbi_ram, asynchronous read (WIDTH=32, DEPTH=64)
     filesets_append :
@@ -114,21 +210,13 @@ targets:
         analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
         run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
 
-  sim_64x32b_async_read:
-    << : *default
-    description     : All RAMs and sbi_ram, synchronous read (WIDTH=32, DEPTH=64)
-    filesets_append :
-      - files_sim
-    toplevel        : tb_ram
-    parameters      :
-      - WIDTH=32
-      - DEPTH=64
-      - SYNC_READ=true
-    default_tool    : ghdl
-    tools :
-      ghdl :
-        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
-        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+scripts:
+
+  #---------------------------------------
+  # pre_run hook of lint_ghdl_synth_* (cwd = work_root)
+  #---------------------------------------
+  ghdl_synth :
+    cmd : [bash, ghdl_synth.sh]
 
 parameters :
 
@@ -157,5 +245,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-ram
   version : asylum-component-ram-1.2.3
- #version : c0b50c3c6a9272d07ea6c3a0c2bb778d11c07f75
+ #version : c9ca1f1acfd5a8531dc82c1bc2c571f2019d7d98
 #<PROVIDER_END>

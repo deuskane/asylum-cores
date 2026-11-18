@@ -49,7 +49,7 @@ filesets:
     file_type    : vhdlSource
     logical_name : asylum
     depend       :
-      - asylum:utils:generators
+      - ">=asylum:utils:generators:2.8.0"
       - asylum:utils:pkg
       - asylum:target:techmap
 
@@ -61,6 +61,17 @@ filesets:
     file_type : vhdlSource-2008
     depend       :
       - bitvis:verification:uvvm
+
+  #---------------------------------------
+  syn:
+  #---------------------------------------
+    files        :
+      - syn/sbi_spinlock_wrapper.vhd
+    file_type    : vhdlSource-2008
+    logical_name : asylum
+    # ghdl_synth.sh / ghdl_synth.mk (pre_run hook of lint_ghdl_synth_*)
+    depend       :
+      - asylum:utils:ghdl_synth
 
 #=========================================
 targets:
@@ -76,6 +87,43 @@ targets:
     default_tool    : ghdl
     generate        :
       - gen_csr
+
+  #---------------------------------------
+  # Lint : -Wall analysis and elaboration (empty simulation)
+  #---------------------------------------
+  lint_ghdl : &lint_ghdl
+    << : *default
+    description     : Lint with GHDL (-Wall analysis and elaboration of sbi_spinlock_wrapper)
+    toplevel        : asylum.sbi_spinlock_wrapper
+    filesets_append : [syn]
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall"]
+
+  #---------------------------------------
+  # Synthesis check : -Wall analysis, ghdl --synth -Wall and elaboration
+  # (no simulation) of sbi_spinlock_wrapper with the generics of the target.
+  # The pre_run hook (ghdl_synth.sh of asylum:utils:ghdl_synth) adds
+  # ghdl_synth.mk to the edalize Makefile.
+  # FuseSoC merges tools in depth : analyze_options comes from lint_ghdl.
+  #---------------------------------------
+  lint_ghdl_synth_default : &lint_ghdl_synth
+    << : *lint_ghdl
+    description     : Synthesis check of sbi_spinlock_wrapper, default generics
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [ghdl_synth]
+
+  #---------------------------------------
+  lint_ghdl_synth_owner :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi_spinlock_wrapper, owner ID mode (OWNER_ID = true)
+    parameters      :
+      - OWNER_ID=true
 
   #---------------------------------------
   sim_spinlock:
@@ -108,11 +156,21 @@ targets:
         run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
 
 #=========================================
+scripts:
+#=========================================
+
+  #---------------------------------------
+  # pre_run hook of lint_ghdl_synth_* (cwd = work_root)
+  #---------------------------------------
+  ghdl_synth :
+    cmd : [bash, ghdl_synth.sh]
+
+#=========================================
 parameters :
 #=========================================
 
   OWNER_ID :
-    description : Lock protocol of the testbench DUT, false = test-and-set on read, true = owner ID
+    description : Lock protocol of sbi_spinlock (tb_spinlock, sbi_spinlock_wrapper), false = test-and-set on read, true = owner ID
     datatype    : bool
     default     : false
     paramtype   : generic
@@ -124,5 +182,5 @@ provider  :
   user    : deuskane
   repo    : asylum-system-spinlock
   version : asylum-system-spinlock-1.0.2
- #version : e933a1570af46c2210d7a05fe61c82284a7f23cd
+ #version : 46901b34d10e3d7bfecd698532467a2e77d3cf4e
 #<PROVIDER_END>

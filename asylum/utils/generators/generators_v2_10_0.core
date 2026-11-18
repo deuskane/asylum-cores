@@ -228,60 +228,68 @@ filesets:
     logical_name : asylum
 
   #---------------------------------------
-  files_regtool_sim:
+  # regtool testbenches (UVVM) : APB BFM, scenarios, hardware side
   #---------------------------------------
+  files_regtool_sim:
     files:
+      - tools/regtool/sim/apb_bfm_pkg.vhd
       - tools/regtool/sim/tb_regtool_pkg.vhd
-      - tools/regtool/sim/tb_regtool_scenario.vhd
+      - tools/regtool/sim/tb_regtool_hw.vhd
     file_type    : vhdlSource-2008
     logical_name : asylum
     depend       :
       - asylum:utils:pkg
+      - bitvis:verification:uvvm
 
   #---------------------------------------
   files_regtool_sim_mem:
   #---------------------------------------
     files:
-      - tools/regtool/sim/tb_mem_master.vhd
       - tools/regtool/sim/tb_regtool_mem.vhd
     file_type    : vhdlSource-2008
     logical_name : asylum
+    depend       :
+      - bitvis:verification:uvvm
 
   #---------------------------------------
   files_regtool_sim_sbi:
   #---------------------------------------
     files:
-      - tools/regtool/sim/tb_sbi_master.vhd
       - tools/regtool/sim/tb_regtool_sbi.vhd
     file_type    : vhdlSource-2008
     logical_name : asylum
+    depend       :
+      - bitvis:verification:uvvm
 
   #---------------------------------------
   files_regtool_sim_pbi:
   #---------------------------------------
     files:
-      - tools/regtool/sim/tb_pbi_master.vhd
       - tools/regtool/sim/tb_regtool_pbi.vhd
     file_type    : vhdlSource-2008
     logical_name : asylum
+    depend       :
+      - bitvis:verification:uvvm
 
   #---------------------------------------
   files_regtool_sim_apb:
   #---------------------------------------
     files:
-      - tools/regtool/sim/tb_apb_master.vhd
       - tools/regtool/sim/tb_regtool_apb.vhd
     file_type    : vhdlSource-2008
     logical_name : asylum
+    depend       :
+      - bitvis:verification:uvvm
 
   #---------------------------------------
   files_regtool_sim_axi4lite:
   #---------------------------------------
     files:
-      - tools/regtool/sim/tb_axi4lite_master.vhd
       - tools/regtool/sim/tb_regtool_axi4lite.vhd
     file_type    : vhdlSource-2008
     logical_name : asylum
+    depend       :
+      - bitvis:verification:uvvm
 
 #=========================================
 generate:
@@ -384,7 +392,7 @@ parameters:
 
   TEST :
     datatype    : str
-    description : Scenario of the regtool testbenches (tools/regtool/sim/tb_regtool_scenario.vhd)
+    description : Scenario of the regtool testbenches (tools/regtool/sim/tb_regtool_pkg.vhd)
     paramtype   : generic
 
   #---------------------------------------
@@ -558,6 +566,10 @@ targets:
     generate        :
       - gen_csr_tb_mem
     toplevel        : asylum.tb_regtool_mem
+    parameters      : [TEST=reset]
+    tools :
+      ghdl :
+        analyze_options : ["-frelaxed"]
 
   sim_regtool_mem_reset:
     << : *tb_regtool_mem
@@ -631,6 +643,10 @@ targets:
     generate        :
       - gen_csr_tb_sbi
     toplevel        : asylum.tb_regtool_sbi
+    parameters      : [TEST=reset]
+    tools :
+      ghdl :
+        analyze_options : ["-frelaxed"]
 
   sim_regtool_sbi_reset:
     << : *tb_regtool_sbi
@@ -704,6 +720,10 @@ targets:
     generate        :
       - gen_csr_tb_pbi
     toplevel        : asylum.tb_regtool_pbi
+    parameters      : [TEST=reset]
+    tools :
+      ghdl :
+        analyze_options : ["-frelaxed"]
 
   sim_regtool_pbi_reset:
     << : *tb_regtool_pbi
@@ -777,6 +797,10 @@ targets:
     generate        :
       - gen_csr_tb_apb
     toplevel        : asylum.tb_regtool_apb
+    parameters      : [TEST=reset]
+    tools :
+      ghdl :
+        analyze_options : ["-frelaxed"]
 
   sim_regtool_apb_reset:
     << : *tb_regtool_apb
@@ -850,6 +874,10 @@ targets:
     generate        :
       - gen_csr_tb_axi4lite
     toplevel        : asylum.tb_regtool_axi4lite
+    parameters      : [TEST=reset]
+    tools :
+      ghdl :
+        analyze_options : ["-frelaxed"]
 
   sim_regtool_axi4lite_reset:
     << : *tb_regtool_axi4lite
@@ -955,5 +983,5 @@ provider  :
   user    : deuskane
   repo    : asylum-utils-generators
   version : asylum-utils-generators-2.10.0
- #version : 72a111fb63476d99e19fb2cdef5567b1e836930f
+ #version : bc32be8eaf50163bc04bfc48cd1604c9f30e7fc8
 #<PROVIDER_END>

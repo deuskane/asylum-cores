@@ -435,6 +435,13 @@ filesets:
       - boards/NanoXplore-DK625V0/features.py: {file_type : nx_features}
     file_type : vhdlSource
 
+  #---------------------------------------
+  syn:
+  #---------------------------------------
+    # ghdl_synth.sh / ghdl_synth.mk (pre_run hook of lint_ghdl_synth_*)
+    depend       :
+      - asylum:utils:ghdl_synth
+
   # Next line is a pragma, don't modify
   #<FILESETS_BEGIN>
   #<FILESETS_END>
@@ -452,6 +459,127 @@ targets:
       - files_hdl
     toplevel        : PicoSoC_top
     default_tool    : ghdl
+
+  #---------------------------------------
+  # Lint : -Wall analysis and elaboration (empty simulation)
+  # Firmware : user_identity.c and dummy.c (OpenBlaze8, pbcc_gen)
+  #---------------------------------------
+  lint_ghdl : &lint_ghdl
+    << : *default
+    description     : Lint with GHDL (-Wall analysis and elaboration of PicoSoC_top)
+    toplevel        : asylum.PicoSoC_top
+    filesets_append : [pbcc_dep,syn]
+    generate        : [gen_picoblaze3_user_c_identity,gen_picoblaze3_supervisor_c_dummy]
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-fsynopsys","-frelaxed"]
+
+  #---------------------------------------
+  # Synthesis check : -Wall analysis, ghdl --synth -Wall and elaboration
+  # (no simulation) of PicoSoC_top with the generics of the target.
+  # The pre_run hook (ghdl_synth.sh of asylum:utils:ghdl_synth) adds
+  # ghdl_synth.mk to the edalize Makefile.
+  # FuseSoC merges tools in depth : analyze_options comes from lint_ghdl.
+  # OpenBlaze8 : firmware of lint_ghdl (pbcc_gen)
+  #---------------------------------------
+  lint_ghdl_synth_default : &lint_ghdl_synth
+    << : *lint_ghdl
+    description     : Synthesis check of PicoSoC_top, OpenBlaze8, default generics
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [ghdl_synth]
+
+  #---------------------------------------
+  lint_ghdl_synth_soc1 :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of PicoSoC_top, OpenBlaze8, soc1 (no supervisor, no safety)
+    parameters      :
+      - SUPERVISOR=false
+      - USER_SAFETY=none
+      - USER_FAULT_INJECTION=false
+      - DEBUG_ENABLE=false
+
+  #---------------------------------------
+  lint_ghdl_synth_soc4_ng_medium :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of PicoSoC_top, OpenBlaze8, soc4 (supervisor, TMR) with the NG-MEDIUM generics
+    parameters      :
+      - SUPERVISOR=true
+      - USER_SAFETY=tmr
+      - USER_FAULT_INJECTION=true
+      - DEBUG_ENABLE=false
+      - FSYS=25000000
+      - FSYS_INT=12500000
+      - USER_NB_SWITCH=6
+      - USER_BAUD_RATE=9600
+      - USER_UART_DEPTH_TX=4
+      - USER_UART_DEPTH_RX=4
+      - USER_SPI_DEPTH_CMD=4
+      - USER_SPI_DEPTH_TX=4
+      - USER_SPI_DEPTH_RX=4
+
+  #---------------------------------------
+  lint_ghdl_synth_basys :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of PicoSoC_top, OpenBlaze8, 4 + 1 LEDs and reset active high (emu_basys)
+    parameters      :
+      - USER_NB_LED0=4
+      - USER_NB_LED1=1
+      - RESET_POLARITY=high
+
+  #---------------------------------------
+  # WardRV_fsm : the firmware ROMs depend on the CPU (rvcc_gen)
+  #---------------------------------------
+  lint_ghdl_synth_wardrv_soc1 : &lint_ghdl_synth_wardrv
+    << : *lint_ghdl_synth
+    description     : Synthesis check of PicoSoC_top, WardRV_fsm, soc1 (no supervisor, no safety)
+    generate        : [gen_rv32i_user_c_identity,gen_rv32i_supervisor_c_dummy]
+    parameters      :
+      - CPU_MODEL=WardRV_fsm
+      - SUPERVISOR=false
+      - USER_SAFETY=none
+      - USER_FAULT_INJECTION=false
+      - DEBUG_ENABLE=false
+
+  #---------------------------------------
+  lint_ghdl_synth_wardrv_soc4_ng_medium :
+  #---------------------------------------
+    << : *lint_ghdl_synth_wardrv
+    description     : Synthesis check of PicoSoC_top, WardRV_fsm, soc4 (supervisor, TMR) with the NG-MEDIUM generics
+    parameters      :
+      - CPU_MODEL=WardRV_fsm
+      - SUPERVISOR=true
+      - USER_SAFETY=tmr
+      - USER_FAULT_INJECTION=true
+      - DEBUG_ENABLE=false
+      - FSYS=25000000
+      - FSYS_INT=12500000
+      - USER_NB_SWITCH=6
+      - USER_BAUD_RATE=9600
+      - USER_UART_DEPTH_TX=4
+      - USER_UART_DEPTH_RX=4
+      - USER_SPI_DEPTH_CMD=4
+      - USER_SPI_DEPTH_TX=4
+      - USER_SPI_DEPTH_RX=4
+
+  #---------------------------------------
+  lint_ghdl_synth_wardrv_soc1x4 :
+  #---------------------------------------
+    << : *lint_ghdl_synth_wardrv
+    description     : Synthesis check of PicoSoC_top, WardRV_fsm, soc1 with 4 user CPUs
+    parameters      :
+      - CPU_MODEL=WardRV_fsm
+      - SUPERVISOR=false
+      - USER_SAFETY=none
+      - USER_FAULT_INJECTION=false
+      - DEBUG_ENABLE=false
+      - USER_NB_CPU=4
 
   #---------------------------------------
   sim: &sim
@@ -2199,6 +2327,16 @@ targets:
       - TB_WATCHDOG=200000
 
 #=========================================
+scripts:
+#=========================================
+
+  #---------------------------------------
+  # pre_run hook of lint_ghdl_synth_* (cwd = work_root)
+  #---------------------------------------
+  ghdl_synth :
+    cmd : [bash, ghdl_synth.sh]
+
+#=========================================
 parameters :
 #=========================================
 
@@ -2354,5 +2492,5 @@ provider  :
   user    : deuskane
   repo    : asylum-soc-picosoc
   version : asylum-soc-PicoSoC-3.3.2
- #version : 587218ad9835d83832359504014ef5d3441b84ec
+ #version : f8b5dafdbc10e598f45a69f8b2f745c4760316b0
 #<PROVIDER_END>
