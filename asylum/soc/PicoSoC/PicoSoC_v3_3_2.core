@@ -1080,6 +1080,7 @@ targets:
       # Test Bench Configuration
       - TB_WATCHDOG=20000
       - SPI_MODEL=none
+      - TEST_IT=true
 
   #---------------------------------------
   sim_soc1_openblaze8_c_user_uart:
@@ -1106,6 +1107,8 @@ targets:
       # Test Bench Configuration
       - TB_WATCHDOG=200000
       - SPI_MODEL=none
+      - TEST_IT=true
+      - TEST_UART=user
 
   #---------------------------------------
   sim_soc1_openblaze8_c_user_uart_spi:
@@ -1132,6 +1135,8 @@ targets:
       # Test Bench Configuration
       - TB_WATCHDOG=200000
       - SPI_MODEL=none
+      - TEST_IT=true
+      - TEST_UART=user_spi
 
   #---------------------------------------
   sim_soc1_openblaze8_c_user_uart_spi_mem:
@@ -1158,6 +1163,8 @@ targets:
       # Test Bench Configuration
       - TB_WATCHDOG=200000
       - SPI_MODEL=m25p40
+      - TEST_IT=true
+      - TEST_UART=user_spi_mem
 
   #---------------------------------------
   sim_soc1_openblaze8_c_user_modbus_rtu:
@@ -1210,6 +1217,7 @@ targets:
       # Test Bench Configuration
       - TB_WATCHDOG=200000
       - SPI_MODEL=none
+      - TEST_IT=true
 
   #---------------------------------------
   sim_soc2_openblaze8_c_user_uart:
@@ -1236,6 +1244,8 @@ targets:
       # Test Bench Configuration
       - TB_WATCHDOG=200000
       - SPI_MODEL=none
+      - TEST_IT=true
+      - TEST_UART=user
 
   #---------------------------------------
   sim_soc2_openblaze8_c_user_modbus_rtu:
@@ -1288,6 +1298,7 @@ targets:
       # Test Bench Configuration
       - TB_WATCHDOG=200000
       - SPI_MODEL=none
+      - TEST_IT=true
 
   #---------------------------------------
   sim_soc3_openblaze8_c_user_modbus_rtu:
@@ -1340,6 +1351,7 @@ targets:
       # Test Bench Configuration
       - TB_WATCHDOG=200000
       - SPI_MODEL=none
+      - TEST_IT=true
 
   #---------------------------------------
   sim_soc3_openblaze8_fault_c_user_modbus_rtu:
@@ -1392,12 +1404,13 @@ targets:
       # Test Bench Configuration
       - TB_WATCHDOG=200000
       - SPI_MODEL=none
+      - TEST_IT=true
 
   #---------------------------------------
-  sim_soc4_openblaze8_fault_c_user_uart:
+  sim_soc4_openblaze8_c_user_uart:
   #---------------------------------------
     << : *sim
-    description  : Simulation of the test esw/user.c            - With    Supervisor, Safety TMR      , With    Fault Injection
+    description  : Simulation of the test esw/user.c            - With    Supervisor, Safety TMR      , Without Fault Injection
     generate     : [gen_picoblaze3_user_c_uart_921600,gen_picoblaze3_supervisor_c_tmr]
     parameters   :
       - CPU_MODEL=OpenBlaze8
@@ -1418,6 +1431,8 @@ targets:
       # Test Bench Configuration
       - TB_WATCHDOG=200000
       - SPI_MODEL=none
+      - TEST_IT=true
+      - TEST_UART=user
 
   #---------------------------------------
   sim_soc4_openblaze8_fault_c_user_modbus_rtu:
@@ -1899,6 +1914,8 @@ targets:
       # Test Bench Configuration
       - TB_WATCHDOG=200000
       - SPI_MODEL=none
+      - TEST_IT=true
+      - TEST_UART=user
 
   #---------------------------------------
   sim_soc1_wardrv_fsm_c_user_uart_spi:
@@ -1925,6 +1942,8 @@ targets:
       # Test Bench Configuration
       - TB_WATCHDOG=200000
       - SPI_MODEL=none
+      - TEST_IT=true
+      - TEST_UART=user_spi
 
   #---------------------------------------
   sim_soc1_wardrv_fsm_c_user_uart_spi_mem:
@@ -1951,6 +1970,8 @@ targets:
       # Test Bench Configuration
       - TB_WATCHDOG=200000
       - SPI_MODEL=m25p40
+      - TEST_IT=true
+      - TEST_UART=user_spi_mem
 
   #---------------------------------------
   sim_soc1_wardrv_fsm_c_user_modbus_rtu:
@@ -2091,6 +2112,7 @@ targets:
       # Test Bench Configuration
       - TB_WATCHDOG=200000
       - SPI_MODEL=none
+      - TEST_IT=true
 
   #---------------------------------------
   sim_soc2_wardrv_fsm_c_user_uart:
@@ -2117,6 +2139,8 @@ targets:
       # Test Bench Configuration
       - TB_WATCHDOG=200000
       - SPI_MODEL=none
+      - TEST_IT=true
+      - TEST_UART=user
 
   #---------------------------------------
   sim_soc2_wardrv_fsm_c_user_modbus_rtu:
@@ -2169,6 +2193,7 @@ targets:
       # Test Bench Configuration
       - TB_WATCHDOG=200000
       - SPI_MODEL=none
+      - TEST_IT=true
 
   #---------------------------------------
   sim_soc3_wardrv_fsm_c_user_modbus_rtu:
@@ -2221,6 +2246,7 @@ targets:
       # Test Bench Configuration
       - TB_WATCHDOG=200000
       - SPI_MODEL=none
+      - TEST_IT=true
 
   #---------------------------------------
   sim_soc3_wardrv_fsm_fault_c_user_modbus_rtu:
@@ -2273,12 +2299,13 @@ targets:
       # Test Bench Configuration
       - TB_WATCHDOG=200000
       - SPI_MODEL=none
+      - TEST_IT=true
 
   #---------------------------------------
-  sim_soc4_wardrv_fsm_fault_c_user_uart:
+  sim_soc4_wardrv_fsm_c_user_uart:
   #---------------------------------------
     << : *sim
-    description  : Simulation of the test esw/user.c            - With    Supervisor, Safety TMR      , With    Fault Injection
+    description  : Simulation of the test esw/user.c            - With    Supervisor, Safety TMR      , Without Fault Injection
     generate     : [gen_rv32i_user_c_uart_921600,gen_rv32i_supervisor_c_tmr]
     parameters   :
       - CPU_MODEL=WardRV_fsm
@@ -2299,6 +2326,8 @@ targets:
       # Test Bench Configuration
       - TB_WATCHDOG=200000
       - SPI_MODEL=none
+      - TEST_IT=true
+      - TEST_UART=user
 
   #---------------------------------------
   sim_soc4_wardrv_fsm_fault_c_user_modbus_rtu:
@@ -2466,6 +2495,18 @@ parameters :
     default     : m25p40
     paramtype   : generic
 
+  TEST_IT :
+    description : Testbench checks the user interruption (LED1 counter of esw/user.c)
+    datatype    : bool
+    default     : false
+    paramtype   : generic
+
+  TEST_UART :
+    description : Testbench checks the UART output of esw/user.c (none / user / user_spi / user_spi_mem)
+    datatype    : str
+    default     : none
+    paramtype   : generic
+
   TB_WATCHDOG :
     description : Testbench Watchdog
     datatype    : int
@@ -2492,5 +2533,5 @@ provider  :
   user    : deuskane
   repo    : asylum-soc-picosoc
   version : asylum-soc-PicoSoC-3.3.2
- #version : f8b5dafdbc10e598f45a69f8b2f745c4760316b0
+ #version : a98020c5c97b33205a6b9dab993abbaea4c6ad64
 #<PROVIDER_END>
