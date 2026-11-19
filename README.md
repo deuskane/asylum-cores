@@ -239,6 +239,7 @@
 | asylum               | utils                | pkg                  | [1.7.1](asylum/utils/pkg/utils_pkg_v1_7_1.core)                                                      | [url](https://github.com/deuskane/asylum-utils-pkg/tree/asylum-utils-pkg-1.7.1) |  VHDL Utility Package|
 | asylum               | utils                | pkg                  | [1.7.3](asylum/utils/pkg/utils_pkg_v1_7_3.core)                                                      | [url](https://github.com/deuskane/asylum-utils-pkg/tree/asylum-utils-pkg-1.7.3) |  VHDL Utility Package|
 | asylum               | utils                | pkg                  | [1.8.0](asylum/utils/pkg/utils_pkg_v1_8_0.core)                                                      | [url](https://github.com/deuskane/asylum-utils-pkg/tree/asylum-utils-pkg-1.8.0) |  VHDL Utility Package|
+| asylum               | utils                | pkg                  | [1.9.0](asylum/utils/pkg/utils_pkg_v1_9_0.core)                                                      | [url](https://github.com/deuskane/asylum-utils-pkg/tree/asylum-utils-pkg-1.9.0) |  VHDL Utility Package|
 # bitvis
 ## verification
 | Vendor               | Library              | Name                 | Version                                                                                              | URL                  | Description |
