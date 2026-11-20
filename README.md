@@ -242,6 +242,7 @@
 | asylum               | utils                | pkg                  | [1.8.0](asylum/utils/pkg/utils_pkg_v1_8_0.core)                                                      | [url](https://github.com/deuskane/asylum-utils-pkg/tree/asylum-utils-pkg-1.8.0) |  VHDL Utility Package|
 | asylum               | utils                | pkg                  | [1.9.0](asylum/utils/pkg/utils_pkg_v1_9_0.core)                                                      | [url](https://github.com/deuskane/asylum-utils-pkg/tree/asylum-utils-pkg-1.9.0) |  VHDL Utility Package|
 | asylum               | utils                | pkg                  | [1.10.0](asylum/utils/pkg/utils_pkg_v1_10_0.core)                                                    | [url](https://github.com/deuskane/asylum-utils-pkg/tree/asylum-utils-pkg-1.10.0) |  VHDL Utility Package|
+| asylum               | utils                | yosys_synth          | [1.0.0](asylum/utils/yosys_synth/yosys_synth_v1_0_0.core)                                            | [url](https://github.com/deuskane/asylum-utils-generators/tree/asylum-utils-yosys_synth-1.0.0) |  Yosys synthesis (Artix-7 and sky130) of the syn_* targets|
 # bitvis
 ## verification
 | Vendor               | Library              | Name                 | Version                                                                                              | URL                  | Description |
