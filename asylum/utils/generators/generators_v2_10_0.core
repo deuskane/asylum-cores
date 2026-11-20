@@ -220,25 +220,70 @@ filesets:
     logical_name : asylum
 
   #---------------------------------------
+  # regtool bridges (added by regtool to the calling core for its interface)
+  #---------------------------------------
+  regtool_bridges:
+    files:
+      - tools/regtool/hdl/sbi2mem.vhd
+      - tools/regtool/hdl/pbi2mem.vhd
+      - tools/regtool/hdl/apb2mem.vhd
+      - tools/regtool/hdl/axi4lite2mem.vhd
+    file_type    : vhdlSource-2008
+    logical_name : asylum
+    depend       :
+      # sbi_pkg / pbi_pkg
+      - asylum:utils:pkg
+
+  #---------------------------------------
+  # Wrappers of the lint and synthesis targets : every block at once
+  # (csr_wrapper, lint only), one block (csr_reg, sbi2mem, pbi2mem : generics
+  # without default or unconstrained records). csr_ext, csr_fifo, apb2mem and
+  # axi4lite2mem are their own top.
+  #---------------------------------------
   syn:
   #---------------------------------------
     files        :
       - syn/csr_wrapper.vhd
+      - syn/csr_reg_wrapper.vhd
+      - syn/sbi2mem_wrapper.vhd
+      - syn/pbi2mem_wrapper.vhd
     file_type    : vhdlSource-2008
     logical_name : asylum
 
   #---------------------------------------
-  # regtool testbenches (UVVM) : APB BFM, scenarios, hardware side
+  syn_yosys:
+  #---------------------------------------
+    # yosys_synth.sh / yosys_synth.mk / yosys_synth.py (pre_run hook of syn_*)
+    depend       :
+      - asylum:utils:yosys_synth
+
+  #---------------------------------------
+  # regtool testbenches (UVVM) : APB BFM, helpers, hardware side, one
+  # package per scenario, list of the scenarios and dispatch
   #---------------------------------------
   files_regtool_sim:
     files:
       - tools/regtool/sim/apb_bfm_pkg.vhd
-      - tools/regtool/sim/tb_regtool_pkg.vhd
+      - tools/regtool/sim/tb_regtool_bfm_pkg.vhd
       - tools/regtool/sim/tb_regtool_hw.vhd
+      - tools/regtool/sim/tb_regtool_reset_pkg.vhd
+      - tools/regtool/sim/tb_regtool_write_read_pkg.vhd
+      - tools/regtool/sim/tb_regtool_hw_write_pkg.vhd
+      - tools/regtool/sim/tb_regtool_ext_pkg.vhd
+      - tools/regtool/sim/tb_regtool_fifo_read_pkg.vhd
+      - tools/regtool/sim/tb_regtool_fifo_write_pkg.vhd
+      - tools/regtool/sim/tb_regtool_unmapped_pkg.vhd
+      - tools/regtool/sim/tb_regtool_wait_duration_pkg.vhd
+      - tools/regtool/sim/tb_regtool_wait_write_pkg.vhd
+      - tools/regtool/sim/tb_regtool_wait_read_pkg.vhd
+      - tools/regtool/sim/tb_regtool_wait_read_clear_pkg.vhd
+      - tools/regtool/sim/tb_regtool_wait_none_pkg.vhd
+      - tools/regtool/sim/tb_regtool_tests_pkg.vhd
     file_type    : vhdlSource-2008
     logical_name : asylum
     depend       :
-      - asylum:utils:pkg
+      # string_pkg list_length / list_item / list_contains (TESTS_LIST)
+      - ">=asylum:utils:pkg:1.10.0"
       - bitvis:verification:uvvm
 
   #---------------------------------------
@@ -390,14 +435,22 @@ parameters:
     description : Enable the register reg1 of example1
     paramtype   : generic
 
-  TEST :
+  TESTS_LIST :
     datatype    : str
-    description : Scenario of the regtool testbenches (tools/regtool/sim/tb_regtool_pkg.vhd)
+    description : Scenarios of the regtool testbenches, separated by ',' (names in tools/regtool/sim/tb_regtool_tests_pkg.vhd), empty = build only
+    default     : ""
     paramtype   : generic
 
   #---------------------------------------
-  # Generics of csr_wrapper (lint_ghdl_synth_*)
+  # Generics of csr_wrapper, csr_reg_wrapper, csr_ext, csr_fifo
+  # (lint_ghdl_synth_*, syn_*)
   #---------------------------------------
+  MODEL :
+    description : csr_reg_wrapper, software access model of csr_reg
+    datatype    : str
+    default     : rw
+    paramtype   : generic
+
   WIDTH :
     description : Register width
     datatype    : int
@@ -462,9 +515,9 @@ targets:
   #---------------------------------------
   lint_ghdl : &lint_ghdl
     << : *default
-    description     : Lint with GHDL (-Wall analysis and elaboration of csr_wrapper)
+    description     : Lint with GHDL (-Wall analysis of the building blocks, the bridges and the wrappers, elaboration of csr_wrapper)
     toplevel        : asylum.csr_wrapper
-    filesets_append : [regtool_hdl, syn]
+    filesets_append : [regtool_hdl, regtool_bridges, syn]
     default_tool    : ghdl
     tools :
       ghdl :
@@ -472,14 +525,19 @@ targets:
 
   #---------------------------------------
   # Synthesis check : -Wall analysis, ghdl --synth -Wall and elaboration
-  # (no simulation) of csr_wrapper with the generics of the target.
+  # (no simulation) of one building block (or of csr_wrapper : every block,
+  # every access model of csr_reg) with the generics of the target.
   # The pre_run hook (ghdl_synth.sh of asylum:utils:ghdl_synth, dependency
   # of the deps fileset) adds ghdl_synth.mk to the edalize Makefile.
   # FuseSoC merges tools in depth : analyze_options comes from lint_ghdl.
   #---------------------------------------
-  lint_ghdl_synth_default : &lint_ghdl_synth
+  lint_ghdl_synth_csr_reg_rw : &lint_ghdl_synth
     << : *lint_ghdl
-    description     : Synthesis check of csr_wrapper, default generics
+    description     : Synthesis check of csr_reg (csr_reg_wrapper), rw, 8 bits
+    toplevel        : asylum.csr_reg_wrapper
+    parameters      :
+      - WIDTH=8
+      - MODEL=rw
     tools :
       ghdl :
         run_options     : ["--no-run"]
@@ -487,10 +545,88 @@ targets:
       pre_run : [ghdl_synth]
 
   #---------------------------------------
+  lint_ghdl_synth_csr_reg_rw_wait_state :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of csr_reg (csr_reg_wrapper), rw, 8 bits, 2 read and 3 write wait states
+    toplevel        : asylum.csr_reg_wrapper
+    parameters      :
+      - WIDTH=8
+      - MODEL=rw
+      - RD_WAIT_STATE=2
+      - WR_WAIT_STATE=3
+
+  #---------------------------------------
+  lint_ghdl_synth_csr_ext :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of csr_ext, 8 bits
+    toplevel        : asylum.csr_ext
+    parameters      :
+      - WIDTH=8
+
+  #---------------------------------------
+  lint_ghdl_synth_csr_fifo_blocking :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of csr_fifo, 8 bits, FIFOs of depth 4 / 4, blocking read and write
+    toplevel        : asylum.csr_fifo
+    parameters      :
+      - WIDTH=8
+      - DEPTH_SW2HW=4
+      - DEPTH_HW2SW=4
+      - BLOCKING_READ=true
+
+  #---------------------------------------
+  lint_ghdl_synth_csr_fifo_nonblocking :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of csr_fifo, 8 bits, FIFOs of depth 2 / 8, non-blocking write
+    toplevel        : asylum.csr_fifo
+    parameters      :
+      - WIDTH=8
+      - DEPTH_SW2HW=2
+      - DEPTH_HW2SW=8
+      - BLOCKING_WRITE=false
+
+  #---------------------------------------
+  lint_ghdl_synth_sbi2mem :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi2mem (sbi2mem_wrapper), 8-bit address and data
+    toplevel        : asylum.sbi2mem_wrapper
+    parameters      : []
+
+  #---------------------------------------
+  lint_ghdl_synth_pbi2mem :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of pbi2mem (pbi2mem_wrapper), 8-bit address and data
+    toplevel        : asylum.pbi2mem_wrapper
+    parameters      : []
+
+  #---------------------------------------
+  lint_ghdl_synth_apb2mem :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of apb2mem, 8-bit address, 32-bit data
+    toplevel        : asylum.apb2mem
+    parameters      : []
+
+  #---------------------------------------
+  lint_ghdl_synth_axi4lite2mem :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of axi4lite2mem, 8-bit address, 32-bit data
+    toplevel        : asylum.axi4lite2mem
+    parameters      : []
+
+  #---------------------------------------
   lint_ghdl_synth_width1_init1 :
   #---------------------------------------
     << : *lint_ghdl_synth
-    description     : Synthesis check of csr_wrapper, WIDTH 1, INIT "1"
+    description     : Synthesis check of csr_wrapper (every block, every access model), WIDTH 1, INIT "1"
+    toplevel        : asylum.csr_wrapper
     parameters      :
       - WIDTH=1
       - INIT=1
@@ -499,38 +635,108 @@ targets:
   lint_ghdl_synth_init_a5 :
   #---------------------------------------
     << : *lint_ghdl_synth
-    description     : Synthesis check of csr_wrapper, INIT x"A5"
+    description     : Synthesis check of csr_wrapper (every block, every access model), INIT x"A5"
+    toplevel        : asylum.csr_wrapper
     parameters      :
       - INIT=10100101
 
   #---------------------------------------
-  lint_ghdl_synth_wait_state :
+  # Synthesis : -Wall analysis, then Yosys with the GHDL plugin : size on
+  # Xilinx Artix-7 (LUT, FF, BRAM, DSP) and area on sky130 of one building
+  # block, same configurations as lint_ghdl_synth_<block>_<config>.
+  # The pre_run hook (yosys_synth.sh of asylum:utils:yosys_synth) adds
+  # yosys_synth.mk to the edalize Makefile.
   #---------------------------------------
-    << : *lint_ghdl_synth
-    description     : Synthesis check of csr_wrapper, csr_reg with read and write wait states
+  syn_csr_reg_rw : &syn
+    << : *lint_ghdl
+    description     : Synthesis (Artix-7, sky130) of csr_reg (csr_reg_wrapper), rw, 8 bits
+    toplevel        : asylum.csr_reg_wrapper
     parameters      :
+      - WIDTH=8
+      - MODEL=rw
+    filesets_append : [regtool_hdl, regtool_bridges, syn, syn_yosys]
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [yosys_synth]
+
+  #---------------------------------------
+  syn_csr_reg_rw_wait_state :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of csr_reg (csr_reg_wrapper), rw, 8 bits, 2 read and 3 write wait states
+    toplevel        : asylum.csr_reg_wrapper
+    parameters      :
+      - WIDTH=8
+      - MODEL=rw
       - RD_WAIT_STATE=2
       - WR_WAIT_STATE=3
 
   #---------------------------------------
-  lint_ghdl_synth_fifo_blocking :
+  syn_csr_ext :
   #---------------------------------------
-    << : *lint_ghdl_synth
-    description     : Synthesis check of csr_wrapper, csr_fifo with FIFOs, blocking read
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of csr_ext, 8 bits
+    toplevel        : asylum.csr_ext
     parameters      :
+      - WIDTH=8
+
+  #---------------------------------------
+  syn_csr_fifo_blocking :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of csr_fifo, 8 bits, FIFOs of depth 4 / 4, blocking read and write
+    toplevel        : asylum.csr_fifo
+    parameters      :
+      - WIDTH=8
       - DEPTH_SW2HW=4
       - DEPTH_HW2SW=4
       - BLOCKING_READ=true
 
   #---------------------------------------
-  lint_ghdl_synth_fifo_nonblocking :
+  syn_csr_fifo_nonblocking :
   #---------------------------------------
-    << : *lint_ghdl_synth
-    description     : Synthesis check of csr_wrapper, csr_fifo with FIFOs, non-blocking write
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of csr_fifo, 8 bits, FIFOs of depth 2 / 8, non-blocking write
+    toplevel        : asylum.csr_fifo
     parameters      :
+      - WIDTH=8
       - DEPTH_SW2HW=2
       - DEPTH_HW2SW=8
       - BLOCKING_WRITE=false
+
+  #---------------------------------------
+  syn_sbi2mem :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of sbi2mem (sbi2mem_wrapper), 8-bit address and data
+    toplevel        : asylum.sbi2mem_wrapper
+    parameters      : []
+
+  #---------------------------------------
+  syn_pbi2mem :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of pbi2mem (pbi2mem_wrapper), 8-bit address and data
+    toplevel        : asylum.pbi2mem_wrapper
+    parameters      : []
+
+  #---------------------------------------
+  syn_apb2mem :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of apb2mem, 8-bit address, 32-bit data
+    toplevel        : asylum.apb2mem
+    parameters      : []
+
+  #---------------------------------------
+  syn_axi4lite2mem :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of axi4lite2mem, 8-bit address, 32-bit data
+    toplevel        : asylum.axi4lite2mem
+    parameters      : []
 
   #---------------------------------------
   sim: &sim
@@ -555,87 +761,17 @@ targets:
       - REG1_ENABLE=true
 
   #---------------------------------------
-  tb_regtool_mem: &tb_regtool_mem
+  # regtool testbenches : one testbench per interface (the CSR tbcsr
+  # generated with that interface), scenarios chosen at run time with
+  # TESTS_LIST (names in tools/regtool/sim/tb_regtool_tests_pkg.vhd), each
+  # one after a reset pulse. Reference configuration : sbi (the bus of the
+  # Asylum IPs), one target per scenario ; every other interface runs the
+  # whole list in one target. FuseSoC replaces the parameters list of an
+  # inherited target.
   #---------------------------------------
+  sim_regtool_sbi: &sim_regtool_sbi
     << : *sim
-    description     : regtool testbench, interface mem (base of the sim_regtool_mem_* targets)
-    filesets        :
-      - deps
-      - files_regtool_sim
-      - files_regtool_sim_mem
-    generate        :
-      - gen_csr_tb_mem
-    toplevel        : asylum.tb_regtool_mem
-    parameters      : [TEST=reset]
-    tools :
-      ghdl :
-        analyze_options : ["-frelaxed"]
-
-  sim_regtool_mem_reset:
-    << : *tb_regtool_mem
-    description     : regtool testbench, interface mem, reset values
-    parameters      : [TEST=reset]
-
-  sim_regtool_mem_write_read:
-    << : *tb_regtool_mem
-    description     : regtool testbench, interface mem, software write / read back, write only register
-    parameters      : [TEST=write_read]
-
-  sim_regtool_mem_hw_write:
-    << : *tb_regtool_mem
-    description     : regtool testbench, interface mem, registers written by the hardware, rw1c
-    parameters      : [TEST=hw_write]
-
-  sim_regtool_mem_ext:
-    << : *tb_regtool_mem
-    description     : regtool testbench, interface mem, external register
-    parameters      : [TEST=ext]
-
-  sim_regtool_mem_fifo_read:
-    << : *tb_regtool_mem
-    description     : regtool testbench, interface mem, blocking read of an empty FIFO
-    parameters      : [TEST=fifo_read]
-
-  sim_regtool_mem_fifo_write:
-    << : *tb_regtool_mem
-    description     : regtool testbench, interface mem, blocking write of a full FIFO
-    parameters      : [TEST=fifo_write]
-
-  sim_regtool_mem_unmapped:
-    << : *tb_regtool_mem
-    description     : regtool testbench, interface mem, access to an unmapped address
-    parameters      : [TEST=unmapped]
-
-  sim_regtool_mem_wait_duration:
-    << : *tb_regtool_mem
-    description     : regtool testbench, interface mem, wait states, duration of the accesses
-    parameters      : [TEST=wait_duration]
-
-  sim_regtool_mem_wait_write:
-    << : *tb_regtool_mem
-    description     : regtool testbench, interface mem, write wait states, write and write strobe once, during the access
-    parameters      : [TEST=wait_write]
-
-  sim_regtool_mem_wait_read:
-    << : *tb_regtool_mem
-    description     : regtool testbench, interface mem, read wait states, read data of the last cycle, read strobe once
-    parameters      : [TEST=wait_read]
-
-  sim_regtool_mem_wait_read_clear:
-    << : *tb_regtool_mem
-    description     : regtool testbench, interface mem, read wait states, read side effect once, value before the clear
-    parameters      : [TEST=wait_read_clear]
-
-  sim_regtool_mem_wait_none:
-    << : *tb_regtool_mem
-    description     : regtool testbench, interface mem, wait states at 0, same as without them
-    parameters      : [TEST=wait_none]
-
-  #---------------------------------------
-  tb_regtool_sbi: &tb_regtool_sbi
-  #---------------------------------------
-    << : *sim
-    description     : regtool testbench, interface sbi (base of the sim_regtool_sbi_* targets)
+    description     : regtool testbench, interface sbi - build only (scenarios of TESTS_LIST)
     filesets        :
       - deps
       - files_regtool_sim
@@ -643,76 +779,131 @@ targets:
     generate        :
       - gen_csr_tb_sbi
     toplevel        : asylum.tb_regtool_sbi
-    parameters      : [TEST=reset]
+    parameters      :
+      - TESTS_LIST
     tools :
       ghdl :
         analyze_options : ["-frelaxed"]
 
+  #---------------------------------------
   sim_regtool_sbi_reset:
-    << : *tb_regtool_sbi
+  #---------------------------------------
+    << : *sim_regtool_sbi
     description     : regtool testbench, interface sbi, reset values
-    parameters      : [TEST=reset]
-
-  sim_regtool_sbi_write_read:
-    << : *tb_regtool_sbi
-    description     : regtool testbench, interface sbi, software write / read back, write only register
-    parameters      : [TEST=write_read]
-
-  sim_regtool_sbi_hw_write:
-    << : *tb_regtool_sbi
-    description     : regtool testbench, interface sbi, registers written by the hardware, rw1c
-    parameters      : [TEST=hw_write]
-
-  sim_regtool_sbi_ext:
-    << : *tb_regtool_sbi
-    description     : regtool testbench, interface sbi, external register
-    parameters      : [TEST=ext]
-
-  sim_regtool_sbi_fifo_read:
-    << : *tb_regtool_sbi
-    description     : regtool testbench, interface sbi, blocking read of an empty FIFO
-    parameters      : [TEST=fifo_read]
-
-  sim_regtool_sbi_fifo_write:
-    << : *tb_regtool_sbi
-    description     : regtool testbench, interface sbi, blocking write of a full FIFO
-    parameters      : [TEST=fifo_write]
-
-  sim_regtool_sbi_unmapped:
-    << : *tb_regtool_sbi
-    description     : regtool testbench, interface sbi, access to an unmapped address
-    parameters      : [TEST=unmapped]
-
-  sim_regtool_sbi_wait_duration:
-    << : *tb_regtool_sbi
-    description     : regtool testbench, interface sbi, wait states, duration of the accesses
-    parameters      : [TEST=wait_duration]
-
-  sim_regtool_sbi_wait_write:
-    << : *tb_regtool_sbi
-    description     : regtool testbench, interface sbi, write wait states, write and write strobe once, during the access
-    parameters      : [TEST=wait_write]
-
-  sim_regtool_sbi_wait_read:
-    << : *tb_regtool_sbi
-    description     : regtool testbench, interface sbi, read wait states, read data of the last cycle, read strobe once
-    parameters      : [TEST=wait_read]
-
-  sim_regtool_sbi_wait_read_clear:
-    << : *tb_regtool_sbi
-    description     : regtool testbench, interface sbi, read wait states, read side effect once, value before the clear
-    parameters      : [TEST=wait_read_clear]
-
-  sim_regtool_sbi_wait_none:
-    << : *tb_regtool_sbi
-    description     : regtool testbench, interface sbi, wait states at 0, same as without them
-    parameters      : [TEST=wait_none]
+    parameters      :
+      - TESTS_LIST=reset
 
   #---------------------------------------
-  tb_regtool_pbi: &tb_regtool_pbi
+  sim_regtool_sbi_write_read:
+  #---------------------------------------
+    << : *sim_regtool_sbi
+    description     : regtool testbench, interface sbi, software write / read back, write only register
+    parameters      :
+      - TESTS_LIST=write_read
+
+  #---------------------------------------
+  sim_regtool_sbi_hw_write:
+  #---------------------------------------
+    << : *sim_regtool_sbi
+    description     : regtool testbench, interface sbi, registers written by the hardware, rw1c
+    parameters      :
+      - TESTS_LIST=hw_write
+
+  #---------------------------------------
+  sim_regtool_sbi_ext:
+  #---------------------------------------
+    << : *sim_regtool_sbi
+    description     : regtool testbench, interface sbi, external register
+    parameters      :
+      - TESTS_LIST=ext
+
+  #---------------------------------------
+  sim_regtool_sbi_fifo_read:
+  #---------------------------------------
+    << : *sim_regtool_sbi
+    description     : regtool testbench, interface sbi, blocking read of an empty FIFO
+    parameters      :
+      - TESTS_LIST=fifo_read
+
+  #---------------------------------------
+  sim_regtool_sbi_fifo_write:
+  #---------------------------------------
+    << : *sim_regtool_sbi
+    description     : regtool testbench, interface sbi, blocking write of a full FIFO
+    parameters      :
+      - TESTS_LIST=fifo_write
+
+  #---------------------------------------
+  sim_regtool_sbi_unmapped:
+  #---------------------------------------
+    << : *sim_regtool_sbi
+    description     : regtool testbench, interface sbi, access to an unmapped address
+    parameters      :
+      - TESTS_LIST=unmapped
+
+  #---------------------------------------
+  sim_regtool_sbi_wait_duration:
+  #---------------------------------------
+    << : *sim_regtool_sbi
+    description     : regtool testbench, interface sbi, wait states, duration of the accesses
+    parameters      :
+      - TESTS_LIST=wait_duration
+
+  #---------------------------------------
+  sim_regtool_sbi_wait_write:
+  #---------------------------------------
+    << : *sim_regtool_sbi
+    description     : regtool testbench, interface sbi, write wait states, write and write strobe once, during the access
+    parameters      :
+      - TESTS_LIST=wait_write
+
+  #---------------------------------------
+  sim_regtool_sbi_wait_read:
+  #---------------------------------------
+    << : *sim_regtool_sbi
+    description     : regtool testbench, interface sbi, read wait states, read data of the last cycle, read strobe once
+    parameters      :
+      - TESTS_LIST=wait_read
+
+  #---------------------------------------
+  sim_regtool_sbi_wait_read_clear:
+  #---------------------------------------
+    << : *sim_regtool_sbi
+    description     : regtool testbench, interface sbi, read wait states, read side effect once, value before the clear
+    parameters      :
+      - TESTS_LIST=wait_read_clear
+
+  #---------------------------------------
+  sim_regtool_sbi_wait_none:
+  #---------------------------------------
+    << : *sim_regtool_sbi
+    description     : regtool testbench, interface sbi, wait states at 0, same as without them
+    parameters      :
+      - TESTS_LIST=wait_none
+
+  #---------------------------------------
+  sim_regtool_mem:
   #---------------------------------------
     << : *sim
-    description     : regtool testbench, interface pbi (base of the sim_regtool_pbi_* targets)
+    description     : regtool testbench, interface mem, every scenario
+    filesets        :
+      - deps
+      - files_regtool_sim
+      - files_regtool_sim_mem
+    generate        :
+      - gen_csr_tb_mem
+    toplevel        : asylum.tb_regtool_mem
+    parameters      :
+      - TESTS_LIST=reset,write_read,hw_write,ext,fifo_read,fifo_write,unmapped,wait_duration,wait_write,wait_read,wait_read_clear,wait_none
+    tools :
+      ghdl :
+        analyze_options : ["-frelaxed"]
+
+  #---------------------------------------
+  sim_regtool_pbi:
+  #---------------------------------------
+    << : *sim
+    description     : regtool testbench, interface pbi, every scenario
     filesets        :
       - deps
       - files_regtool_sim
@@ -720,76 +911,17 @@ targets:
     generate        :
       - gen_csr_tb_pbi
     toplevel        : asylum.tb_regtool_pbi
-    parameters      : [TEST=reset]
+    parameters      :
+      - TESTS_LIST=reset,write_read,hw_write,ext,fifo_read,fifo_write,unmapped,wait_duration,wait_write,wait_read,wait_read_clear,wait_none
     tools :
       ghdl :
         analyze_options : ["-frelaxed"]
 
-  sim_regtool_pbi_reset:
-    << : *tb_regtool_pbi
-    description     : regtool testbench, interface pbi, reset values
-    parameters      : [TEST=reset]
-
-  sim_regtool_pbi_write_read:
-    << : *tb_regtool_pbi
-    description     : regtool testbench, interface pbi, software write / read back, write only register
-    parameters      : [TEST=write_read]
-
-  sim_regtool_pbi_hw_write:
-    << : *tb_regtool_pbi
-    description     : regtool testbench, interface pbi, registers written by the hardware, rw1c
-    parameters      : [TEST=hw_write]
-
-  sim_regtool_pbi_ext:
-    << : *tb_regtool_pbi
-    description     : regtool testbench, interface pbi, external register
-    parameters      : [TEST=ext]
-
-  sim_regtool_pbi_fifo_read:
-    << : *tb_regtool_pbi
-    description     : regtool testbench, interface pbi, blocking read of an empty FIFO
-    parameters      : [TEST=fifo_read]
-
-  sim_regtool_pbi_fifo_write:
-    << : *tb_regtool_pbi
-    description     : regtool testbench, interface pbi, blocking write of a full FIFO
-    parameters      : [TEST=fifo_write]
-
-  sim_regtool_pbi_unmapped:
-    << : *tb_regtool_pbi
-    description     : regtool testbench, interface pbi, access to an unmapped address
-    parameters      : [TEST=unmapped]
-
-  sim_regtool_pbi_wait_duration:
-    << : *tb_regtool_pbi
-    description     : regtool testbench, interface pbi, wait states, duration of the accesses
-    parameters      : [TEST=wait_duration]
-
-  sim_regtool_pbi_wait_write:
-    << : *tb_regtool_pbi
-    description     : regtool testbench, interface pbi, write wait states, write and write strobe once, during the access
-    parameters      : [TEST=wait_write]
-
-  sim_regtool_pbi_wait_read:
-    << : *tb_regtool_pbi
-    description     : regtool testbench, interface pbi, read wait states, read data of the last cycle, read strobe once
-    parameters      : [TEST=wait_read]
-
-  sim_regtool_pbi_wait_read_clear:
-    << : *tb_regtool_pbi
-    description     : regtool testbench, interface pbi, read wait states, read side effect once, value before the clear
-    parameters      : [TEST=wait_read_clear]
-
-  sim_regtool_pbi_wait_none:
-    << : *tb_regtool_pbi
-    description     : regtool testbench, interface pbi, wait states at 0, same as without them
-    parameters      : [TEST=wait_none]
-
   #---------------------------------------
-  tb_regtool_apb: &tb_regtool_apb
+  sim_regtool_apb:
   #---------------------------------------
     << : *sim
-    description     : regtool testbench, interface apb (base of the sim_regtool_apb_* targets)
+    description     : regtool testbench, interface apb, every scenario
     filesets        :
       - deps
       - files_regtool_sim
@@ -797,76 +929,17 @@ targets:
     generate        :
       - gen_csr_tb_apb
     toplevel        : asylum.tb_regtool_apb
-    parameters      : [TEST=reset]
+    parameters      :
+      - TESTS_LIST=reset,write_read,hw_write,ext,fifo_read,fifo_write,unmapped,wait_duration,wait_write,wait_read,wait_read_clear,wait_none
     tools :
       ghdl :
         analyze_options : ["-frelaxed"]
 
-  sim_regtool_apb_reset:
-    << : *tb_regtool_apb
-    description     : regtool testbench, interface apb, reset values
-    parameters      : [TEST=reset]
-
-  sim_regtool_apb_write_read:
-    << : *tb_regtool_apb
-    description     : regtool testbench, interface apb, software write / read back, write only register
-    parameters      : [TEST=write_read]
-
-  sim_regtool_apb_hw_write:
-    << : *tb_regtool_apb
-    description     : regtool testbench, interface apb, registers written by the hardware, rw1c
-    parameters      : [TEST=hw_write]
-
-  sim_regtool_apb_ext:
-    << : *tb_regtool_apb
-    description     : regtool testbench, interface apb, external register
-    parameters      : [TEST=ext]
-
-  sim_regtool_apb_fifo_read:
-    << : *tb_regtool_apb
-    description     : regtool testbench, interface apb, blocking read of an empty FIFO
-    parameters      : [TEST=fifo_read]
-
-  sim_regtool_apb_fifo_write:
-    << : *tb_regtool_apb
-    description     : regtool testbench, interface apb, blocking write of a full FIFO
-    parameters      : [TEST=fifo_write]
-
-  sim_regtool_apb_unmapped:
-    << : *tb_regtool_apb
-    description     : regtool testbench, interface apb, access to an unmapped address
-    parameters      : [TEST=unmapped]
-
-  sim_regtool_apb_wait_duration:
-    << : *tb_regtool_apb
-    description     : regtool testbench, interface apb, wait states, duration of the accesses
-    parameters      : [TEST=wait_duration]
-
-  sim_regtool_apb_wait_write:
-    << : *tb_regtool_apb
-    description     : regtool testbench, interface apb, write wait states, write and write strobe once, during the access
-    parameters      : [TEST=wait_write]
-
-  sim_regtool_apb_wait_read:
-    << : *tb_regtool_apb
-    description     : regtool testbench, interface apb, read wait states, read data of the last cycle, read strobe once
-    parameters      : [TEST=wait_read]
-
-  sim_regtool_apb_wait_read_clear:
-    << : *tb_regtool_apb
-    description     : regtool testbench, interface apb, read wait states, read side effect once, value before the clear
-    parameters      : [TEST=wait_read_clear]
-
-  sim_regtool_apb_wait_none:
-    << : *tb_regtool_apb
-    description     : regtool testbench, interface apb, wait states at 0, same as without them
-    parameters      : [TEST=wait_none]
-
   #---------------------------------------
-  tb_regtool_axi4lite: &tb_regtool_axi4lite
+  sim_regtool_axi4lite:
   #---------------------------------------
     << : *sim
-    description     : regtool testbench, interface axi4lite (base of the sim_regtool_axi4lite_* targets)
+    description     : regtool testbench, interface axi4lite, every scenario
     filesets        :
       - deps
       - files_regtool_sim
@@ -874,70 +947,11 @@ targets:
     generate        :
       - gen_csr_tb_axi4lite
     toplevel        : asylum.tb_regtool_axi4lite
-    parameters      : [TEST=reset]
+    parameters      :
+      - TESTS_LIST=reset,write_read,hw_write,ext,fifo_read,fifo_write,unmapped,wait_duration,wait_write,wait_read,wait_read_clear,wait_none
     tools :
       ghdl :
         analyze_options : ["-frelaxed"]
-
-  sim_regtool_axi4lite_reset:
-    << : *tb_regtool_axi4lite
-    description     : regtool testbench, interface axi4lite, reset values
-    parameters      : [TEST=reset]
-
-  sim_regtool_axi4lite_write_read:
-    << : *tb_regtool_axi4lite
-    description     : regtool testbench, interface axi4lite, software write / read back, write only register
-    parameters      : [TEST=write_read]
-
-  sim_regtool_axi4lite_hw_write:
-    << : *tb_regtool_axi4lite
-    description     : regtool testbench, interface axi4lite, registers written by the hardware, rw1c
-    parameters      : [TEST=hw_write]
-
-  sim_regtool_axi4lite_ext:
-    << : *tb_regtool_axi4lite
-    description     : regtool testbench, interface axi4lite, external register
-    parameters      : [TEST=ext]
-
-  sim_regtool_axi4lite_fifo_read:
-    << : *tb_regtool_axi4lite
-    description     : regtool testbench, interface axi4lite, blocking read of an empty FIFO
-    parameters      : [TEST=fifo_read]
-
-  sim_regtool_axi4lite_fifo_write:
-    << : *tb_regtool_axi4lite
-    description     : regtool testbench, interface axi4lite, blocking write of a full FIFO
-    parameters      : [TEST=fifo_write]
-
-  sim_regtool_axi4lite_unmapped:
-    << : *tb_regtool_axi4lite
-    description     : regtool testbench, interface axi4lite, access to an unmapped address
-    parameters      : [TEST=unmapped]
-
-  sim_regtool_axi4lite_wait_duration:
-    << : *tb_regtool_axi4lite
-    description     : regtool testbench, interface axi4lite, wait states, duration of the accesses
-    parameters      : [TEST=wait_duration]
-
-  sim_regtool_axi4lite_wait_write:
-    << : *tb_regtool_axi4lite
-    description     : regtool testbench, interface axi4lite, write wait states, write and write strobe once, during the access
-    parameters      : [TEST=wait_write]
-
-  sim_regtool_axi4lite_wait_read:
-    << : *tb_regtool_axi4lite
-    description     : regtool testbench, interface axi4lite, read wait states, read data of the last cycle, read strobe once
-    parameters      : [TEST=wait_read]
-
-  sim_regtool_axi4lite_wait_read_clear:
-    << : *tb_regtool_axi4lite
-    description     : regtool testbench, interface axi4lite, read wait states, read side effect once, value before the clear
-    parameters      : [TEST=wait_read_clear]
-
-  sim_regtool_axi4lite_wait_none:
-    << : *tb_regtool_axi4lite
-    description     : regtool testbench, interface axi4lite, wait states at 0, same as without them
-    parameters      : [TEST=wait_none]
 
 #  #---------------------------------------
 #  sim_regtool_example2:
@@ -976,6 +990,12 @@ scripts:
   ghdl_synth :
     cmd : [bash, ghdl_synth.sh]
 
+  #---------------------------------------
+  # pre_run hook of syn_* (cwd = work_root)
+  #---------------------------------------
+  yosys_synth :
+    cmd : [bash, yosys_synth.sh]
+
 # Next lines is a pragma, don't modify
 #<PROVIDER_BEGIN>
 provider  :
@@ -983,5 +1003,5 @@ provider  :
   user    : deuskane
   repo    : asylum-utils-generators
   version : asylum-utils-generators-2.10.0
- #version : 746324fa05ff9b7bace91045a5e7951c6f654452
+ #version : e60355435925ed8ba96e681e675b1e9c6df0b641
 #<PROVIDER_END>

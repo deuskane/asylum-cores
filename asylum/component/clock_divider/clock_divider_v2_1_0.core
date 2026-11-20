@@ -47,10 +47,20 @@ filesets:
   #---------------------------------------
   files_sim:
     files:
-      - sim/tb_clock_divider.vhd
+      - sim/clock_divider/tb_clock_divider_bfm_pkg.vhd
+      - sim/clock_divider/tb_clock_divider_reset_pkg.vhd
+      - sim/clock_divider/tb_clock_divider_period_pkg.vhd
+      - sim/clock_divider/tb_clock_divider_cke_stop_pkg.vhd
+      - sim/clock_divider/tb_clock_divider_cke_half_pkg.vhd
+      - sim/clock_divider/tb_clock_divider_reset_running_pkg.vhd
+      - sim/clock_divider/tb_clock_divider_bypass_pkg.vhd
+      - sim/clock_divider/tb_clock_divider_tests_pkg.vhd
+      - sim/clock_divider/tb_clock_divider.vhd
     file_type : vhdlSource-2008
     depend    :
       - bitvis:verification:uvvm
+      # string_pkg list_length / list_item / list_contains (TESTS_LIST)
+      - ">=asylum:utils:pkg:1.10.0"
 
   #---------------------------------------
   syn:
@@ -59,8 +69,16 @@ filesets:
       - syn/clock_divider_wrapper.vhd
     file_type    : vhdlSource
     logical_name : asylum
+    # ghdl_synth.sh / ghdl_synth.mk (pre_run hook of lint_ghdl_synth_*)
     depend       :
-      - ">=asylum:utils:generators:2.8.0"
+      - asylum:utils:ghdl_synth
+
+  #---------------------------------------
+  # Yosys scripts of the syn_* targets
+  #---------------------------------------
+  syn_yosys:
+    depend       :
+      - asylum:utils:yosys_synth
 
 targets:
 
@@ -90,7 +108,7 @@ targets:
   #---------------------------------------
   # Synthesis check : -Wall analysis, ghdl --synth -Wall and elaboration
   # (no simulation) of clock_divider_wrapper with the generics of the target.
-  # The pre_run hook (ghdl_synth.sh of asylum:utils:generators) adds
+  # The pre_run hook (ghdl_synth.sh of asylum:utils:ghdl_synth) adds
   # ghdl_synth.mk to the edalize Makefile.
   # FuseSoC merges tools in depth : analyze_options comes from lint_ghdl.
   #---------------------------------------
@@ -137,17 +155,339 @@ targets:
       - RATIO=5
       - ALGO_50=true
 
-  sim_basic:
+  #---------------------------------------
+  # Synthesis : size of clock_divider_wrapper with the generics of the
+  # target, Xilinx Artix-7 (LUT, FF, BRAM, DSP) and sky130 (area), by Yosys
+  # and its GHDL plugin. Same configurations as lint_ghdl_synth_*.
+  # The pre_run hook (yosys_synth.sh of asylum:utils:yosys_synth) adds
+  # yosys_synth.mk to the edalize Makefile.
+  #---------------------------------------
+  syn_default : &syn
+    << : *lint_ghdl
+    description     : Synthesis (Artix-7, sky130) of clock_divider_wrapper, default generics
+    filesets_append : [syn, syn_yosys]
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [yosys_synth]
+
+  #---------------------------------------
+  syn_pulse_ratio1 :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of clock_divider_wrapper, pulse, RATIO 1
+    parameters      :
+      - RATIO=1
+
+  #---------------------------------------
+  syn_pulse_ratio5 :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of clock_divider_wrapper, pulse, RATIO 5
+    parameters      :
+      - RATIO=5
+
+  #---------------------------------------
+  syn_duty50_ratio4 :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of clock_divider_wrapper, 50% duty cycle, RATIO 4
+    parameters      :
+      - RATIO=4
+      - ALGO_50=true
+
+  #---------------------------------------
+  syn_duty50_ratio5 :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of clock_divider_wrapper, 50% duty cycle, RATIO 5
+    parameters      :
+      - RATIO=5
+      - ALGO_50=true
+
+  #---------------------------------------
+  # tb_clock_divider (sim/clock_divider) : compiled once per configuration
+  # (RATIO, ALGO_50), scenarios chosen at run time (TESTS_LIST, empty :
+  # build and elaboration only). Reference configuration 50% duty cycle,
+  # RATIO 5 (odd ratio : rising and falling edge registers) : sim_duty50_ratio5
+  # (build only) and one sim_duty50_ratio5_<test> target per scenario ;
+  # every other configuration (pulse and 50%, RATIO 1 to 8, 24 and 25)
+  # runs the whole list. Each target repeats the generics of its
+  # configuration : FuseSoC replaces the parameters list of an inherited
+  # target.
+  #---------------------------------------
+  sim_duty50_ratio5: &sim
+  #---------------------------------------
     << : *default
-    description     : Simulation of all RATIO / ALGO cases (UVVM, self-checking)
+    description     : Simulation of clock_divider (UVVM), 50% duty cycle, RATIO 5 - build only (scenarios of TESTS_LIST)
     filesets_append :
       - files_sim
     toplevel        : tb_clock_divider
+    parameters      :
+      - TESTS_LIST
+      - RATIO=5
+      - ALGO_50=true
     default_tool    : ghdl
     tools :
       ghdl :
-        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
-        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+        analyze_options :
+          - "$(GHDL_ANALYZE_OPTION)"
+          - "-Wall"
+          - "-frelaxed"
+        run_options     :
+          - "$(GHDL_RUN_OPTION)"
+          - "--ieee-asserts=disable"
+
+  #---------------------------------------
+  sim_duty50_ratio5_reset:
+  #---------------------------------------
+    << : *sim
+    description     : Simulation of clock_divider (UVVM), 50% duty cycle, RATIO 5 - clk_div_o low during the reset, first rising edge after the release
+    parameters      :
+      - TESTS_LIST=reset
+      - RATIO=5
+      - ALGO_50=true
+
+  #---------------------------------------
+  sim_duty50_ratio5_period:
+  #---------------------------------------
+    << : *sim
+    description     : Simulation of clock_divider (UVVM), 50% duty cycle, RATIO 5 - period and high time with cke_i = 1
+    parameters      :
+      - TESTS_LIST=period
+      - RATIO=5
+      - ALGO_50=true
+
+  #---------------------------------------
+  sim_duty50_ratio5_cke_stop:
+  #---------------------------------------
+    << : *sim
+    description     : Simulation of clock_divider (UVVM), 50% duty cycle, RATIO 5 - cke_i = 0 at 4 phases freezes clk_div_o, then period and high time
+    parameters      :
+      - TESTS_LIST=cke_stop
+      - RATIO=5
+      - ALGO_50=true
+
+  #---------------------------------------
+  sim_duty50_ratio5_cke_half:
+  #---------------------------------------
+    << : *sim
+    description     : Simulation of clock_divider (UVVM), 50% duty cycle, RATIO 5 - cke_i = 1 one cycle out of 2 (changes on the falling then the rising edges), period 2*RATIO
+    parameters      :
+      - TESTS_LIST=cke_half
+      - RATIO=5
+      - ALGO_50=true
+
+  #---------------------------------------
+  sim_duty50_ratio5_reset_running:
+  #---------------------------------------
+    << : *sim
+    description     : Simulation of clock_divider (UVVM), 50% duty cycle, RATIO 5 - reset between two clock edges clears clk_div_o at once, first rising edge after the release
+    parameters      :
+      - TESTS_LIST=reset_running
+      - RATIO=5
+      - ALGO_50=true
+
+  #---------------------------------------
+  sim_duty50_ratio5_bypass:
+  #---------------------------------------
+    << : *sim
+    description     : Simulation of clock_divider (UVVM), 50% duty cycle, RATIO 5 - period and high time of the instance with BYPASS_CBUFG = true
+    parameters      :
+      - TESTS_LIST=bypass
+      - RATIO=5
+      - ALGO_50=true
+
+  #---------------------------------------
+  sim_pulse_ratio1:
+  #---------------------------------------
+    << : *sim
+    description     : Simulation of clock_divider (UVVM), pulse, RATIO 1 - every scenario
+    parameters      :
+      - TESTS_LIST=reset,period,cke_stop,cke_half,reset_running,bypass
+      - RATIO=1
+      - ALGO_50=false
+
+  #---------------------------------------
+  sim_pulse_ratio2:
+  #---------------------------------------
+    << : *sim
+    description     : Simulation of clock_divider (UVVM), pulse, RATIO 2 - every scenario
+    parameters      :
+      - TESTS_LIST=reset,period,cke_stop,cke_half,reset_running,bypass
+      - RATIO=2
+      - ALGO_50=false
+
+  #---------------------------------------
+  sim_pulse_ratio3:
+  #---------------------------------------
+    << : *sim
+    description     : Simulation of clock_divider (UVVM), pulse, RATIO 3 - every scenario
+    parameters      :
+      - TESTS_LIST=reset,period,cke_stop,cke_half,reset_running,bypass
+      - RATIO=3
+      - ALGO_50=false
+
+  #---------------------------------------
+  sim_pulse_ratio4:
+  #---------------------------------------
+    << : *sim
+    description     : Simulation of clock_divider (UVVM), pulse, RATIO 4 - every scenario
+    parameters      :
+      - TESTS_LIST=reset,period,cke_stop,cke_half,reset_running,bypass
+      - RATIO=4
+      - ALGO_50=false
+
+  #---------------------------------------
+  sim_pulse_ratio5:
+  #---------------------------------------
+    << : *sim
+    description     : Simulation of clock_divider (UVVM), pulse, RATIO 5 - every scenario
+    parameters      :
+      - TESTS_LIST=reset,period,cke_stop,cke_half,reset_running,bypass
+      - RATIO=5
+      - ALGO_50=false
+
+  #---------------------------------------
+  sim_pulse_ratio6:
+  #---------------------------------------
+    << : *sim
+    description     : Simulation of clock_divider (UVVM), pulse, RATIO 6 - every scenario
+    parameters      :
+      - TESTS_LIST=reset,period,cke_stop,cke_half,reset_running,bypass
+      - RATIO=6
+      - ALGO_50=false
+
+  #---------------------------------------
+  sim_pulse_ratio7:
+  #---------------------------------------
+    << : *sim
+    description     : Simulation of clock_divider (UVVM), pulse, RATIO 7 - every scenario
+    parameters      :
+      - TESTS_LIST=reset,period,cke_stop,cke_half,reset_running,bypass
+      - RATIO=7
+      - ALGO_50=false
+
+  #---------------------------------------
+  sim_pulse_ratio8:
+  #---------------------------------------
+    << : *sim
+    description     : Simulation of clock_divider (UVVM), pulse, RATIO 8 - every scenario
+    parameters      :
+      - TESTS_LIST=reset,period,cke_stop,cke_half,reset_running,bypass
+      - RATIO=8
+      - ALGO_50=false
+
+  #---------------------------------------
+  sim_pulse_ratio24:
+  #---------------------------------------
+    << : *sim
+    description     : Simulation of clock_divider (UVVM), pulse, RATIO 24 - every scenario
+    parameters      :
+      - TESTS_LIST=reset,period,cke_stop,cke_half,reset_running,bypass
+      - RATIO=24
+      - ALGO_50=false
+
+  #---------------------------------------
+  sim_pulse_ratio25:
+  #---------------------------------------
+    << : *sim
+    description     : Simulation of clock_divider (UVVM), pulse, RATIO 25 - every scenario
+    parameters      :
+      - TESTS_LIST=reset,period,cke_stop,cke_half,reset_running,bypass
+      - RATIO=25
+      - ALGO_50=false
+
+  #---------------------------------------
+  sim_duty50_ratio1:
+  #---------------------------------------
+    << : *sim
+    description     : Simulation of clock_divider (UVVM), 50% duty cycle, RATIO 1 - every scenario
+    parameters      :
+      - TESTS_LIST=reset,period,cke_stop,cke_half,reset_running,bypass
+      - RATIO=1
+      - ALGO_50=true
+
+  #---------------------------------------
+  sim_duty50_ratio2:
+  #---------------------------------------
+    << : *sim
+    description     : Simulation of clock_divider (UVVM), 50% duty cycle, RATIO 2 - every scenario
+    parameters      :
+      - TESTS_LIST=reset,period,cke_stop,cke_half,reset_running,bypass
+      - RATIO=2
+      - ALGO_50=true
+
+  #---------------------------------------
+  sim_duty50_ratio3:
+  #---------------------------------------
+    << : *sim
+    description     : Simulation of clock_divider (UVVM), 50% duty cycle, RATIO 3 - every scenario
+    parameters      :
+      - TESTS_LIST=reset,period,cke_stop,cke_half,reset_running,bypass
+      - RATIO=3
+      - ALGO_50=true
+
+  #---------------------------------------
+  sim_duty50_ratio4:
+  #---------------------------------------
+    << : *sim
+    description     : Simulation of clock_divider (UVVM), 50% duty cycle, RATIO 4 - every scenario
+    parameters      :
+      - TESTS_LIST=reset,period,cke_stop,cke_half,reset_running,bypass
+      - RATIO=4
+      - ALGO_50=true
+
+  #---------------------------------------
+  sim_duty50_ratio6:
+  #---------------------------------------
+    << : *sim
+    description     : Simulation of clock_divider (UVVM), 50% duty cycle, RATIO 6 - every scenario
+    parameters      :
+      - TESTS_LIST=reset,period,cke_stop,cke_half,reset_running,bypass
+      - RATIO=6
+      - ALGO_50=true
+
+  #---------------------------------------
+  sim_duty50_ratio7:
+  #---------------------------------------
+    << : *sim
+    description     : Simulation of clock_divider (UVVM), 50% duty cycle, RATIO 7 - every scenario
+    parameters      :
+      - TESTS_LIST=reset,period,cke_stop,cke_half,reset_running,bypass
+      - RATIO=7
+      - ALGO_50=true
+
+  #---------------------------------------
+  sim_duty50_ratio8:
+  #---------------------------------------
+    << : *sim
+    description     : Simulation of clock_divider (UVVM), 50% duty cycle, RATIO 8 - every scenario
+    parameters      :
+      - TESTS_LIST=reset,period,cke_stop,cke_half,reset_running,bypass
+      - RATIO=8
+      - ALGO_50=true
+
+  #---------------------------------------
+  sim_duty50_ratio24:
+  #---------------------------------------
+    << : *sim
+    description     : Simulation of clock_divider (UVVM), 50% duty cycle, RATIO 24 - every scenario
+    parameters      :
+      - TESTS_LIST=reset,period,cke_stop,cke_half,reset_running,bypass
+      - RATIO=24
+      - ALGO_50=true
+
+  #---------------------------------------
+  sim_duty50_ratio25:
+  #---------------------------------------
+    << : *sim
+    description     : Simulation of clock_divider (UVVM), 50% duty cycle, RATIO 25 - every scenario
+    parameters      :
+      - TESTS_LIST=reset,period,cke_stop,cke_half,reset_running,bypass
+      - RATIO=25
+      - ALGO_50=true
 
 scripts:
 
@@ -157,12 +497,25 @@ scripts:
   ghdl_synth :
     cmd : [bash, ghdl_synth.sh]
 
+  #---------------------------------------
+  # pre_run hook of syn_* (cwd = work_root)
+  #---------------------------------------
+  yosys_synth :
+    cmd : [bash, yosys_synth.sh]
+
 #=========================================
 parameters :
 #=========================================
 
+  TESTS_LIST :
+    description : Scenarios run in sequence, separated by ',' (names in sim/clock_divider/tb_clock_divider_tests_pkg.vhd), empty = build only
+    datatype    : str
+    default     : ""
+    paramtype   : generic
+
   #---------------------------------------
-  # Generics of clock_divider_wrapper (lint_ghdl_synth_*)
+  # Generics of clock_divider_wrapper (lint_ghdl_synth_*, syn_*) and
+  # tb_clock_divider (sim_*)
   #---------------------------------------
   RATIO :
     description : Static ratio
@@ -183,5 +536,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-clock_divider
   version : asylum-component-clock_divider-2.1.0
- #version : 1845cb22a41f7beb64ee99261ee7e4b0ab491759
+ #version : eb104b0024576debdd0dde47eb6c3933529d5af6
 #<PROVIDER_END>

@@ -52,42 +52,73 @@ filesets:
       - asylum:utils:pkg
 
   #---------------------------------------
-  # Testbench files shared by tb_PWM and tb_pwm_core
+  # Testbench helpers shared by tb_PWM and tb_pwm_core
   #---------------------------------------
   sim_common:
     files        :
-      - sim/common/tb_pwm_pkg.vhd
+      - sim/common/tb_PWM_bfm_pkg.vhd
     file_type    : vhdlSource-2008
     depend       :
       - bitvis:verification:uvvm
+      # string_pkg list_length / list_item / list_contains (TESTS_LIST)
+      - ">=asylum:utils:pkg:1.10.0"
 
   #---------------------------------------
-  sim_basic:
+  sim_pwm:
   #---------------------------------------
     files        :
-      - sim/basic/tb_PWM.vhd
+      - sim/pwm/tb_PWM_reset_values_pkg.vhd
+      - sim/pwm/tb_PWM_registers_pkg.vhd
+      - sim/pwm/tb_PWM_disabled_pkg.vhd
+      - sim/pwm/tb_PWM_no_prescaler_pkg.vhd
+      - sim/pwm/tb_PWM_prescaler_pkg.vhd
+      - sim/pwm/tb_PWM_duty_pkg.vhd
+      - sim/pwm/tb_PWM_period_0_pkg.vhd
+      - sim/pwm/tb_PWM_update_duty_pkg.vhd
+      - sim/pwm/tb_PWM_update_period_pkg.vhd
+      - sim/pwm/tb_PWM_update_prescaler_pkg.vhd
+      - sim/pwm/tb_PWM_disable_enable_pkg.vhd
+      - sim/pwm/tb_PWM_frequency_pkg.vhd
+      - sim/pwm/tb_PWM_servo_pkg.vhd
+      - sim/pwm/tb_PWM_async_reset_pkg.vhd
+      - sim/pwm/tb_PWM_tests_pkg.vhd
+      - sim/pwm/tb_PWM.vhd
     file_type    : vhdlSource-2008
     depend       :
       - bitvis:verification:uvvm
 
   #---------------------------------------
-  sim_core:
+  sim_pwm_core:
   #---------------------------------------
     files        :
-      - sim/core/tb_pwm_core.vhd
+      - sim/pwm_core/tb_pwm_core_bfm_pkg.vhd
+      - sim/pwm_core/tb_pwm_core_prescaler_pkg.vhd
+      - sim/pwm_core/tb_pwm_core_full_period_pkg.vhd
+      - sim/pwm_core/tb_pwm_core_update_duty_pkg.vhd
+      - sim/pwm_core/tb_pwm_core_always_high_pkg.vhd
+      - sim/pwm_core/tb_pwm_core_tests_pkg.vhd
+      - sim/pwm_core/tb_pwm_core.vhd
     file_type    : vhdlSource-2008
     depend       :
       - bitvis:verification:uvvm
 
   #---------------------------------------
-  # Lint Files (pre_run hook of lint_ghdl_synth_*)
+  syn:
   #---------------------------------------
-  files_lint:
-    files:
-      - syn/ghdl/sbi_PWM_synth_top.vhd
-      - syn/ghdl/ghdl_synth.sh : {file_type : user, copyto : ghdl_synth.sh}
-      - syn/ghdl/ghdl_synth.mk : {file_type : user, copyto : ghdl_synth.mk}
-    file_type : vhdlSource-2008
+    files        :
+      - syn/sbi_PWM_wrapper.vhd
+    file_type    : vhdlSource-2008
+    logical_name : asylum
+    # ghdl_synth.sh / ghdl_synth.mk (pre_run hook of lint_ghdl_synth_*)
+    depend       :
+      - asylum:utils:ghdl_synth
+
+  #---------------------------------------
+  syn_yosys:
+  #---------------------------------------
+    # yosys_synth.sh / yosys_synth.mk / yosys_synth.py (pre_run hook of syn_*)
+    depend       :
+      - asylum:utils:yosys_synth
 
 #=========================================
 targets:
@@ -109,9 +140,9 @@ targets:
   #---------------------------------------
   lint_ghdl : &lint_ghdl
     << : *default
-    description     : Lint with GHDL (-Wall analysis and elaboration of sbi_PWM_synth_top)
-    toplevel        : sbi_PWM_synth_top
-    filesets_append : [files_lint]
+    description     : Lint with GHDL (-Wall analysis and elaboration of sbi_PWM_wrapper)
+    toplevel        : asylum.sbi_PWM_wrapper
+    filesets_append : [syn]
     default_tool    : ghdl
     tools :
       ghdl :
@@ -119,13 +150,14 @@ targets:
 
   #---------------------------------------
   # Synthesis check : -Wall analysis, ghdl --synth -Wall and elaboration
-  # (no simulation) of sbi_PWM_synth_top with the generics of the target.
-  # The pre_run hook adds syn/ghdl/ghdl_synth.mk to the edalize Makefile.
+  # (no simulation) of sbi_PWM_wrapper with the generics of the target.
+  # The pre_run hook (ghdl_synth.sh of asylum:utils:ghdl_synth) adds
+  # ghdl_synth.mk to the edalize Makefile.
   # FuseSoC merges tools in depth : analyze_options comes from lint_ghdl.
   #---------------------------------------
   lint_ghdl_synth_default : &lint_ghdl_synth
     << : *lint_ghdl
-    description     : Synthesis check of sbi_PWM_synth_top, default generics (also the generics of the sim_ targets of tb_PWM)
+    description     : Synthesis check of sbi_PWM_wrapper, default generics (also the generics of sim_pwm)
     tools :
       ghdl :
         run_options     : ["--no-run"]
@@ -136,7 +168,7 @@ targets:
   lint_ghdl_synth_fixed_prescaler :
   #---------------------------------------
     << : *lint_ghdl_synth
-    description     : Synthesis check of sbi_PWM_synth_top, fixed prescaler (generics of the sim_fixed_prescaler targets)
+    description     : Synthesis check of sbi_PWM_wrapper, fixed prescaler (generics of sim_pwm_fixed_prescaler)
     parameters      :
       - USER_DEFINE_PRESCALER=false
       - PRESCALER_RATIO=00000010
@@ -145,24 +177,69 @@ targets:
   lint_ghdl_synth_static_prescaler :
   #---------------------------------------
     << : *lint_ghdl_synth
-    description     : Synthesis check of sbi_PWM_synth_top, static prescaler (generics of the sim_static_prescaler targets)
+    description     : Synthesis check of sbi_PWM_wrapper, static prescaler (generics of sim_pwm_static_prescaler)
     parameters      :
       - STATIC_PRESCALER_RATIO=20
 
   #---------------------------------------
-  # Simulations of sbi_PWM (tb_PWM) : one scenario (TEST) per target, with
-  # the generics of the DUT configuration (default generics if not set)
+  # Synthesis : size of sbi_PWM_wrapper with the generics of the target,
+  # Xilinx Artix-7 (LUT, FF, BRAM, DSP) and sky130 (area), by Yosys and
+  # its GHDL plugin. Same configurations as lint_ghdl_synth_*.
+  # The pre_run hook (yosys_synth.sh of asylum:utils:yosys_synth) adds
+  # yosys_synth.mk to the edalize Makefile.
   #---------------------------------------
-  sim_reset_values: &sim_pwm
+  syn_default : &syn
+    << : *lint_ghdl
+    description     : Synthesis (Artix-7, sky130) of sbi_PWM_wrapper, default generics (also the generics of sim_pwm)
+    filesets_append : [syn, syn_yosys]
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [yosys_synth]
+
+  #---------------------------------------
+  syn_fixed_prescaler :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of sbi_PWM_wrapper, fixed prescaler (generics of sim_pwm_fixed_prescaler)
+    parameters      :
+      - USER_DEFINE_PRESCALER=false
+      - PRESCALER_RATIO=00000010
+
+  #---------------------------------------
+  syn_static_prescaler :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of sbi_PWM_wrapper, static prescaler (generics of sim_pwm_static_prescaler)
+    parameters      :
+      - STATIC_PRESCALER_RATIO=20
+
+  #---------------------------------------
+  # tb_PWM (sim/pwm) : compiled once per configuration
+  # (STATIC_PRESCALER_RATIO, USER_DEFINE_PRESCALER, PRESCALER_RATIO),
+  # scenarios chosen at run time (TESTS_LIST, empty : build and
+  # elaboration only). Reference configuration : default generics of
+  # sbi_PWM : sim_pwm (build only) and one sim_pwm_<test> target per
+  # scenario ; sim_pwm_fixed_prescaler and sim_pwm_static_prescaler run
+  # the list of their scenarios. Each target repeats the generics of its
+  # configuration : FuseSoC replaces the parameters list of an inherited
+  # target.
+  #---------------------------------------
+  #---------------------------------------
+  sim_pwm: &sim_pwm
   #---------------------------------------
     << : *default
-    description     : sbi_PWM, reset values of the registers and of the output
+    description     : Simulation of sbi_PWM (UVVM) - build only (scenarios of TESTS_LIST)
     filesets_append :
       - sim_common
-      - sim_basic
+      - sim_pwm
     toplevel        : tb_PWM
     parameters      :
-      - TEST=reset_values
+      - TESTS_LIST
+      - STATIC_PRESCALER_RATIO=1
+      - USER_DEFINE_PRESCALER=true
+      - PRESCALER_RATIO=11000010
     default_tool    : ghdl
     tools :
       ghdl :
@@ -175,196 +252,197 @@ targets:
           - "--ieee-asserts=disable"
 
   #---------------------------------------
-  sim_registers:
+  sim_pwm_reset_values:
   #---------------------------------------
     << : *sim_pwm
-    description     : sbi_PWM, read and write of the registers
+    description     : Simulation of sbi_PWM (UVVM) - reset values of the registers and of pwm_o
     parameters      :
-      - TEST=registers
+      - TESTS_LIST=reset_values
+      - STATIC_PRESCALER_RATIO=1
+      - USER_DEFINE_PRESCALER=true
+      - PRESCALER_RATIO=11000010
 
   #---------------------------------------
-  sim_disabled:
+  sim_pwm_registers:
   #---------------------------------------
     << : *sim_pwm
-    description     : sbi_PWM, output low while the PWM is disabled
+    description     : Simulation of sbi_PWM (UVVM) - read and write of the registers
     parameters      :
-      - TEST=disabled
+      - TESTS_LIST=registers
+      - STATIC_PRESCALER_RATIO=1
+      - USER_DEFINE_PRESCALER=true
+      - PRESCALER_RATIO=11000010
 
   #---------------------------------------
-  sim_no_prescaler:
+  sim_pwm_disabled:
   #---------------------------------------
     << : *sim_pwm
-    description     : sbi_PWM, start latency and timing with prescaler 0
+    description     : Simulation of sbi_PWM (UVVM) - pwm_o low while the PWM is disabled
     parameters      :
-      - TEST=no_prescaler
+      - TESTS_LIST=disabled
+      - STATIC_PRESCALER_RATIO=1
+      - USER_DEFINE_PRESCALER=true
+      - PRESCALER_RATIO=11000010
 
   #---------------------------------------
-  sim_prescaler:
+  sim_pwm_no_prescaler:
   #---------------------------------------
     << : *sim_pwm
-    description     : sbi_PWM, start latency and timing with prescaler 4
+    description     : Simulation of sbi_PWM (UVVM) - start latency and timing with prescaler 0
     parameters      :
-      - TEST=prescaler
+      - TESTS_LIST=no_prescaler
+      - STATIC_PRESCALER_RATIO=1
+      - USER_DEFINE_PRESCALER=true
+      - PRESCALER_RATIO=11000010
 
   #---------------------------------------
-  sim_duty:
+  sim_pwm_prescaler:
   #---------------------------------------
     << : *sim_pwm
-    description     : sbi_PWM, duty 0, 1, period, period+1 and 255
+    description     : Simulation of sbi_PWM (UVVM) - start latency and timing with prescaler 4
     parameters      :
-      - TEST=duty
+      - TESTS_LIST=prescaler
+      - STATIC_PRESCALER_RATIO=1
+      - USER_DEFINE_PRESCALER=true
+      - PRESCALER_RATIO=11000010
 
   #---------------------------------------
-  sim_period_0:
+  sim_pwm_duty:
   #---------------------------------------
     << : *sim_pwm
-    description     : sbi_PWM, PWM period of one tick
+    description     : Simulation of sbi_PWM (UVVM) - duty 0, 1, period, period+1 and 255
     parameters      :
-      - TEST=period_0
+      - TESTS_LIST=duty
+      - STATIC_PRESCALER_RATIO=1
+      - USER_DEFINE_PRESCALER=true
+      - PRESCALER_RATIO=11000010
 
   #---------------------------------------
-  sim_update_duty:
+  sim_pwm_period_0:
   #---------------------------------------
     << : *sim_pwm
-    description     : sbi_PWM, duty changed during a period, taken into account at the next one
+    description     : Simulation of sbi_PWM (UVVM) - PWM period of one tick
     parameters      :
-      - TEST=update_duty
+      - TESTS_LIST=period_0
+      - STATIC_PRESCALER_RATIO=1
+      - USER_DEFINE_PRESCALER=true
+      - PRESCALER_RATIO=11000010
 
   #---------------------------------------
-  sim_update_period:
+  sim_pwm_update_duty:
   #---------------------------------------
     << : *sim_pwm
-    description     : sbi_PWM, period changed during a period (increased, decreased below the counter)
+    description     : Simulation of sbi_PWM (UVVM) - duty changed during a period, taken into account at the next one
     parameters      :
-      - TEST=update_period
+      - TESTS_LIST=update_duty
+      - STATIC_PRESCALER_RATIO=1
+      - USER_DEFINE_PRESCALER=true
+      - PRESCALER_RATIO=11000010
 
   #---------------------------------------
-  sim_update_prescaler:
+  sim_pwm_update_period:
   #---------------------------------------
     << : *sim_pwm
-    description     : sbi_PWM, prescaler changed during a period, taken into account at the next one
+    description     : Simulation of sbi_PWM (UVVM) - period changed during a period (increased, decreased below the counter)
     parameters      :
-      - TEST=update_prescaler
+      - TESTS_LIST=update_period
+      - STATIC_PRESCALER_RATIO=1
+      - USER_DEFINE_PRESCALER=true
+      - PRESCALER_RATIO=11000010
 
   #---------------------------------------
-  sim_disable_enable:
+  sim_pwm_update_prescaler:
   #---------------------------------------
     << : *sim_pwm
-    description     : sbi_PWM, disable during the high phase then enable
+    description     : Simulation of sbi_PWM (UVVM) - prescaler changed during a period, taken into account at the next one
     parameters      :
-      - TEST=disable_enable
+      - TESTS_LIST=update_prescaler
+      - STATIC_PRESCALER_RATIO=1
+      - USER_DEFINE_PRESCALER=true
+      - PRESCALER_RATIO=11000010
 
   #---------------------------------------
-  sim_frequency_1khz:
+  sim_pwm_disable_enable:
   #---------------------------------------
     << : *sim_pwm
-    description     : sbi_PWM, reset values of prescaler and period (1 kHz with a 50 MHz clock)
+    description     : Simulation of sbi_PWM (UVVM) - disable during the high and the low phase then enable
     parameters      :
-      - TEST=frequency
+      - TESTS_LIST=disable_enable
+      - STATIC_PRESCALER_RATIO=1
+      - USER_DEFINE_PRESCALER=true
+      - PRESCALER_RATIO=11000010
 
   #---------------------------------------
-  sim_reset:
+  sim_pwm_frequency:
   #---------------------------------------
     << : *sim_pwm
-    description     : sbi_PWM, asynchronous reset while running
+    description     : Simulation of sbi_PWM (UVVM) - reset values of prescaler and period (1 kHz with a 50 MHz clock)
     parameters      :
-      - TEST=reset
+      - TESTS_LIST=frequency
+      - STATIC_PRESCALER_RATIO=1
+      - USER_DEFINE_PRESCALER=true
+      - PRESCALER_RATIO=11000010
 
   #---------------------------------------
-  # sbi_PWM with a fixed prescaler (no prescaler register)
-  #---------------------------------------
-  #---------------------------------------
-  sim_fixed_prescaler_reset_values:
+  sim_pwm_servo:
   #---------------------------------------
     << : *sim_pwm
-    description     : sbi_PWM fixed prescaler 2, reset values (prescaler read 0)
+    description     : Simulation of sbi_PWM (UVVM) - prescaler 249, period 199, duty 15 (servo pulse)
     parameters      :
-      - TEST=reset_values
+      - TESTS_LIST=servo
+      - STATIC_PRESCALER_RATIO=1
+      - USER_DEFINE_PRESCALER=true
+      - PRESCALER_RATIO=11000010
+
+  #---------------------------------------
+  sim_pwm_async_reset:
+  #---------------------------------------
+    << : *sim_pwm
+    description     : Simulation of sbi_PWM (UVVM) - asynchronous reset while running
+    parameters      :
+      - TESTS_LIST=async_reset
+      - STATIC_PRESCALER_RATIO=1
+      - USER_DEFINE_PRESCALER=true
+      - PRESCALER_RATIO=11000010
+
+  #---------------------------------------
+  sim_pwm_fixed_prescaler:
+  #---------------------------------------
+    << : *sim_pwm
+    description     : Simulation of sbi_PWM (UVVM) - fixed prescaler 2 (no prescaler register), every scenario but update_prescaler
+    parameters      :
+      - TESTS_LIST=reset_values,registers,disabled,no_prescaler,prescaler,duty,period_0,update_duty,update_period,disable_enable,frequency,servo,async_reset
+      - STATIC_PRESCALER_RATIO=1
       - USER_DEFINE_PRESCALER=false
       - PRESCALER_RATIO=00000010
 
   #---------------------------------------
-  sim_fixed_prescaler_registers:
+  sim_pwm_static_prescaler:
   #---------------------------------------
     << : *sim_pwm
-    description     : sbi_PWM fixed prescaler 2, prescaler register not writable
+    description     : Simulation of sbi_PWM (UVVM) - static prescaler 20 (servo 50 Hz), every scenario
     parameters      :
-      - TEST=registers
-      - USER_DEFINE_PRESCALER=false
-      - PRESCALER_RATIO=00000010
-
-  #---------------------------------------
-  sim_fixed_prescaler:
-  #---------------------------------------
-    << : *sim_pwm
-    description     : sbi_PWM fixed prescaler 2, timing with the fixed ratio
-    parameters      :
-      - TEST=prescaler
-      - USER_DEFINE_PRESCALER=false
-      - PRESCALER_RATIO=00000010
-
-  #---------------------------------------
-  # sbi_PWM with a static prescaler of 20 clock cycles
-  #---------------------------------------
-  #---------------------------------------
-  sim_static_prescaler:
-  #---------------------------------------
-    << : *sim_pwm
-    description     : sbi_PWM static prescaler 20, tick of 20 x (prescaler+1) cycles, start on a pulse
-    parameters      :
-      - TEST=prescaler
+      - TESTS_LIST=reset_values,registers,disabled,no_prescaler,prescaler,duty,period_0,update_duty,update_period,update_prescaler,disable_enable,frequency,servo,async_reset
       - STATIC_PRESCALER_RATIO=20
+      - USER_DEFINE_PRESCALER=true
+      - PRESCALER_RATIO=11000010
 
   #---------------------------------------
-  sim_static_prescaler_update_duty:
+  # tb_pwm_core (sim/pwm_core) : pwm_core alone, one configuration
+  # (4-bit prescaler, 12-bit counter) : sim_pwm_core (build only) and one
+  # sim_pwm_core_<test> target per scenario
   #---------------------------------------
-    << : *sim_pwm
-    description     : sbi_PWM static prescaler 20, duty taken into account at the next period
-    parameters      :
-      - TEST=update_duty
-      - STATIC_PRESCALER_RATIO=20
-
   #---------------------------------------
-  sim_static_prescaler_disable_enable:
-  #---------------------------------------
-    << : *sim_pwm
-    description     : sbi_PWM static prescaler 20, disable not delayed by the static prescaler
-    parameters      :
-      - TEST=disable_enable
-      - STATIC_PRESCALER_RATIO=20
-
-  #---------------------------------------
-  sim_static_prescaler_reset:
-  #---------------------------------------
-    << : *sim_pwm
-    description     : sbi_PWM static prescaler 20, asynchronous reset while running
-    parameters      :
-      - TEST=reset
-      - STATIC_PRESCALER_RATIO=20
-
-  #---------------------------------------
-  sim_static_prescaler_servo_50hz:
-  #---------------------------------------
-    << : *sim_pwm
-    description     : sbi_PWM static prescaler 20, servo 50 Hz (1.5 ms pulse every 20 ms)
-    parameters      :
-      - TEST=servo
-      - STATIC_PRESCALER_RATIO=20
-
-  #---------------------------------------
-  # Simulations of pwm_core alone (tb_pwm_core) : 4-bit prescaler, 12-bit
-  # counter
-  #---------------------------------------
-  sim_core_prescaler: &sim_core
+  sim_pwm_core: &sim_pwm_core
   #---------------------------------------
     << : *default
-    description     : pwm_core, maximum prescaler ratio, period 1000 ticks
+    description     : Simulation of pwm_core alone (UVVM), 4-bit prescaler, 12-bit counter - build only (scenarios of TESTS_LIST)
     filesets_append :
       - sim_common
-      - sim_core
+      - sim_pwm_core
     toplevel        : tb_pwm_core
     parameters      :
-      - TEST=prescaler
+      - TESTS_LIST
       - PRESCALER_WIDTH=4
       - COUNTER_WIDTH=12
     default_tool    : ghdl
@@ -379,32 +457,42 @@ targets:
           - "--ieee-asserts=disable"
 
   #---------------------------------------
-  sim_core_full_period:
+  sim_pwm_core_prescaler:
   #---------------------------------------
-    << : *sim_core
-    description     : pwm_core, maximum period (4096 ticks)
+    << : *sim_pwm_core
+    description     : Simulation of pwm_core alone (UVVM), 4-bit prescaler, 12-bit counter - maximum prescaler ratio, period 1000 ticks
     parameters      :
-      - TEST=full_period
+      - TESTS_LIST=prescaler
       - PRESCALER_WIDTH=4
       - COUNTER_WIDTH=12
 
   #---------------------------------------
-  sim_core_update_duty:
+  sim_pwm_core_full_period:
   #---------------------------------------
-    << : *sim_core
-    description     : pwm_core, maximum duty written while running
+    << : *sim_pwm_core
+    description     : Simulation of pwm_core alone (UVVM), 4-bit prescaler, 12-bit counter - maximum period (4096 ticks)
     parameters      :
-      - TEST=update_duty
+      - TESTS_LIST=full_period
       - PRESCALER_WIDTH=4
       - COUNTER_WIDTH=12
 
   #---------------------------------------
-  sim_core_always_high:
+  sim_pwm_core_update_duty:
   #---------------------------------------
-    << : *sim_core
-    description     : pwm_core, duty greater than period
+    << : *sim_pwm_core
+    description     : Simulation of pwm_core alone (UVVM), 4-bit prescaler, 12-bit counter - maximum duty written while running
     parameters      :
-      - TEST=always_high
+      - TESTS_LIST=update_duty
+      - PRESCALER_WIDTH=4
+      - COUNTER_WIDTH=12
+
+  #---------------------------------------
+  sim_pwm_core_always_high:
+  #---------------------------------------
+    << : *sim_pwm_core
+    description     : Simulation of pwm_core alone (UVVM), 4-bit prescaler, 12-bit counter - duty greater than period
+    parameters      :
+      - TESTS_LIST=always_high
       - PRESCALER_WIDTH=4
       - COUNTER_WIDTH=12
 
@@ -418,21 +506,27 @@ scripts:
   ghdl_synth :
     cmd : [bash, ghdl_synth.sh]
 
+  #---------------------------------------
+  # pre_run hook of syn_* (cwd = work_root)
+  #---------------------------------------
+  yosys_synth :
+    cmd : [bash, yosys_synth.sh]
+
 #=========================================
 parameters :
 #=========================================
 
   #---------------------------------------
-  # Scenario of tb_PWM and tb_pwm_core (sim_*)
+  # Scenarios of tb_PWM and tb_pwm_core (sim_*)
   #---------------------------------------
-  TEST :
-    description : Scenario run by the testbench
+  TESTS_LIST :
+    description : Scenarios run in sequence, separated by ',' (names in sim/pwm/tb_PWM_tests_pkg.vhd, sim/pwm_core/tb_pwm_core_tests_pkg.vhd), empty = build only
     datatype    : str
-    default     : reset_values
+    default     : ""
     paramtype   : generic
 
   #---------------------------------------
-  # Generics of tb_pwm_core (sim_core_*)
+  # Generics of tb_pwm_core (sim_pwm_core*)
   #---------------------------------------
   PRESCALER_WIDTH :
     description : Width of the prescaler ratio of pwm_core
@@ -447,7 +541,7 @@ parameters :
     paramtype   : generic
 
   #---------------------------------------
-  # Generics of sbi_PWM_synth_top (lint_ghdl_synth_*) and of tb_PWM (sim_*)
+  # Generics of sbi_PWM_wrapper (lint_ghdl_synth_*, syn_*) and of tb_PWM (sim_*)
   #---------------------------------------
   STATIC_PRESCALER_RATIO :
     description : Static prescaler, clock cycles per step of the prescaler (1 = no static prescaler)
@@ -474,5 +568,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-pwm
   version : asylum-component-PWM-1.0.0
- #version : 1f425ffdee722b23e5762b07cd77b791bccbdfd3
+ #version : bae70aa13b4c1ceb31840e6f9105947bc53a9441
 #<PROVIDER_END>

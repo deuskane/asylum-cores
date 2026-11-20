@@ -54,5 +54,5 @@ provider  :
   user    : deuskane
   repo    : asylum-target-techmap
   version : asylum-target-techmap-1.0.0
- #version : 5fcb7f5b6cc504d5ccaecaebcaaeae6c864c24dc
+ #version : d76101c56271f3087f2340e59a60aa860814459d
 #<PROVIDER_END>

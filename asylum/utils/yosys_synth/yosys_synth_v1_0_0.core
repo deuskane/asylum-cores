@@ -53,5 +53,5 @@ provider  :
   user    : deuskane
   repo    : asylum-utils-generators
   version : asylum-utils-yosys_synth-1.0.0
- #version : 746324fa05ff9b7bace91045a5e7951c6f654452
+ #version : e60355435925ed8ba96e681e675b1e9c6df0b641
 #<PROVIDER_END>

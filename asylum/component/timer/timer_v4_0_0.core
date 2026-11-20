@@ -68,25 +68,48 @@ filesets:
       - asylum:utils:pkg
       
   #---------------------------------------
-  # Testbench Files
+  # Testbench Files (tb_timer)
   #---------------------------------------
   files_sim:
     files:
-      - sim/tb_sbi_timer.vhd
+      - sim/timer/tb_timer_bfm_pkg.vhd
+      - sim/timer/tb_timer_reset_values_pkg.vhd
+      - sim/timer/tb_timer_registers_pkg.vhd
+      - sim/timer/tb_timer_init_atomic_pkg.vhd
+      - sim/timer/tb_timer_borrow_pkg.vhd
+      - sim/timer/tb_timer_one_shot_pkg.vhd
+      - sim/timer/tb_timer_mask_pkg.vhd
+      - sim/timer/tb_timer_disable_pkg.vhd
+      - sim/timer/tb_timer_enable_pkg.vhd
+      - sim/timer/tb_timer_autoreload_pkg.vhd
+      - sim/timer/tb_timer_init_zero_pkg.vhd
+      - sim/timer/tb_timer_async_reset_pkg.vhd
+      - sim/timer/tb_timer_tests_pkg.vhd
+      - sim/timer/tb_timer.vhd
     file_type : vhdlSource-2008
     depend       :
       - bitvis:verification:uvvm
+      # string_pkg list_length / list_item / list_contains (TESTS_LIST)
+      - ">=asylum:utils:pkg:1.10.0"
 
   #---------------------------------------
   syn:
   #---------------------------------------
     files        :
       - syn/sbi_timer_wrapper.vhd
+      - syn/timer_v1_wrapper.vhd
     file_type    : vhdlSource-2008
     logical_name : asylum
     # ghdl_synth.sh / ghdl_synth.mk (pre_run hook of lint_ghdl_synth_*)
     depend       :
       - asylum:utils:ghdl_synth
+
+  #---------------------------------------
+  syn_yosys:
+  #---------------------------------------
+    # yosys_synth.sh / yosys_synth.mk / yosys_synth.py (pre_run hook of syn_*)
+    depend       :
+      - asylum:utils:yosys_synth
 
 #=========================================
 targets:
@@ -104,11 +127,12 @@ targets:
       - gen_csr
 
   #---------------------------------------
-  # Lint : -Wall analysis and elaboration (empty simulation)
+  # Lint : -Wall analysis of both wrappers, elaboration (empty
+  # simulation) of sbi_timer_wrapper
   #---------------------------------------
   lint_ghdl : &lint_ghdl
     << : *default
-    description     : Lint with GHDL (-Wall analysis and elaboration of sbi_timer_wrapper)
+    description     : Lint with GHDL (-Wall analysis of sbi_timer_wrapper and timer_v1_wrapper, elaboration of sbi_timer_wrapper)
     toplevel        : asylum.sbi_timer_wrapper
     filesets_append : [syn]
     default_tool    : ghdl
@@ -118,14 +142,16 @@ targets:
 
   #---------------------------------------
   # Synthesis check : -Wall analysis, ghdl --synth -Wall and elaboration
-  # (no simulation) of sbi_timer_wrapper with the generics of the target.
+  # (no simulation) of the wrapper of a variant (sbi_timer_wrapper :
+  # lint_ghdl_synth_timer_*, timer_v1_wrapper : lint_ghdl_synth_timer_v1_*)
+  # with the generics of the target.
   # The pre_run hook (ghdl_synth.sh of asylum:utils:ghdl_synth) adds
   # ghdl_synth.mk to the edalize Makefile.
   # FuseSoC merges tools in depth : analyze_options comes from lint_ghdl.
   #---------------------------------------
-  lint_ghdl_synth_default : &lint_ghdl_synth
+  lint_ghdl_synth_timer_default : &lint_ghdl_synth
     << : *lint_ghdl
-    description     : Synthesis check of sbi_timer_wrapper, default generics
+    description     : Synthesis check of sbi_timer_wrapper (sbi_timer has no generic)
     tools :
       ghdl :
         run_options     : ["--no-run"]
@@ -133,27 +159,166 @@ targets:
       pre_run : [ghdl_synth]
 
   #---------------------------------------
-  lint_ghdl_synth_v1_it :
+  lint_ghdl_synth_timer_v1_default : &lint_ghdl_synth_v1
   #---------------------------------------
     << : *lint_ghdl_synth
-    description     : Synthesis check of sbi_timer_wrapper, timer_v1 with interrupt, tick 10
+    description     : Synthesis check of timer_v1_wrapper (legacy timer_v1), default generics (tick 1000)
+    toplevel        : asylum.timer_v1_wrapper
+
+  #---------------------------------------
+  lint_ghdl_synth_timer_v1_it :
+  #---------------------------------------
+    << : *lint_ghdl_synth_v1
+    description     : Synthesis check of timer_v1_wrapper (legacy timer_v1), with interrupt, tick 10
     parameters      :
       - V1_IT_ENABLE=true
       - V1_TICK=10
 
   #---------------------------------------
-  sim_sbi_timer:
+  # Synthesis : size of the wrapper of a variant with the generics of the
+  # target, Xilinx Artix-7 (LUT, FF, BRAM, DSP) and sky130 (area), by Yosys
+  # and its GHDL plugin. Same configurations as lint_ghdl_synth_*.
+  # The pre_run hook (yosys_synth.sh of asylum:utils:yosys_synth) adds
+  # yosys_synth.mk to the edalize Makefile.
   #---------------------------------------
+  syn_timer_default : &syn
+    << : *lint_ghdl
+    description     : Synthesis (Artix-7, sky130) of sbi_timer_wrapper (sbi_timer has no generic)
+    filesets_append : [syn, syn_yosys]
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [yosys_synth]
+
+  #---------------------------------------
+  syn_timer_v1_default : &syn_v1
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of timer_v1_wrapper (legacy timer_v1), default generics (tick 1000)
+    toplevel        : asylum.timer_v1_wrapper
+
+  #---------------------------------------
+  syn_timer_v1_it :
+  #---------------------------------------
+    << : *syn_v1
+    description     : Synthesis (Artix-7, sky130) of timer_v1_wrapper (legacy timer_v1), with interrupt, tick 10
+    parameters      :
+      - V1_IT_ENABLE=true
+      - V1_TICK=10
+
+  #---------------------------------------
+  # tb_timer (sim/timer) : sbi_timer has no generic, a single
+  # configuration compiled once, scenarios chosen at run time (TESTS_LIST,
+  # empty : build and elaboration only) : sim_timer (build only) and one
+  # sim_timer_<test> target per scenario.
+  #---------------------------------------
+  sim_timer: &sim_timer
     << : *default
-    description     : Simulation of sbi_timer with SBI VIP
+    description     : Simulation of sbi_timer (UVVM) - build only (scenarios of TESTS_LIST)
     filesets_append :
       - files_sim
-    toplevel        : tb_sbi_timer
+    toplevel        : tb_timer
+    parameters      :
+      - TESTS_LIST
     default_tool    : ghdl
     tools :
       ghdl :
-        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
-        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+        analyze_options :
+          - "$(GHDL_ANALYZE_OPTION)"
+          - "-Wall"
+          - "-frelaxed"
+        run_options     :
+          - "$(GHDL_RUN_OPTION)"
+          - "--ieee-asserts=disable"
+
+  #---------------------------------------
+  sim_timer_reset_values:
+  #---------------------------------------
+    << : *sim_timer
+    description     : Simulation of sbi_timer (UVVM) - reset values of the registers, it_o and the counter
+    parameters      :
+      - TESTS_LIST=reset_values
+
+  #---------------------------------------
+  sim_timer_registers:
+  #---------------------------------------
+    << : *sim_timer
+    description     : Simulation of sbi_timer (UVVM) - read / write of the registers, counter follows the initial value while clear
+    parameters      :
+      - TESTS_LIST=registers
+
+  #---------------------------------------
+  sim_timer_init_atomic:
+  #---------------------------------------
+    << : *sim_timer
+    description     : Simulation of sbi_timer (UVVM) - initial value updated at once on the write of timer_byte3
+    parameters      :
+      - TESTS_LIST=init_atomic
+
+  #---------------------------------------
+  sim_timer_borrow:
+  #---------------------------------------
+    << : *sim_timer
+    description     : Simulation of sbi_timer (UVVM) - 32-bit decrement, borrows across the bytes
+    parameters      :
+      - TESTS_LIST=borrow
+
+  #---------------------------------------
+  sim_timer_one_shot:
+  #---------------------------------------
+    << : *sim_timer
+    description     : Simulation of sbi_timer (UVVM) - one-shot count, exact cycles up to it_o, rw1c acknowledge, no event while held at 0
+    parameters      :
+      - TESTS_LIST=one_shot
+
+  #---------------------------------------
+  sim_timer_mask:
+  #---------------------------------------
+    << : *sim_timer
+    description     : Simulation of sbi_timer (UVVM) - isr records the event while masked (polling), imr only masks it_o
+    parameters      :
+      - TESTS_LIST=mask
+
+  #---------------------------------------
+  sim_timer_disable:
+  #---------------------------------------
+    << : *sim_timer
+    description     : Simulation of sbi_timer (UVVM) - timer_disable_i freezes the counter
+    parameters      :
+      - TESTS_LIST=disable
+
+  #---------------------------------------
+  sim_timer_enable:
+  #---------------------------------------
+    << : *sim_timer
+    description     : Simulation of sbi_timer (UVVM) - control.enable stops and restarts the count
+    parameters      :
+      - TESTS_LIST=enable
+
+  #---------------------------------------
+  sim_timer_autoreload:
+  #---------------------------------------
+    << : *sim_timer
+    description     : Simulation of sbi_timer (UVVM) - auto-reload, period init + 1, polling while masked, timer_clear_i reload
+    parameters      :
+      - TESTS_LIST=autoreload
+
+  #---------------------------------------
+  sim_timer_init_zero:
+  #---------------------------------------
+    << : *sim_timer
+    description     : Simulation of sbi_timer (UVVM) - initial value 0, no interrupt event
+    parameters      :
+      - TESTS_LIST=init_zero
+
+  #---------------------------------------
+  sim_timer_async_reset:
+  #---------------------------------------
+    << : *sim_timer
+    description     : Simulation of sbi_timer (UVVM) - asynchronous reset while counting with an interrupt pending
+    parameters      :
+      - TESTS_LIST=async_reset
 
 #=========================================
 scripts:
@@ -165,12 +330,27 @@ scripts:
   ghdl_synth :
     cmd : [bash, ghdl_synth.sh]
 
+  #---------------------------------------
+  # pre_run hook of syn_* (cwd = work_root)
+  #---------------------------------------
+  yosys_synth :
+    cmd : [bash, yosys_synth.sh]
+
 #=========================================
 parameters :
 #=========================================
 
   #---------------------------------------
-  # Generics of sbi_timer_wrapper (lint_ghdl_synth_*)
+  # Generic of tb_timer (sim_timer*)
+  #---------------------------------------
+  TESTS_LIST :
+    description : Scenarios run in sequence, separated by ',' (names in sim/timer/tb_timer_tests_pkg.vhd), empty = build only
+    datatype    : str
+    default     : ""
+    paramtype   : generic
+
+  #---------------------------------------
+  # Generics of timer_v1_wrapper (lint_ghdl_synth_timer_v1_*, syn_timer_v1_*)
   #---------------------------------------
   V1_TICK :
     description : timer_v1, tick period (clock cycles)
@@ -191,5 +371,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-timer
   version : asylum-component-timer-4.0.0
- #version : 9177971f6a3a0483a406544e3f885c307a0fd931
+ #version : eff40ba3ef0bbf1a51759823ab91e698d230e739
 #<PROVIDER_END>

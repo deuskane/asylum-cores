@@ -82,27 +82,64 @@ filesets:
       - asylum:target:techmap
 
   #---------------------------------------
-  sim:
+  sim_gpio:
   #---------------------------------------
     files:
       - hdl/legacy/GPIO_v1.vhd : {logical_name : asylum}
-      - sim/tb_GPIO_vs_v1.vhd
-      - sim/tb_GPIO.vhd
-      - sim/tb_GPIO_irq.vhd
+      - sim/common/tb_GPIO_bfm_pkg.vhd
+      - sim/gpio/tb_GPIO_reset_values_pkg.vhd
+      - sim/gpio/tb_GPIO_output_pkg.vhd
+      - sim/gpio/tb_GPIO_input_pkg.vhd
+      - sim/gpio/tb_GPIO_mixed_pkg.vhd
+      - sim/gpio/tb_GPIO_async_reset_pkg.vhd
+      - sim/gpio/tb_GPIO_walking_one_pkg.vhd
+      - sim/gpio/tb_GPIO_tests_pkg.vhd
+      - sim/gpio/tb_GPIO.vhd
     file_type : vhdlSource-2008
     depend       :
-      - bitvis:verification:uvvm      
+      - bitvis:verification:uvvm
+      # string_pkg list_length / list_item / list_contains (TESTS_LIST)
+      - ">=asylum:utils:pkg:1.10.0"
+
+  #---------------------------------------
+  sim_gpio_irq:
+  #---------------------------------------
+    files:
+      - sim/common/tb_GPIO_bfm_pkg.vhd
+      - sim/gpio_irq/tb_GPIO_irq_reset_values_pkg.vhd
+      - sim/gpio_irq/tb_GPIO_irq_output_pkg.vhd
+      - sim/gpio_irq/tb_GPIO_irq_input_pkg.vhd
+      - sim/gpio_irq/tb_GPIO_irq_posedge_pkg.vhd
+      - sim/gpio_irq/tb_GPIO_irq_negedge_pkg.vhd
+      - sim/gpio_irq/tb_GPIO_irq_mask_pkg.vhd
+      - sim/gpio_irq/tb_GPIO_irq_output_line_pkg.vhd
+      - sim/gpio_irq/tb_GPIO_irq_async_reset_pkg.vhd
+      - sim/gpio_irq/tb_GPIO_irq_tests_pkg.vhd
+      - sim/gpio_irq/tb_GPIO_irq.vhd
+    file_type : vhdlSource-2008
+    depend       :
+      - bitvis:verification:uvvm
+      # string_pkg list_length / list_item / list_contains (TESTS_LIST)
+      - ">=asylum:utils:pkg:1.10.0"
 
   #---------------------------------------
   syn:
   #---------------------------------------
     files        :
       - syn/sbi_GPIO_wrapper.vhd
+      - syn/sbi_GPIO_irq_wrapper.vhd
     file_type    : vhdlSource-2008
     logical_name : asylum
     # ghdl_synth.sh / ghdl_synth.mk (pre_run hook of lint_ghdl_synth_*)
     depend       :
       - asylum:utils:ghdl_synth
+
+  #---------------------------------------
+  syn_yosys:
+  #---------------------------------------
+    # yosys_synth.sh / yosys_synth.mk / yosys_synth.py (pre_run hook of syn_*)
+    depend       :
+      - asylum:utils:yosys_synth
 
 #=========================================
 targets:
@@ -121,11 +158,12 @@ targets:
       - gen_csr_irq
 
   #---------------------------------------
-  # Lint : -Wall analysis and elaboration (empty simulation)
+  # Lint : -Wall analysis of both wrappers, elaboration (empty
+  # simulation) of sbi_GPIO_wrapper
   #---------------------------------------
   lint_ghdl : &lint_ghdl
     << : *default
-    description     : Lint with GHDL (-Wall analysis and elaboration of sbi_GPIO_wrapper)
+    description     : Lint with GHDL (-Wall analysis of sbi_GPIO_wrapper and sbi_GPIO_irq_wrapper, elaboration of sbi_GPIO_wrapper)
     toplevel        : asylum.sbi_GPIO_wrapper
     filesets_append : [syn]
     default_tool    : ghdl
@@ -135,14 +173,16 @@ targets:
 
   #---------------------------------------
   # Synthesis check : -Wall analysis, ghdl --synth -Wall and elaboration
-  # (no simulation) of sbi_GPIO_wrapper with the generics of the target.
+  # (no simulation) of the wrapper of a variant (sbi_GPIO_wrapper :
+  # lint_ghdl_synth_gpio_*, sbi_GPIO_irq_wrapper : lint_ghdl_synth_gpio_irq_*)
+  # with the generics of the target.
   # The pre_run hook (ghdl_synth.sh of asylum:utils:ghdl_synth) adds
   # ghdl_synth.mk to the edalize Makefile.
   # FuseSoC merges tools in depth : analyze_options comes from lint_ghdl.
   #---------------------------------------
-  lint_ghdl_synth_default : &lint_ghdl_synth
+  lint_ghdl_synth_gpio_default : &lint_ghdl_synth
     << : *lint_ghdl
-    description     : Synthesis check of sbi_GPIO_wrapper, default generics (PicoSoC switches)
+    description     : Synthesis check of sbi_GPIO_wrapper, default generics (8 lines, input after reset)
     tools :
       ghdl :
         run_options     : ["--no-run"]
@@ -150,65 +190,337 @@ targets:
       pre_run : [ghdl_synth]
 
   #---------------------------------------
-  lint_ghdl_synth_led :
+  lint_ghdl_synth_gpio_led :
   #---------------------------------------
     << : *lint_ghdl_synth
-    description     : Synthesis check of sbi_GPIO_wrapper, PicoSoC LEDs
+    description     : Synthesis check of sbi_GPIO_wrapper, every line output after reset (LEDs)
     parameters      :
       - DATA_OE_INIT=11111111
-      - IRQ_POSEDGE=00000000
-      - IRQ_NEGEDGE=00000000
 
   #---------------------------------------
-  lint_ghdl_synth_nb_io4 :
+  lint_ghdl_synth_gpio_irq_default : &lint_ghdl_synth_irq
   #---------------------------------------
     << : *lint_ghdl_synth
-    description     : Synthesis check of sbi_GPIO_wrapper, NB_IO 4 with the edges of tb_GPIO_irq
+    description     : Synthesis check of sbi_GPIO_irq_wrapper, default generics (8 lines, input after reset, interrupt on both edges, PicoSoC switches)
+    toplevel        : asylum.sbi_GPIO_irq_wrapper
+
+  #---------------------------------------
+  lint_ghdl_synth_gpio_irq_nb_io4 :
+  #---------------------------------------
+    << : *lint_ghdl_synth_irq
+    description     : Synthesis check of sbi_GPIO_irq_wrapper, NB_IO 4 with the edges of tb_GPIO_irq
     parameters      :
       - NB_IO=4
       - IRQ_POSEDGE=00001010
       - IRQ_NEGEDGE=00001100
 
   #---------------------------------------
-  sim_testcase_vs_v1:
+  lint_ghdl_synth_gpio_irq_no_irq :
   #---------------------------------------
-    << : *default
-    description     : Simulation of sb_GPIO against GPIO_v1
-    filesets_append :
-      - sim
-    toplevel        : tb_GPIO_vs_v1
-    default_tool    : ghdl
-    tools :
-      ghdl :
-        run_options : ["--vcd=dut.vcd"]
+    << : *lint_ghdl_synth_irq
+    description     : Synthesis check of sbi_GPIO_irq_wrapper, every line output after reset, no interrupt (PicoSoC LEDs)
+    parameters      :
+      - DATA_OE_INIT=11111111
+      - IRQ_POSEDGE=00000000
+      - IRQ_NEGEDGE=00000000
 
   #---------------------------------------
-  sim_testcase:
+  # Synthesis : size of the wrapper of a variant with the generics of the
+  # target, Xilinx Artix-7 (LUT, FF, BRAM, DSP) and sky130 (area), by Yosys
+  # and its GHDL plugin. Same configurations as lint_ghdl_synth_*.
+  # The pre_run hook (yosys_synth.sh of asylum:utils:yosys_synth) adds
+  # yosys_synth.mk to the edalize Makefile.
   #---------------------------------------
+  syn_gpio_default : &syn
+    << : *lint_ghdl
+    description     : Synthesis (Artix-7, sky130) of sbi_GPIO_wrapper, default generics (8 lines, input after reset)
+    filesets_append : [syn, syn_yosys]
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [yosys_synth]
+
+  #---------------------------------------
+  syn_gpio_led :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of sbi_GPIO_wrapper, every line output after reset (LEDs)
+    parameters      :
+      - DATA_OE_INIT=11111111
+
+  #---------------------------------------
+  syn_gpio_irq_default : &syn_irq
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of sbi_GPIO_irq_wrapper, default generics (8 lines, input after reset, interrupt on both edges, PicoSoC switches)
+    toplevel        : asylum.sbi_GPIO_irq_wrapper
+
+  #---------------------------------------
+  syn_gpio_irq_nb_io4 :
+  #---------------------------------------
+    << : *syn_irq
+    description     : Synthesis (Artix-7, sky130) of sbi_GPIO_irq_wrapper, NB_IO 4 with the edges of tb_GPIO_irq
+    parameters      :
+      - NB_IO=4
+      - IRQ_POSEDGE=00001010
+      - IRQ_NEGEDGE=00001100
+
+  #---------------------------------------
+  syn_gpio_irq_no_irq :
+  #---------------------------------------
+    << : *syn_irq
+    description     : Synthesis (Artix-7, sky130) of sbi_GPIO_irq_wrapper, every line output after reset, no interrupt (PicoSoC LEDs)
+    parameters      :
+      - DATA_OE_INIT=11111111
+      - IRQ_POSEDGE=00000000
+      - IRQ_NEGEDGE=00000000
+
+  #---------------------------------------
+  # tb_GPIO (sim/gpio) : compiled once per configuration (DATA_OE_INIT),
+  # scenarios chosen at run time (TESTS_LIST, empty : build and
+  # elaboration only). Reference configuration DATA_OE_INIT = 0 (every
+  # line input after reset) : sim_gpio (build only) and one
+  # sim_gpio_<test> target per scenario ; sim_gpio_led (DATA_OE_INIT =
+  # 0xFF, every line output after reset) runs the whole list. Each target
+  # repeats the generics of its configuration : FuseSoC replaces the
+  # parameters list of an inherited target.
+  #---------------------------------------
+  sim_gpio: &sim_gpio
     << : *default
-    description     : Simulation of sbi_GPIO with VIP
+    description     : Simulation of sbi_GPIO (UVVM), compared with GPIO_v1 - build only (scenarios of TESTS_LIST)
     filesets_append :
-      - sim
+      - sim_gpio
     toplevel        : tb_GPIO
+    parameters      :
+      - TESTS_LIST
+      - DATA_OE_INIT=00000000
     default_tool    : ghdl
     tools :
       ghdl :
-        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
-        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+        analyze_options :
+          - "$(GHDL_ANALYZE_OPTION)"
+          - "-Wall"
+          - "-frelaxed"
+        run_options     :
+          - "$(GHDL_RUN_OPTION)"
+          - "--ieee-asserts=disable"
 
   #---------------------------------------
-  sim_testcase_irq:
+  sim_gpio_reset_values:
   #---------------------------------------
+    << : *sim_gpio
+    description     : Simulation of sbi_GPIO (UVVM), compared with GPIO_v1 - reset values of the registers and pins (DATA_OE_INIT), data_in through the synchronizer
+    parameters      :
+      - TESTS_LIST=reset_values
+      - DATA_OE_INIT=00000000
+
+  #---------------------------------------
+  sim_gpio_output:
+  #---------------------------------------
+    << : *sim_gpio
+    description     : Simulation of sbi_GPIO (UVVM), compared with GPIO_v1 - every line output, data and data_out writes drive data_o
+    parameters      :
+      - TESTS_LIST=output
+      - DATA_OE_INIT=00000000
+
+  #---------------------------------------
+  sim_gpio_input:
+  #---------------------------------------
+    << : *sim_gpio
+    description     : Simulation of sbi_GPIO (UVVM), compared with GPIO_v1 - every line input, data and data_in read the pins
+    parameters      :
+      - TESTS_LIST=input
+      - DATA_OE_INIT=00000000
+
+  #---------------------------------------
+  sim_gpio_mixed:
+  #---------------------------------------
+    << : *sim_gpio
+    description     : Simulation of sbi_GPIO (UVVM), compared with GPIO_v1 - inputs and outputs on the same port, data per bit
+    parameters      :
+      - TESTS_LIST=mixed
+      - DATA_OE_INIT=00000000
+
+  #---------------------------------------
+  sim_gpio_async_reset:
+  #---------------------------------------
+    << : *sim_gpio
+    description     : Simulation of sbi_GPIO (UVVM), compared with GPIO_v1 - asynchronous reset of the output register and data_oe, pins held high during the reset
+    parameters      :
+      - TESTS_LIST=async_reset
+      - DATA_OE_INIT=00000000
+
+  #---------------------------------------
+  sim_gpio_walking_one:
+  #---------------------------------------
+    << : *sim_gpio
+    description     : Simulation of sbi_GPIO (UVVM), compared with GPIO_v1 - walking one on the output register then on the pins
+    parameters      :
+      - TESTS_LIST=walking_one
+      - DATA_OE_INIT=00000000
+
+  #---------------------------------------
+  sim_gpio_led:
+  #---------------------------------------
+    << : *sim_gpio
+    description     : Simulation of sbi_GPIO (UVVM), compared with GPIO_v1 - DATA_OE_INIT 0xFF (every line output after reset), every scenario
+    parameters      :
+      - TESTS_LIST=reset_values,output,input,mixed,async_reset,walking_one
+      - DATA_OE_INIT=11111111
+
+  #---------------------------------------
+  # tb_GPIO_irq (sim/gpio_irq) : compiled once per configuration (NB_IO,
+  # DATA_OE_INIT, IRQ_POSEDGE, IRQ_NEGEDGE), scenarios chosen at run time.
+  # Reference configuration 4 lines, line 0 no interrupt, 1 rising, 2
+  # falling, 3 both edges, lines 1 and 2 output after reset (DATA_OE_INIT
+  # not uniform) : sim_gpio_irq (build only) and one
+  # sim_gpio_irq_<test> target per scenario ; sim_gpio_irq_default (8
+  # lines, both edges, PicoSoC switches) and sim_gpio_irq_led (8 lines
+  # output, no interrupt) run the list of their scenarios.
+  #---------------------------------------
+  sim_gpio_irq: &sim_gpio_irq
     << : *default
-    description     : Simulation of sbi_GPIO_irq with VIP
+    description     : Simulation of sbi_GPIO_irq (UVVM) - build only (scenarios of TESTS_LIST)
     filesets_append :
-      - sim
+      - sim_gpio_irq
     toplevel        : tb_GPIO_irq
+    parameters      :
+      - TESTS_LIST
+      - NB_IO=4
+      - DATA_OE_INIT=00000110
+      - IRQ_POSEDGE=00001010
+      - IRQ_NEGEDGE=00001100
     default_tool    : ghdl
     tools :
       ghdl :
-        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
-        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+        analyze_options :
+          - "$(GHDL_ANALYZE_OPTION)"
+          - "-Wall"
+          - "-frelaxed"
+        run_options     :
+          - "$(GHDL_RUN_OPTION)"
+          - "--ieee-asserts=disable"
+
+  #---------------------------------------
+  sim_gpio_irq_reset_values:
+  #---------------------------------------
+    << : *sim_gpio_irq
+    description     : Simulation of sbi_GPIO_irq (UVVM) - reset values of isr, imr, data_oe (DATA_OE_INIT) and pins
+    parameters      :
+      - TESTS_LIST=reset_values
+      - NB_IO=4
+      - DATA_OE_INIT=00000110
+      - IRQ_POSEDGE=00001010
+      - IRQ_NEGEDGE=00001100
+
+  #---------------------------------------
+  sim_gpio_irq_output:
+  #---------------------------------------
+    << : *sim_gpio_irq
+    description     : Simulation of sbi_GPIO_irq (UVVM) - data written before the direction, data reads the output register
+    parameters      :
+      - TESTS_LIST=output
+      - NB_IO=4
+      - DATA_OE_INIT=00000110
+      - IRQ_POSEDGE=00001010
+      - IRQ_NEGEDGE=00001100
+
+  #---------------------------------------
+  sim_gpio_irq_input:
+  #---------------------------------------
+    << : *sim_gpio_irq
+    description     : Simulation of sbi_GPIO_irq (UVVM) - data reads the pins of the input lines, per bit
+    parameters      :
+      - TESTS_LIST=input
+      - NB_IO=4
+      - DATA_OE_INIT=00000110
+      - IRQ_POSEDGE=00001010
+      - IRQ_NEGEDGE=00001100
+
+  #---------------------------------------
+  sim_gpio_irq_posedge:
+  #---------------------------------------
+    << : *sim_gpio_irq
+    description     : Simulation of sbi_GPIO_irq (UVVM) - rising edges recorded for IRQ_POSEDGE lines only, it_o latency, isr rw1c
+    parameters      :
+      - TESTS_LIST=posedge
+      - NB_IO=4
+      - DATA_OE_INIT=00000110
+      - IRQ_POSEDGE=00001010
+      - IRQ_NEGEDGE=00001100
+
+  #---------------------------------------
+  sim_gpio_irq_negedge:
+  #---------------------------------------
+    << : *sim_gpio_irq
+    description     : Simulation of sbi_GPIO_irq (UVVM) - falling edges recorded for IRQ_NEGEDGE lines only, it_o latency
+    parameters      :
+      - TESTS_LIST=negedge
+      - NB_IO=4
+      - DATA_OE_INIT=00000110
+      - IRQ_POSEDGE=00001010
+      - IRQ_NEGEDGE=00001100
+
+  #---------------------------------------
+  sim_gpio_irq_mask:
+  #---------------------------------------
+    << : *sim_gpio_irq
+    description     : Simulation of sbi_GPIO_irq (UVVM) - imr only masks it_o, the isr records the masked edges
+    parameters      :
+      - TESTS_LIST=mask
+      - NB_IO=4
+      - DATA_OE_INIT=00000110
+      - IRQ_POSEDGE=00001010
+      - IRQ_NEGEDGE=00001100
+
+  #---------------------------------------
+  sim_gpio_irq_output_line:
+  #---------------------------------------
+    << : *sim_gpio_irq
+    description     : Simulation of sbi_GPIO_irq (UVVM) - no interrupt on an output line, nor when it becomes input with its pin high
+    parameters      :
+      - TESTS_LIST=output_line
+      - NB_IO=4
+      - DATA_OE_INIT=00000110
+      - IRQ_POSEDGE=00001010
+      - IRQ_NEGEDGE=00001100
+
+  #---------------------------------------
+  sim_gpio_irq_async_reset:
+  #---------------------------------------
+    << : *sim_gpio_irq
+    description     : Simulation of sbi_GPIO_irq (UVVM) - asynchronous reset, pins high during the reset give no edge at the release
+    parameters      :
+      - TESTS_LIST=async_reset
+      - NB_IO=4
+      - DATA_OE_INIT=00000110
+      - IRQ_POSEDGE=00001010
+      - IRQ_NEGEDGE=00001100
+
+  #---------------------------------------
+  sim_gpio_irq_default:
+  #---------------------------------------
+    << : *sim_gpio_irq
+    description     : Simulation of sbi_GPIO_irq (UVVM) - 8 lines, interrupt on both edges (PicoSoC switches), every scenario
+    parameters      :
+      - TESTS_LIST=reset_values,output,input,posedge,negedge,mask,output_line,async_reset
+      - NB_IO=8
+      - DATA_OE_INIT=00000000
+      - IRQ_POSEDGE=11111111
+      - IRQ_NEGEDGE=11111111
+
+  #---------------------------------------
+  sim_gpio_irq_led:
+  #---------------------------------------
+    << : *sim_gpio_irq
+    description     : Simulation of sbi_GPIO_irq (UVVM) - 8 lines output after reset, no interrupt (PicoSoC LEDs), scenarios without interrupt line
+    parameters      :
+      - TESTS_LIST=reset_values,output,input,posedge,negedge,async_reset
+      - NB_IO=8
+      - DATA_OE_INIT=11111111
+      - IRQ_POSEDGE=00000000
+      - IRQ_NEGEDGE=00000000
 
 #=========================================
 scripts:
@@ -220,12 +532,25 @@ scripts:
   ghdl_synth :
     cmd : [bash, ghdl_synth.sh]
 
+  #---------------------------------------
+  # pre_run hook of syn_* (cwd = work_root)
+  #---------------------------------------
+  yosys_synth :
+    cmd : [bash, yosys_synth.sh]
+
 #=========================================
 parameters :
 #=========================================
 
+  TESTS_LIST :
+    description : Scenarios run in sequence, separated by ',' (names in sim/gpio/tb_GPIO_tests_pkg.vhd, sim/gpio_irq/tb_GPIO_irq_tests_pkg.vhd), empty = build only
+    datatype    : str
+    default     : ""
+    paramtype   : generic
+
   #---------------------------------------
-  # Generics of sbi_GPIO_wrapper (lint_ghdl_synth_*)
+  # Generics of the wrappers (lint_ghdl_synth_*, syn_*), tb_GPIO and
+  # tb_GPIO_irq
   #---------------------------------------
   NB_IO :
     description : Number of IOs
@@ -258,5 +583,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-gpio
   version : asylum-component-GPIO-2.1.0
- #version : ef5526c127df9dfb6fcda93abe6c2e35d1475b62
+ #version : 8a986235ace7f311361aa48f122ce82183c74fbd
 #<PROVIDER_END>

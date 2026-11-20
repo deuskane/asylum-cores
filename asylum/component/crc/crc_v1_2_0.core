@@ -61,11 +61,23 @@ filesets:
   sim:
   #---------------------------------------
     files:
-      - sim/tb_crc_pkg.vhd
-      - sim/tb_crc.vhd
+      - sim/crc/tb_crc_pkg.vhd
+      - sim/crc/tb_crc_bfm_pkg.vhd
+      - sim/crc/tb_crc_core_default_pkg.vhd
+      - sim/crc/tb_crc_reset_values_pkg.vhd
+      - sim/crc/tb_crc_register_access_pkg.vhd
+      - sim/crc/tb_crc_check_value_pkg.vhd
+      - sim/crc/tb_crc_latency_pkg.vhd
+      - sim/crc/tb_crc_seed_after_data_pkg.vhd
+      - sim/crc/tb_crc_random_pkg.vhd
+      - sim/crc/tb_crc_async_reset_pkg.vhd
+      - sim/crc/tb_crc_tests_pkg.vhd
+      - sim/crc/tb_crc.vhd
     file_type : vhdlSource-2008
     depend       :
       - bitvis:verification:uvvm
+      # string_pkg list_length / list_item / list_contains (TESTS_LIST)
+      - ">=asylum:utils:pkg:1.10.0"
 
   #---------------------------------------
   syn:
@@ -74,6 +86,16 @@ filesets:
       - syn/sbi_crc_wrapper.vhd
     file_type    : vhdlSource-2008
     logical_name : asylum
+    # ghdl_synth.sh / ghdl_synth.mk (pre_run hook of lint_ghdl_synth_*)
+    depend       :
+      - asylum:utils:ghdl_synth
+
+  #---------------------------------------
+  syn_yosys:
+  #---------------------------------------
+    # yosys_synth.sh / yosys_synth.mk / yosys_synth.py (pre_run hook of syn_*)
+    depend       :
+      - asylum:utils:yosys_synth
 
 #=========================================
 targets:
@@ -106,7 +128,7 @@ targets:
   #---------------------------------------
   # Synthesis check : -Wall analysis, ghdl --synth -Wall and elaboration
   # (no simulation) of sbi_crc_wrapper with the generics of the target.
-  # The pre_run hook (ghdl_synth.sh of asylum:utils:generators) adds
+  # The pre_run hook (ghdl_synth.sh of asylum:utils:ghdl_synth) adds
   # ghdl_synth.mk to the edalize Makefile.
   # FuseSoC merges tools in depth : analyze_options comes from lint_ghdl.
   #---------------------------------------
@@ -172,164 +194,256 @@ targets:
       - SHIFT_LEFT=true
 
   #---------------------------------------
-  sim_crc8_smbus:
+  # Synthesis : size of sbi_crc_wrapper with the generics of the target,
+  # Xilinx Artix-7 (LUT, FF, BRAM, DSP) and sky130 (area), by Yosys and
+  # its GHDL plugin. Same configurations as lint_ghdl_synth_*.
+  # The pre_run hook (yosys_synth.sh of asylum:utils:yosys_synth) adds
+  # yosys_synth.mk to the edalize Makefile.
   #---------------------------------------
-    << : *default
-    description     : Simulation of sbi_crc with VIP - CRC-8/SMBUS (poly 0x07)
-    filesets_append :
-      - sim
-    toplevel        : tb_crc
-    parameters      :
-      - CFG=0
-    default_tool    : ghdl
+  syn_default : &syn
+    << : *lint_ghdl
+    description     : Synthesis (Artix-7, sky130) of sbi_crc_wrapper, default generics
+    filesets_append : [syn, syn_yosys]
     tools :
       ghdl :
-        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
-        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [yosys_synth]
 
   #---------------------------------------
-  sim_crc8_i432:
+  syn_crc8_smbus :
   #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of sbi_crc_wrapper, CRC-8/SMBUS
+    parameters      :
+      - WIDTH_CRC=8
+      - POLYNOM=00000111
+      - SHIFT_LEFT=true
+      - XOR_OUT=00000000
+
+  #---------------------------------------
+  syn_crc16_modbus :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of sbi_crc_wrapper, CRC-16/MODBUS (PicoSoC)
+    parameters      :
+      - POLYNOM=1010000000000001
+      - LSB_FIRST=true
+
+  #---------------------------------------
+  syn_crc16_arc_right :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of sbi_crc_wrapper, CRC-16/ARC shift right
+    parameters      :
+      - POLYNOM=1000000000000101
+      - POLYNOM_REVERSE=true
+      - REFLECT_IN=true
+
+  #---------------------------------------
+  syn_crc5_usb :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of sbi_crc_wrapper, CRC-5/USB
+    parameters      :
+      - WIDTH_CRC=5
+      - POLYNOM=00101
+      - SHIFT_LEFT=true
+      - REFLECT_IN=true
+      - REFLECT_OUT=true
+      - XOR_OUT=11111
+
+  #---------------------------------------
+  syn_crc16_data16 :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of sbi_crc_wrapper, WIDTH_DATA 16
+    parameters      :
+      - WIDTH_DATA=16
+      - SHIFT_LEFT=true
+
+  #---------------------------------------
+  # tb_crc (sim/crc) : compiled once, the configuration (CFG, a CRC of
+  # the catalogue in sim/crc/tb_crc_pkg.vhd) and the scenarios
+  # (TESTS_LIST, empty : build and elaboration only) are chosen at run
+  # time. Reference configuration CRC-16/X-25 (REFLECT_IN, REFLECT_OUT,
+  # XOR_OUT, init 0xFFFF) : sim_crc16_x25 (build only) and one
+  # sim_crc16_x25_<test> target per scenario ; every other configuration
+  # sim_<crc> runs the whole list. Each target repeats CFG : FuseSoC
+  # replaces the parameters list of an inherited target.
+  #---------------------------------------
+  sim_crc16_x25: &sim_crc
     << : *default
-    description     : Simulation of sbi_crc with VIP - CRC-8/I-432-1 (poly 0x07, XOR_OUT 0x55)
+    description     : Simulation of sbi_crc (UVVM) - CRC-16/X-25 (poly 0x1021, init 0xFFFF, REFLECT_IN/OUT, XOR_OUT 0xFFFF) - build only (scenarios of TESTS_LIST)
     filesets_append :
       - sim
     toplevel        : tb_crc
     parameters      :
-      - CFG=1
-    default_tool    : ghdl
-    tools :
-      ghdl :
-        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
-        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
-
-  #---------------------------------------
-  sim_crc16_ccitt_false:
-  #---------------------------------------
-    << : *default
-    description     : Simulation of sbi_crc with VIP - CRC-16/CCITT-FALSE (poly 0x1021, init 0xFFFF)
-    filesets_append :
-      - sim
-    toplevel        : tb_crc
-    parameters      :
-      - CFG=2
-    default_tool    : ghdl
-    tools :
-      ghdl :
-        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
-        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
-
-  #---------------------------------------
-  sim_crc16_genibus:
-  #---------------------------------------
-    << : *default
-    description     : Simulation of sbi_crc with VIP - CRC-16/GENIBUS (poly 0x1021, init 0xFFFF, XOR_OUT 0xFFFF)
-    filesets_append :
-      - sim
-    toplevel        : tb_crc
-    parameters      :
-      - CFG=3
-    default_tool    : ghdl
-    tools :
-      ghdl :
-        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
-        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
-
-  #---------------------------------------
-  sim_crc16_arc:
-  #---------------------------------------
-    << : *default
-    description     : Simulation of sbi_crc with VIP - CRC-16/ARC (poly 0x8005, shift left, REFLECT_IN/OUT)
-    filesets_append :
-      - sim
-    toplevel        : tb_crc
-    parameters      :
-      - CFG=4
-    default_tool    : ghdl
-    tools :
-      ghdl :
-        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
-        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
-
-  #---------------------------------------
-  sim_crc16_x25:
-  #---------------------------------------
-    << : *default
-    description     : Simulation of sbi_crc with VIP - CRC-16/X-25 (poly 0x1021, REFLECT_IN/OUT, XOR_OUT 0xFFFF)
-    filesets_append :
-      - sim
-    toplevel        : tb_crc
-    parameters      :
+      - TESTS_LIST
       - CFG=5
     default_tool    : ghdl
     tools :
       ghdl :
-        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
-        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
+        analyze_options :
+          - "$(GHDL_ANALYZE_OPTION)"
+          - "-Wall"
+          - "-frelaxed"
+        run_options     :
+          - "$(GHDL_RUN_OPTION)"
+          - "--ieee-asserts=disable"
+
+  #---------------------------------------
+  sim_crc16_x25_core_default:
+  #---------------------------------------
+    << : *sim_crc
+    description     : Simulation of sbi_crc (UVVM) - CRC-16/X-25 - crc_core alone, default generics (CRC-16/XMODEM, CRC-8/SMBUS), crc_o REFLECT_OUT then XOR_OUT
+    parameters      :
+      - TESTS_LIST=core_default
+      - CFG=5
+
+  #---------------------------------------
+  sim_crc16_x25_reset_values:
+  #---------------------------------------
+    << : *sim_crc
+    description     : Simulation of sbi_crc (UVVM) - CRC-16/X-25 - reset values of data0, data1 and of the CRC (XOR_OUT)
+    parameters      :
+      - TESTS_LIST=reset_values
+      - CFG=5
+
+  #---------------------------------------
+  sim_crc16_x25_register_access:
+  #---------------------------------------
+    << : *sim_crc
+    description     : Simulation of sbi_crc (UVVM) - CRC-16/X-25 - data0 / data1 read back, crc0 / crc1 write the raw register and read the final CRC
+    parameters      :
+      - TESTS_LIST=register_access
+      - CFG=5
+
+  #---------------------------------------
+  sim_crc16_x25_check_value:
+  #---------------------------------------
+    << : *sim_crc
+    description     : Simulation of sbi_crc (UVVM) - CRC-16/X-25 - model and DUT against the catalogue check value of 123456789, CRC after each word
+    parameters      :
+      - TESTS_LIST=check_value
+      - CFG=5
+
+  #---------------------------------------
+  sim_crc16_x25_latency:
+  #---------------------------------------
+    << : *sim_crc
+    description     : Simulation of sbi_crc (UVVM) - CRC-16/X-25 - new CRC read by the access following the data0 write
+    parameters      :
+      - TESTS_LIST=latency
+      - CFG=5
+
+  #---------------------------------------
+  sim_crc16_x25_seed_after_data:
+  #---------------------------------------
+    << : *sim_crc
+    description     : Simulation of sbi_crc (UVVM) - CRC-16/X-25 - CRC byte written just after data0, the update of data0 is kept
+    parameters      :
+      - TESTS_LIST=seed_after_data
+      - CFG=5
+
+  #---------------------------------------
+  sim_crc16_x25_random:
+  #---------------------------------------
+    << : *sim_crc
+    description     : Simulation of sbi_crc (UVVM) - CRC-16/X-25 - 32 random messages, random init, random unused bits
+    parameters      :
+      - TESTS_LIST=random
+      - CFG=5
+
+  #---------------------------------------
+  sim_crc16_x25_async_reset:
+  #---------------------------------------
+    << : *sim_crc
+    description     : Simulation of sbi_crc (UVVM) - CRC-16/X-25 - asynchronous reset without clock edge
+    parameters      :
+      - TESTS_LIST=async_reset
+      - CFG=5
+
+  #---------------------------------------
+  sim_crc8_smbus:
+  #---------------------------------------
+    << : *sim_crc
+    description     : Simulation of sbi_crc (UVVM) - CRC-8/SMBUS (poly 0x07) - every scenario
+    parameters      :
+      - TESTS_LIST=core_default,reset_values,register_access,check_value,latency,seed_after_data,random,async_reset
+      - CFG=0
+
+  #---------------------------------------
+  sim_crc8_i432:
+  #---------------------------------------
+    << : *sim_crc
+    description     : Simulation of sbi_crc (UVVM) - CRC-8/I-432-1 (poly 0x07, XOR_OUT 0x55) - every scenario
+    parameters      :
+      - TESTS_LIST=core_default,reset_values,register_access,check_value,latency,seed_after_data,random,async_reset
+      - CFG=1
+
+  #---------------------------------------
+  sim_crc16_ccitt_false:
+  #---------------------------------------
+    << : *sim_crc
+    description     : Simulation of sbi_crc (UVVM) - CRC-16/CCITT-FALSE (poly 0x1021, init 0xFFFF) - every scenario
+    parameters      :
+      - TESTS_LIST=core_default,reset_values,register_access,check_value,latency,seed_after_data,random,async_reset
+      - CFG=2
+
+  #---------------------------------------
+  sim_crc16_genibus:
+  #---------------------------------------
+    << : *sim_crc
+    description     : Simulation of sbi_crc (UVVM) - CRC-16/GENIBUS (poly 0x1021, init 0xFFFF, XOR_OUT 0xFFFF) - every scenario
+    parameters      :
+      - TESTS_LIST=core_default,reset_values,register_access,check_value,latency,seed_after_data,random,async_reset
+      - CFG=3
+
+  #---------------------------------------
+  sim_crc16_arc:
+  #---------------------------------------
+    << : *sim_crc
+    description     : Simulation of sbi_crc (UVVM) - CRC-16/ARC (poly 0x8005, shift left, REFLECT_IN/OUT) - every scenario
+    parameters      :
+      - TESTS_LIST=core_default,reset_values,register_access,check_value,latency,seed_after_data,random,async_reset
+      - CFG=4
 
   #---------------------------------------
   sim_crc16_modbus:
   #---------------------------------------
-    << : *default
-    description     : Simulation of sbi_crc with VIP - CRC-16/MODBUS (poly 0xA001, shift right, LSB first - PicoSoC config)
-    filesets_append :
-      - sim
-    toplevel        : tb_crc
+    << : *sim_crc
+    description     : Simulation of sbi_crc (UVVM) - CRC-16/MODBUS (poly 0xA001, shift right, LSB first, PicoSoC config) - every scenario
     parameters      :
+      - TESTS_LIST=core_default,reset_values,register_access,check_value,latency,seed_after_data,random,async_reset
       - CFG=6
-    default_tool    : ghdl
-    tools :
-      ghdl :
-        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
-        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
 
   #---------------------------------------
   sim_crc16_arc_shift_right:
   #---------------------------------------
-    << : *default
-    description     : Simulation of sbi_crc with VIP - CRC-16/ARC (poly 0x8005 reversed, shift right, REFLECT_IN)
-    filesets_append :
-      - sim
-    toplevel        : tb_crc
+    << : *sim_crc
+    description     : Simulation of sbi_crc (UVVM) - CRC-16/ARC (poly 0x8005 reversed, shift right, REFLECT_IN) - every scenario
     parameters      :
+      - TESTS_LIST=core_default,reset_values,register_access,check_value,latency,seed_after_data,random,async_reset
       - CFG=7
-    default_tool    : ghdl
-    tools :
-      ghdl :
-        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
-        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
 
   #---------------------------------------
   sim_crc5_usb:
   #---------------------------------------
-    << : *default
-    description     : Simulation of sbi_crc with VIP - CRC-5/USB (WIDTH_CRC 5, REFLECT_IN/OUT, XOR_OUT 0x1F)
-    filesets_append :
-      - sim
-    toplevel        : tb_crc
+    << : *sim_crc
+    description     : Simulation of sbi_crc (UVVM) - CRC-5/USB (WIDTH_CRC 5, REFLECT_IN/OUT, XOR_OUT 0x1F) - every scenario
     parameters      :
+      - TESTS_LIST=core_default,reset_values,register_access,check_value,latency,seed_after_data,random,async_reset
       - CFG=8
-    default_tool    : ghdl
-    tools :
-      ghdl :
-        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
-        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
 
   #---------------------------------------
   sim_crc16_xmodem_data16:
   #---------------------------------------
-    << : *default
-    description     : Simulation of sbi_crc with VIP - CRC-16/XMODEM with WIDTH_DATA 16
-    filesets_append :
-      - sim
-    toplevel        : tb_crc
+    << : *sim_crc
+    description     : Simulation of sbi_crc (UVVM) - CRC-16/XMODEM with WIDTH_DATA 16 - every scenario
     parameters      :
+      - TESTS_LIST=core_default,reset_values,register_access,check_value,latency,seed_after_data,random,async_reset
       - CFG=9
-    default_tool    : ghdl
-    tools :
-      ghdl :
-        analyze_options : ["-Wall","-fsynopsys","-frelaxed","--no-vital-checks"]
-        run_options     : ["--fst=dut.fst","--ieee-asserts=disable"]
 
 #=========================================
 scripts:
@@ -341,12 +455,24 @@ scripts:
   ghdl_synth :
     cmd : [bash, ghdl_synth.sh]
 
+  #---------------------------------------
+  # pre_run hook of syn_* (cwd = work_root)
+  #---------------------------------------
+  yosys_synth :
+    cmd : [bash, yosys_synth.sh]
+
 #=========================================
 parameters :
 #=========================================
 
+  TESTS_LIST :
+    description : Scenarios run in sequence, separated by ',' (names in sim/crc/tb_crc_tests_pkg.vhd), empty = build only
+    datatype    : str
+    default     : ""
+    paramtype   : generic
+
   CFG :
-    description : Index of the sbi_crc configuration in tb_crc_pkg.C_CRC_CFG
+    description : Index of the sbi_crc configuration in sim/crc/tb_crc_pkg.vhd C_CRC_CFG
     datatype    : int
     default     : 2
     paramtype   : generic
@@ -415,5 +541,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-crc
   version : asylum-component-crc-1.2.0
- #version : 34b0bcf773558b0f30f1818ee4d964bfeb3b2d50
+ #version : 6751f545af94dbc4453082a4bb30e5c7e83dfb7a
 #<PROVIDER_END>

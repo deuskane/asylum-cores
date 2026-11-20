@@ -59,19 +59,31 @@ filesets:
   sim_basic:
   #---------------------------------------
     files        :
+      - sim/basic/tb_I2C_bfm_pkg.vhd
+      - sim/basic/tb_I2C_reset_pkg.vhd
+      - sim/basic/tb_I2C_master_pkg.vhd
+      - sim/basic/tb_I2C_slave_pkg.vhd
+      - sim/basic/tb_I2C_tests_pkg.vhd
       - sim/basic/tb_I2C.vhd
     file_type    : vhdlSource-2008
     depend       :
       - bitvis:verification:uvvm
+      # string_pkg list_length / list_item / list_contains (TESTS_LIST)
+      - ">=asylum:utils:pkg:1.10.0"
 
   #---------------------------------------
   sim_multi:
   #---------------------------------------
     files        :
+      - sim/multi/tb_I2C_multi_bfm_pkg.vhd
+      - sim/multi/tb_I2C_multi_transfers_pkg.vhd
+      - sim/multi/tb_I2C_multi_tests_pkg.vhd
       - sim/multi/tb_I2C_multi.vhd
     file_type    : vhdlSource-2008
     depend       :
       - bitvis:verification:uvvm
+      # string_pkg list_length / list_item / list_contains (TESTS_LIST)
+      - ">=asylum:utils:pkg:1.10.0"
 
   #---------------------------------------
   # Lint Files (pre_run hook of lint_ghdl_synth_*)
@@ -81,6 +93,13 @@ filesets:
       - syn/sbi_I2C_wrapper.vhd
     file_type    : vhdlSource-2008
     logical_name : asylum
+
+  #---------------------------------------
+  # Yosys scripts of the syn_* targets
+  #---------------------------------------
+  syn_yosys:
+    depend       :
+      - asylum:utils:yosys_synth
 
 #=========================================
 targets:
@@ -161,16 +180,70 @@ targets:
       - PRESCALER_RATIO=00011000
 
   #---------------------------------------
-  # Simulation : tb_I2C, one scenario (TEST) per target
+  # Synthesis : size of sbi_I2C_wrapper with the generics of the target,
+  # Xilinx Artix-7 (LUT, FF, BRAM, DSP) and sky130 (area), by Yosys and
+  # its GHDL plugin. Same configurations as lint_ghdl_synth_*.
+  # The pre_run hook (yosys_synth.sh of asylum:utils:yosys_synth) adds
+  # yosys_synth.mk to the edalize Makefile.
   #---------------------------------------
-  default_sim: &default_sim
+  syn_default : &syn
+    << : *lint_ghdl
+    description     : Synthesis (Artix-7, sky130) of sbi_I2C_wrapper, default generics
+    filesets_append : [syn, syn_yosys]
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [yosys_synth]
+
+  #---------------------------------------
+  syn_sim :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of sbi_I2C_wrapper, generics of the sim_* targets
+    parameters      :
+      - DEPTH_CMD=4
+      - DEPTH_TX=8
+      - DEPTH_RX=8
+
+  #---------------------------------------
+  syn_master_only :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of sbi_I2C_wrapper, master only
+    parameters      :
+      - SLAVE_ENABLE=false
+
+  #---------------------------------------
+  syn_slave_only :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of sbi_I2C_wrapper, slave only (no cmd register)
+    parameters      :
+      - MASTER_ENABLE=false
+
+  #---------------------------------------
+  syn_fixed_prescaler :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of sbi_I2C_wrapper, fixed prescaler
+    parameters      :
+      - USER_DEFINE_PRESCALER=false
+      - PRESCALER_RATIO=00011000
+
+  #---------------------------------------
+  # tb_I2C : compiled once (one DUT configuration), scenarios chosen at
+  # run time (TESTS_LIST, empty : build and elaboration only) ;
+  # sim_i2c (build only) and one sim_i2c_<test> target per scenario
+  #---------------------------------------
+  sim_i2c: &sim_i2c
     << : *default
-    description     : Default Target for simulation (tb_I2C, TEST=master_write)
+    description     : Simulation of sbi_I2C (tb_I2C) - build only (scenarios of TESTS_LIST)
     filesets_append :
       - sim_basic
     toplevel        : tb_I2C
     parameters      :
-      - TEST=master_write
+      - TESTS_LIST
     default_tool    : ghdl
     tools :
       ghdl :
@@ -183,128 +256,199 @@ targets:
           - "--ieee-asserts=disable"
 
   #---------------------------------------
-  sim_reset_values:
+  sim_i2c_reset_values:
   #---------------------------------------
-    << : *default_sim
-    description     : Reset values of the registers
+    << : *sim_i2c
+    description     : Simulation of sbi_I2C (tb_I2C) - reset values of the registers
     parameters      :
-      - TEST=reset_values
+      - TESTS_LIST=reset_values
 
   #---------------------------------------
-  sim_master_write:
+  sim_i2c_master_write:
   #---------------------------------------
-    << : *default_sim
-    description     : DUT master writes to the BFM slave, SCL period (prescaler 4)
+    << : *sim_i2c
+    description     : Simulation of sbi_I2C (tb_I2C) - DUT master writes to the BFM slave, SCL period (prescaler 4)
     parameters      :
-      - TEST=master_write
+      - TESTS_LIST=master_write
 
   #---------------------------------------
-  sim_master_read:
+  sim_i2c_master_read:
   #---------------------------------------
-    << : *default_sim
-    description     : DUT master reads from the BFM slave
+    << : *sim_i2c
+    description     : Simulation of sbi_I2C (tb_I2C) - DUT master reads from the BFM slave
     parameters      :
-      - TEST=master_read
+      - TESTS_LIST=master_read
 
   #---------------------------------------
-  sim_master_write_read:
+  sim_i2c_master_write_read:
   #---------------------------------------
-    << : *default_sim
-    description     : DUT master write + repeated START + read (register read)
+    << : *sim_i2c
+    description     : Simulation of sbi_I2C (tb_I2C) - DUT master write + repeated START + read (register read)
     parameters      :
-      - TEST=master_write_read
+      - TESTS_LIST=master_write_read
 
   #---------------------------------------
-  sim_master_nack:
+  sim_i2c_master_nack:
   #---------------------------------------
-    << : *default_sim
-    description     : DUT master writes to an absent slave (NACK)
+    << : *sim_i2c
+    description     : Simulation of sbi_I2C (tb_I2C) - DUT master writes to an absent slave (NACK)
     parameters      :
-      - TEST=master_nack
+      - TESTS_LIST=master_nack
 
   #---------------------------------------
-  sim_master_stretch:
+  sim_i2c_master_stretch:
   #---------------------------------------
-    << : *default_sim
-    description     : DUT master write with SCL stretched by the bench
+    << : *sim_i2c
+    description     : Simulation of sbi_I2C (tb_I2C) - DUT master write with SCL stretched by the bench
     parameters      :
-      - TEST=master_stretch
+      - TESTS_LIST=master_stretch
 
   #---------------------------------------
-  sim_master_prescaler:
+  sim_i2c_master_prescaler:
   #---------------------------------------
-    << : *default_sim
-    description     : DUT master SCL period with prescaler 9
+    << : *sim_i2c
+    description     : Simulation of sbi_I2C (tb_I2C) - DUT master SCL period with prescaler 9
     parameters      :
-      - TEST=master_prescaler
+      - TESTS_LIST=master_prescaler
 
   #---------------------------------------
-  sim_slave_write:
+  sim_i2c_slave_write:
   #---------------------------------------
-    << : *default_sim
-    description     : BFM master writes to the DUT slave
+    << : *sim_i2c
+    description     : Simulation of sbi_I2C (tb_I2C) - BFM master writes to the DUT slave
     parameters      :
-      - TEST=slave_write
+      - TESTS_LIST=slave_write
 
   #---------------------------------------
-  sim_slave_read:
+  sim_i2c_slave_read:
   #---------------------------------------
-    << : *default_sim
-    description     : BFM master reads from the DUT slave
+    << : *sim_i2c
+    description     : Simulation of sbi_I2C (tb_I2C) - BFM master reads from the DUT slave
     parameters      :
-      - TEST=slave_read
+      - TESTS_LIST=slave_read
 
   #---------------------------------------
-  sim_slave_stretch:
+  sim_i2c_slave_stretch:
   #---------------------------------------
-    << : *default_sim
-    description     : BFM master reads from the DUT slave, TX FIFO empty (clock stretching)
+    << : *sim_i2c
+    description     : Simulation of sbi_I2C (tb_I2C) - BFM master reads from the DUT slave, TX FIFO empty (clock stretching)
     parameters      :
-      - TEST=slave_stretch
+      - TESTS_LIST=slave_stretch
 
   #---------------------------------------
-  sim_slave_write_read:
+  sim_i2c_slave_write_read:
   #---------------------------------------
-    << : *default_sim
-    description     : BFM master write + repeated START + read from the DUT slave
+    << : *sim_i2c
+    description     : Simulation of sbi_I2C (tb_I2C) - BFM master write + repeated START + read from the DUT slave
     parameters      :
-      - TEST=slave_write_read
+      - TESTS_LIST=slave_write_read
 
   #---------------------------------------
-  sim_slave_wrong_address:
+  sim_i2c_slave_wrong_address:
   #---------------------------------------
-    << : *default_sim
-    description     : BFM master addresses an other slave (NACK)
+    << : *sim_i2c
+    description     : Simulation of sbi_I2C (tb_I2C) - BFM master addresses an other slave (NACK)
     parameters      :
-      - TEST=slave_wrong_address
+      - TESTS_LIST=slave_wrong_address
 
   #---------------------------------------
-  sim_slave_disabled:
+  sim_i2c_slave_disabled:
   #---------------------------------------
-    << : *default_sim
-    description     : BFM master addresses a disabled slave (NACK)
+    << : *sim_i2c
+    description     : Simulation of sbi_I2C (tb_I2C) - BFM master addresses a disabled slave (NACK)
     parameters      :
-      - TEST=slave_disabled
+      - TESTS_LIST=slave_disabled
 
   #---------------------------------------
-  sim_disabled:
+  sim_i2c_disabled:
   #---------------------------------------
-    << : *default_sim
-    description     : BFM master addresses a disabled I2C (NACK, pads released)
+    << : *sim_i2c
+    description     : Simulation of sbi_I2C (tb_I2C) - BFM master addresses a disabled I2C (NACK, pads released)
     parameters      :
-      - TEST=disabled
+      - TESTS_LIST=disabled
 
   #---------------------------------------
-  # Simulation : tb_I2C_multi, one master and NB_SLAVE slaves
+  # tb_I2C_multi : compiled once per configuration (NB_SLAVE), scenarios
+  # chosen at run time (TESTS_LIST, empty : build and elaboration only).
+  # Reference configuration 3 slaves : sim_multi_3 (build only) and one
+  # sim_multi_3_<test> target per scenario ; the other configurations run
+  # the whole list. Each target repeats the generics of its
+  # configuration : FuseSoC replaces the parameters list of an inherited
+  # target.
   #---------------------------------------
-  sim_multi_slave:
-    << : *default_sim
-    description     : One master and 3 slaves sbi_I2C on the same bus
+  sim_multi_3: &sim_multi
+    << : *default
+    description     : Simulation of one master and 3 slaves sbi_I2C (tb_I2C_multi) - build only (scenarios of TESTS_LIST)
     filesets_append :
       - sim_multi
     toplevel        : tb_I2C_multi
     parameters      :
+      - TESTS_LIST
       - NB_SLAVE=3
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options :
+          - "$(GHDL_ANALYZE_OPTION)"
+          - "-Wall"
+          - "-frelaxed"
+        run_options     :
+          - "$(GHDL_RUN_OPTION)"
+          - "--ieee-asserts=disable"
+
+  #---------------------------------------
+  sim_multi_3_write:
+  #---------------------------------------
+    << : *sim_multi
+    description     : Simulation of one master and 3 slaves sbi_I2C (tb_I2C_multi) - the master writes to each slave
+    parameters      :
+      - TESTS_LIST=write
+      - NB_SLAVE=3
+
+  #---------------------------------------
+  sim_multi_3_read:
+  #---------------------------------------
+    << : *sim_multi
+    description     : Simulation of one master and 3 slaves sbi_I2C (tb_I2C_multi) - the master reads from each slave
+    parameters      :
+      - TESTS_LIST=read
+      - NB_SLAVE=3
+
+  #---------------------------------------
+  sim_multi_3_write_read:
+  #---------------------------------------
+    << : *sim_multi
+    description     : Simulation of one master and 3 slaves sbi_I2C (tb_I2C_multi) - write to a slave + repeated START + read from an other slave
+    parameters      :
+      - TESTS_LIST=write_read
+      - NB_SLAVE=3
+
+  #---------------------------------------
+  sim_multi_3_stretch:
+  #---------------------------------------
+    << : *sim_multi
+    description     : Simulation of one master and 3 slaves sbi_I2C (tb_I2C_multi) - read with an empty TX FIFO (clock stretching by the slave)
+    parameters      :
+      - TESTS_LIST=stretch
+      - NB_SLAVE=3
+
+  #---------------------------------------
+  sim_multi_3_nack:
+  #---------------------------------------
+    << : *sim_multi
+    description     : Simulation of one master and 3 slaves sbi_I2C (tb_I2C_multi) - write to an absent address (NACK)
+    parameters      :
+      - TESTS_LIST=nack
+      - NB_SLAVE=3
+
+  #---------------------------------------
+  sim_multi_1:
+  #---------------------------------------
+    << : *sim_multi
+    description     : Simulation of one master and 1 slave sbi_I2C (tb_I2C_multi) - every scenario
+    parameters      :
+      - TESTS_LIST=write,read,write_read,stretch,nack
+      - NB_SLAVE=1
 
 #=========================================
 scripts:
@@ -316,6 +460,12 @@ scripts:
   ghdl_synth :
     cmd : [bash, ghdl_synth.sh]
 
+  #---------------------------------------
+  # pre_run hook of syn_* (cwd = work_root)
+  #---------------------------------------
+  yosys_synth :
+    cmd : [bash, yosys_synth.sh]
+
 #=========================================
 parameters :
 #=========================================
@@ -323,10 +473,10 @@ parameters :
   #---------------------------------------
   # Generics of the testbenches (sim_*)
   #---------------------------------------
-  TEST :
-    description : Scenario of tb_I2C (see sim/basic/tb_I2C.vhd)
+  TESTS_LIST :
+    description : Scenarios run in sequence, separated by ',' (names in sim/basic/tb_I2C_tests_pkg.vhd, sim/multi/tb_I2C_multi_tests_pkg.vhd), empty = build only
     datatype    : str
-    default     : master_write
+    default     : ""
     paramtype   : generic
 
   NB_SLAVE :
@@ -336,7 +486,7 @@ parameters :
     paramtype   : generic
 
   #---------------------------------------
-  # Generics of sbi_I2C_wrapper (lint_ghdl_synth_*)
+  # Generics of sbi_I2C_wrapper (lint_ghdl_synth_*, syn_*)
   #---------------------------------------
   USER_DEFINE_PRESCALER :
     description : true, prescaler register writable by software ; false, ratio fixed to PRESCALER_RATIO
@@ -387,5 +537,5 @@ provider  :
   user    : deuskane
   repo    : asylum-communication-i2c
   version : asylum-communication-I2C-1.0.0
- #version : 7f06fd01100c6369b34ef3841d5a3b0213726117
+ #version : e5270eb6e2790a9be1f8834bbc8de2ba14efe3eb
 #<PROVIDER_END>
