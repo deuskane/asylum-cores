@@ -1,0 +1,707 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : HWLA Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : HWLA.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: Hardware Logic Analyzer : capture in a trigger clock domain,
+#              extraction on an AXI-Stream master in another clock domain
+#-----------------------------------------------------------------------------
+# Copyright (c) 2026
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2026-10-22  1.0.0    mrosiere First Release
+# 2026-10-22  2.0.0    mrosiere Timestamp (TIMESTAMP_WIDTH), store only the
+#                               changes (CHANGE_ONLY), sample in several
+#                               beats (TDATA_WIDTH)
+#                               sim_uart_no_timestamp, arguments of the
+#                               post_run hooks written by tb_hwla_uart
+#                               One tb_hwla test per target (TEST) :
+#                               sim_<configuration>_<test>
+# 2026-11-21  3.0.0    mrosiere Generic NB_PROBE removed, probe_i and
+#                               m_axis_tdata_o unconstrained
+#-----------------------------------------------------------------------------
+
+name        : asylum:debug:HWLA:3.0.0
+description : Hardware Logic Analyzer
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  hdl:
+  #---------------------------------------
+    files        :
+      - hdl/hwla_pkg.vhd
+      - hdl/hwla_ram.vhd
+      - hdl/hwla_trigger.vhd
+      - hdl/hwla_extract.vhd
+      - hdl/hwla.vhd
+    file_type    : vhdlSource
+    logical_name : asylum
+    depend       :
+      - asylum:utils:pkg
+      - asylum:target:techmap
+
+  #---------------------------------------
+  sim_basic:
+  #---------------------------------------
+    files        :
+      - sim/basic/tb_hwla_bfm_pkg.vhd
+      - sim/basic/tb_hwla_reset_values_pkg.vhd
+      - sim/basic/tb_hwla_not_armed_pkg.vhd
+      - sim/basic/tb_hwla_capture_pkg.vhd
+      - sim/basic/tb_hwla_pre_trigger_ignored_pkg.vhd
+      - sim/basic/tb_hwla_level_trigger_pkg.vhd
+      - sim/basic/tb_hwla_late_trigger_pkg.vhd
+      - sim/basic/tb_hwla_back_pressure_pkg.vhd
+      - sim/basic/tb_hwla_stall_pkg.vhd
+      - sim/basic/tb_hwla_continuous_pkg.vhd
+      - sim/basic/tb_hwla_sparse_pkg.vhd
+      - sim/basic/tb_hwla_frozen_pkg.vhd
+      - sim/basic/tb_hwla_first_sample_pkg.vhd
+      - sim/basic/tb_hwla_async_reset_pkg.vhd
+      - sim/basic/tb_hwla_tests_pkg.vhd
+      - sim/basic/tb_hwla.vhd
+    file_type    : vhdlSource-2008
+    depend       :
+      - bitvis:verification:uvvm
+      # string_pkg list_length / list_item / list_contains (TESTS_LIST)
+      - ">=asylum:utils:pkg:1.10.0"
+
+  #---------------------------------------
+  # HWLA on a UART : uart_tx_axis, VCD rebuilt from the UART bytes (post_run
+  # hooks of sim_uart)
+  #---------------------------------------
+  sim_uart:
+    files        :
+      - sim/uart/tb_hwla_uart.vhd
+      - tools/hwla2vcd.py    : {file_type : user, copyto : hwla2vcd.py}
+      - sim/uart/check_vcd.py : {file_type : user, copyto : check_vcd.py}
+    file_type    : vhdlSource-2008
+    depend       :
+      - bitvis:verification:uvvm
+      - asylum:communication:uart
+
+  #---------------------------------------
+  syn:
+  #---------------------------------------
+    files        :
+      - syn/hwla_wrapper.vhd
+    file_type    : vhdlSource
+    logical_name : asylum
+    # ghdl_synth.sh / ghdl_synth.mk (pre_run hook of lint_ghdl_synth_*)
+    depend       :
+      - asylum:utils:ghdl_synth
+
+  #---------------------------------------
+  syn_yosys:
+  #---------------------------------------
+    # yosys_synth.sh / yosys_synth.mk / yosys_synth.py (pre_run hook of syn_*)
+    depend       :
+      - asylum:utils:yosys_synth
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target
+    filesets        :
+      - hdl
+    toplevel        : hwla
+    default_tool    : ghdl
+
+  #---------------------------------------
+  # Lint : -Wall analysis and elaboration (empty simulation)
+  #---------------------------------------
+  lint_ghdl : &lint_ghdl
+    << : *default
+    description     : Lint with GHDL (-Wall analysis and elaboration of hwla_wrapper)
+    toplevel        : asylum.hwla_wrapper
+    filesets_append : [syn]
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall"]
+
+  #---------------------------------------
+  # Synthesis check : -Wall analysis, ghdl --synth -Wall and elaboration
+  # (no simulation) of hwla_wrapper with the generics of the target.
+  # The pre_run hook (ghdl_synth.sh of asylum:utils:ghdl_synth) adds
+  # ghdl_synth.mk to the edalize Makefile.
+  # FuseSoC merges tools in depth : analyze_options comes from lint_ghdl.
+  #---------------------------------------
+  lint_ghdl_synth_default : &lint_ghdl_synth
+    << : *lint_ghdl
+    description     : Synthesis check of hwla_wrapper, default generics (8 probes, 256 samples, 128 pre-trigger samples, 16-bit timestamp, changes only)
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [ghdl_synth]
+
+  #---------------------------------------
+  lint_ghdl_synth_pre_trigger_0 :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of hwla_wrapper, no pre-trigger sample
+    parameters      :
+      - PRE_TRIGGER=0
+
+  #---------------------------------------
+  lint_ghdl_synth_pre_trigger_max :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of hwla_wrapper, no post-trigger sample
+    parameters      :
+      - PRE_TRIGGER=255
+
+  #---------------------------------------
+  lint_ghdl_synth_all_samples :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of hwla_wrapper, no timestamp, every sample stored
+    parameters      :
+      - TIMESTAMP_WIDTH=0
+      - CHANGE_ONLY=false
+
+  #---------------------------------------
+  lint_ghdl_synth_uart :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of hwla_wrapper, 8-bit tdata (3 beats per sample, for uart_tx_axis)
+    parameters      :
+      - TDATA_WIDTH=8
+
+  #---------------------------------------
+  lint_ghdl_synth_min :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of hwla_wrapper, smallest configuration (1 probe, 2 samples, no timestamp)
+    parameters      :
+      - NB_PROBE=1
+      - DEPTH=2
+      - PRE_TRIGGER=1
+      - TIMESTAMP_WIDTH=0
+      - CHANGE_ONLY=false
+
+  #---------------------------------------
+  # Synthesis : size of hwla_wrapper with the generics of the target,
+  # Xilinx Artix-7 (LUT, FF, BRAM, DSP) and sky130 (area), by Yosys and
+  # its GHDL plugin. Same configurations as lint_ghdl_synth_*.
+  # The pre_run hook (yosys_synth.sh of asylum:utils:yosys_synth) adds
+  # yosys_synth.mk to the edalize Makefile.
+  #---------------------------------------
+  syn_default : &syn
+    << : *lint_ghdl
+    description     : Synthesis (Artix-7, sky130) of hwla_wrapper, default generics (8 probes, 256 samples, 128 pre-trigger samples, 16-bit timestamp, changes only)
+    filesets_append : [syn, syn_yosys]
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [yosys_synth]
+
+  #---------------------------------------
+  syn_pre_trigger_0 :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of hwla_wrapper, no pre-trigger sample
+    parameters      :
+      - PRE_TRIGGER=0
+
+  #---------------------------------------
+  syn_pre_trigger_max :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of hwla_wrapper, no post-trigger sample
+    parameters      :
+      - PRE_TRIGGER=255
+
+  #---------------------------------------
+  syn_all_samples :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of hwla_wrapper, no timestamp, every sample stored
+    parameters      :
+      - TIMESTAMP_WIDTH=0
+      - CHANGE_ONLY=false
+
+  #---------------------------------------
+  syn_uart :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of hwla_wrapper, 8-bit tdata (3 beats per sample, for uart_tx_axis)
+    parameters      :
+      - TDATA_WIDTH=8
+
+  #---------------------------------------
+  syn_min :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of hwla_wrapper, smallest configuration (1 probe, 2 samples, no timestamp)
+    parameters      :
+      - NB_PROBE=1
+      - DEPTH=2
+      - PRE_TRIGGER=1
+      - TIMESTAMP_WIDTH=0
+      - CHANGE_ONLY=false
+
+  #---------------------------------------
+  # tb_hwla : compiled once per configuration of the HWLA, scenarios
+  # chosen at run time (TESTS_LIST, empty : build and elaboration only).
+  # Reference configuration basic (12 probes, 32 samples, 10 pre-trigger
+  # samples, 16-bit timestamp, changes only, extraction clock slower) :
+  # sim_basic (build only) and one sim_basic_<test> target per scenario
+  # (frozen does not apply : 16-bit timestamp with changes only). The
+  # other configurations (sim_<configuration>) run every scenario that
+  # applies to them. Each target repeats the generics of its
+  # configuration : FuseSoC replaces the parameters list of an inherited
+  # target. Generated.
+  #---------------------------------------
+  sim_basic: &sim_hwla
+    << : *default
+    description     : Simulation of hwla (basic) with the UVVM AXI-Stream BFM - build only (scenarios of TESTS_LIST)
+    filesets_append :
+      - sim_basic
+    toplevel        : tb_hwla
+    default_tool    : ghdl
+    parameters      :
+      - TESTS_LIST
+      - NB_PROBE=12
+      - DEPTH=32
+      - PRE_TRIGGER=10
+      - TIMESTAMP_WIDTH=16
+      - CHANGE_ONLY=true
+      - TDATA_WIDTH=0
+      - TRIG_CLK_PERIOD=10
+      - EXTRACT_CLK_PERIOD=18
+    tools :
+      ghdl :
+        analyze_options :
+          - "$(GHDL_ANALYZE_OPTION)"
+          - "-Wall"
+          - "-frelaxed"
+        run_options     :
+          - "$(GHDL_RUN_OPTION)"
+          - "--ieee-asserts=disable"
+
+  #---------------------------------------
+  sim_basic_reset_values:
+  #---------------------------------------
+    << : *sim_hwla
+    description     : Simulation of hwla (basic) - outputs after the reset
+    parameters      :
+      - TESTS_LIST=reset_values
+      - NB_PROBE=12
+      - DEPTH=32
+      - PRE_TRIGGER=10
+      - TIMESTAMP_WIDTH=16
+      - CHANGE_ONLY=true
+      - TDATA_WIDTH=0
+      - TRIG_CLK_PERIOD=10
+      - EXTRACT_CLK_PERIOD=18
+
+  #---------------------------------------
+  sim_basic_not_armed:
+  #---------------------------------------
+    << : *sim_hwla
+    description     : Simulation of hwla (basic) - trigger ignored while not armed
+    parameters      :
+      - TESTS_LIST=not_armed
+      - NB_PROBE=12
+      - DEPTH=32
+      - PRE_TRIGGER=10
+      - TIMESTAMP_WIDTH=16
+      - CHANGE_ONLY=true
+      - TDATA_WIDTH=0
+      - TRIG_CLK_PERIOD=10
+      - EXTRACT_CLK_PERIOD=18
+
+  #---------------------------------------
+  sim_basic_capture:
+  #---------------------------------------
+    << : *sim_hwla
+    description     : Simulation of hwla (basic) - single capture
+    parameters      :
+      - TESTS_LIST=capture
+      - NB_PROBE=12
+      - DEPTH=32
+      - PRE_TRIGGER=10
+      - TIMESTAMP_WIDTH=16
+      - CHANGE_ONLY=true
+      - TDATA_WIDTH=0
+      - TRIG_CLK_PERIOD=10
+      - EXTRACT_CLK_PERIOD=18
+
+  #---------------------------------------
+  sim_basic_pre_trigger_ignored:
+  #---------------------------------------
+    << : *sim_hwla
+    description     : Simulation of hwla (basic) - triggers ignored during the pre-trigger samples
+    parameters      :
+      - TESTS_LIST=pre_trigger_ignored
+      - NB_PROBE=12
+      - DEPTH=32
+      - PRE_TRIGGER=10
+      - TIMESTAMP_WIDTH=16
+      - CHANGE_ONLY=true
+      - TDATA_WIDTH=0
+      - TRIG_CLK_PERIOD=10
+      - EXTRACT_CLK_PERIOD=18
+
+  #---------------------------------------
+  sim_basic_level_trigger:
+  #---------------------------------------
+    << : *sim_hwla
+    description     : Simulation of hwla (basic) - level trigger already high at the arm
+    parameters      :
+      - TESTS_LIST=level_trigger
+      - NB_PROBE=12
+      - DEPTH=32
+      - PRE_TRIGGER=10
+      - TIMESTAMP_WIDTH=16
+      - CHANGE_ONLY=true
+      - TDATA_WIDTH=0
+      - TRIG_CLK_PERIOD=10
+      - EXTRACT_CLK_PERIOD=18
+
+  #---------------------------------------
+  sim_basic_late_trigger:
+  #---------------------------------------
+    << : *sim_hwla
+    description     : Simulation of hwla (basic) - trigger after 3 turns of the circular buffer
+    parameters      :
+      - TESTS_LIST=late_trigger
+      - NB_PROBE=12
+      - DEPTH=32
+      - PRE_TRIGGER=10
+      - TIMESTAMP_WIDTH=16
+      - CHANGE_ONLY=true
+      - TDATA_WIDTH=0
+      - TRIG_CLK_PERIOD=10
+      - EXTRACT_CLK_PERIOD=18
+
+  #---------------------------------------
+  sim_basic_back_pressure:
+  #---------------------------------------
+    << : *sim_hwla
+    description     : Simulation of hwla (basic) - random back pressure
+    parameters      :
+      - TESTS_LIST=back_pressure
+      - NB_PROBE=12
+      - DEPTH=32
+      - PRE_TRIGGER=10
+      - TIMESTAMP_WIDTH=16
+      - CHANGE_ONLY=true
+      - TDATA_WIDTH=0
+      - TRIG_CLK_PERIOD=10
+      - EXTRACT_CLK_PERIOD=18
+
+  #---------------------------------------
+  sim_basic_stall:
+  #---------------------------------------
+    << : *sim_hwla
+    description     : Simulation of hwla (basic) - long stall, arm_i and trigger ignored during the extraction
+    parameters      :
+      - TESTS_LIST=stall
+      - NB_PROBE=12
+      - DEPTH=32
+      - PRE_TRIGGER=10
+      - TIMESTAMP_WIDTH=16
+      - CHANGE_ONLY=true
+      - TDATA_WIDTH=0
+      - TRIG_CLK_PERIOD=10
+      - EXTRACT_CLK_PERIOD=18
+
+  #---------------------------------------
+  sim_basic_continuous:
+  #---------------------------------------
+    << : *sim_hwla
+    description     : Simulation of hwla (basic) - continuous captures (arm_i held high)
+    parameters      :
+      - TESTS_LIST=continuous
+      - NB_PROBE=12
+      - DEPTH=32
+      - PRE_TRIGGER=10
+      - TIMESTAMP_WIDTH=16
+      - CHANGE_ONLY=true
+      - TDATA_WIDTH=0
+      - TRIG_CLK_PERIOD=10
+      - EXTRACT_CLK_PERIOD=18
+
+  #---------------------------------------
+  sim_basic_sparse:
+  #---------------------------------------
+    << : *sim_hwla
+    description     : Simulation of hwla (basic) - sparse probes
+    parameters      :
+      - TESTS_LIST=sparse
+      - NB_PROBE=12
+      - DEPTH=32
+      - PRE_TRIGGER=10
+      - TIMESTAMP_WIDTH=16
+      - CHANGE_ONLY=true
+      - TDATA_WIDTH=0
+      - TRIG_CLK_PERIOD=10
+      - EXTRACT_CLK_PERIOD=18
+
+  #---------------------------------------
+  sim_basic_first_sample:
+  #---------------------------------------
+    << : *sim_hwla
+    description     : Simulation of hwla (basic) - first sample equal to the last stored sample
+    parameters      :
+      - TESTS_LIST=first_sample
+      - NB_PROBE=12
+      - DEPTH=32
+      - PRE_TRIGGER=10
+      - TIMESTAMP_WIDTH=16
+      - CHANGE_ONLY=true
+      - TDATA_WIDTH=0
+      - TRIG_CLK_PERIOD=10
+      - EXTRACT_CLK_PERIOD=18
+
+  #---------------------------------------
+  sim_basic_async_reset:
+  #---------------------------------------
+    << : *sim_hwla
+    description     : Simulation of hwla (basic) - asynchronous reset during an extraction
+    parameters      :
+      - TESTS_LIST=async_reset
+      - NB_PROBE=12
+      - DEPTH=32
+      - PRE_TRIGGER=10
+      - TIMESTAMP_WIDTH=16
+      - CHANGE_ONLY=true
+      - TDATA_WIDTH=0
+      - TRIG_CLK_PERIOD=10
+      - EXTRACT_CLK_PERIOD=18
+
+  #---------------------------------------
+  sim_pre_trigger_0:
+  #---------------------------------------
+    << : *sim_hwla
+    description     : Simulation of hwla (pre_trigger_0), 8 probes, 16 samples, no pre-trigger sample, 8-bit timestamp, changes only, 2 beats of 8 bits, extraction clock faster, every scenario
+    parameters      :
+      - TESTS_LIST=reset_values,not_armed,capture,level_trigger,late_trigger,back_pressure,stall,continuous,sparse,async_reset
+      - NB_PROBE=8
+      - DEPTH=16
+      - PRE_TRIGGER=0
+      - TIMESTAMP_WIDTH=8
+      - CHANGE_ONLY=true
+      - TDATA_WIDTH=8
+      - TRIG_CLK_PERIOD=26
+      - EXTRACT_CLK_PERIOD=8
+
+  #---------------------------------------
+  sim_pre_trigger_max:
+  #---------------------------------------
+    << : *sim_hwla
+    description     : Simulation of hwla (pre_trigger_max), 33 probes, 64 samples, no post-trigger sample, 4-bit timestamp, changes only, 3 beats of 16 bits, extraction clock much slower, every scenario
+    parameters      :
+      - TESTS_LIST=reset_values,not_armed,capture,pre_trigger_ignored,level_trigger,late_trigger,back_pressure,stall,continuous,sparse,frozen,first_sample,async_reset
+      - NB_PROBE=33
+      - DEPTH=64
+      - PRE_TRIGGER=63
+      - TIMESTAMP_WIDTH=4
+      - CHANGE_ONLY=true
+      - TDATA_WIDTH=16
+      - TRIG_CLK_PERIOD=6
+      - EXTRACT_CLK_PERIOD=34
+
+  #---------------------------------------
+  sim_same_period:
+  #---------------------------------------
+    << : *sim_hwla
+    description     : Simulation of hwla (same_period), 16 probes, 128 samples, 64 pre-trigger samples, no timestamp, every sample stored, same period for both clocks, every scenario
+    parameters      :
+      - TESTS_LIST=reset_values,not_armed,capture,pre_trigger_ignored,level_trigger,late_trigger,back_pressure,stall,continuous,sparse,frozen,first_sample,async_reset
+      - NB_PROBE=16
+      - DEPTH=128
+      - PRE_TRIGGER=64
+      - TIMESTAMP_WIDTH=0
+      - CHANGE_ONLY=false
+      - TDATA_WIDTH=0
+      - TRIG_CLK_PERIOD=10
+      - EXTRACT_CLK_PERIOD=10
+
+  #---------------------------------------
+  sim_all_samples:
+  #---------------------------------------
+    << : *sim_hwla
+    description     : Simulation of hwla (all_samples), 8 probes, 32 samples, 16 pre-trigger samples, 16-bit timestamp, every sample stored, 32-bit tdata, extraction clock faster, every scenario
+    parameters      :
+      - TESTS_LIST=reset_values,not_armed,capture,pre_trigger_ignored,level_trigger,late_trigger,back_pressure,stall,continuous,sparse,frozen,first_sample,async_reset
+      - NB_PROBE=8
+      - DEPTH=32
+      - PRE_TRIGGER=16
+      - TIMESTAMP_WIDTH=16
+      - CHANGE_ONLY=false
+      - TDATA_WIDTH=32
+      - TRIG_CLK_PERIOD=14
+      - EXTRACT_CLK_PERIOD=10
+
+  #---------------------------------------
+  sim_min:
+  #---------------------------------------
+    << : *sim_hwla
+    description     : Simulation of hwla (min), generics of lint_ghdl_synth_min (1 probe, 2 samples, 1 pre-trigger sample, no timestamp, every sample stored), extraction clock 10 times slower (handshake longer than a capture), every scenario
+    parameters      :
+      - TESTS_LIST=reset_values,not_armed,capture,level_trigger,late_trigger,back_pressure,stall,continuous,sparse,frozen,first_sample,async_reset
+      - NB_PROBE=1
+      - DEPTH=2
+      - PRE_TRIGGER=1
+      - TIMESTAMP_WIDTH=0
+      - CHANGE_ONLY=false
+      - TDATA_WIDTH=0
+      - TRIG_CLK_PERIOD=10
+      - EXTRACT_CLK_PERIOD=100
+
+  #---------------------------------------
+  # HWLA on a UART : tb_hwla_uart with the generics of the target, then the
+  # VCD rebuilt from the UART bytes by tools/hwla2vcd.py is checked against
+  # the probes of the testbench
+  #---------------------------------------
+  sim_uart: &sim_uart
+    << : *default
+    description     : Simulation of hwla connected to uart_tx_axis (UVVM UART BFM), 32 samples, 8 pre-trigger samples, 16-bit timestamp, changes only, VCD rebuilt from the UART bytes by tools/hwla2vcd.py and checked
+    filesets_append :
+      - sim_uart
+    toplevel        : tb_hwla_uart
+    default_tool    : ghdl
+    parameters      :
+      - DEPTH=32
+      - PRE_TRIGGER=8
+      - TIMESTAMP_WIDTH=16
+      - CHANGE_ONLY=true
+    tools :
+      ghdl :
+        analyze_options :
+          - "$(GHDL_ANALYZE_OPTION)"
+          - "-Wall"
+          - "-frelaxed"
+        run_options     :
+          - "$(GHDL_RUN_OPTION)"
+          - "--ieee-asserts=disable"
+    hooks :
+      post_run : [hwla2vcd, check_vcd]
+
+  #---------------------------------------
+  sim_uart_no_timestamp:
+  #---------------------------------------
+    << : *sim_uart
+    description     : Simulation of hwla connected to uart_tx_axis, 64 samples, 16 pre-trigger samples, no timestamp, every sample stored (1 byte per sample), VCD rebuilt and checked
+    parameters      :
+      - DEPTH=64
+      - PRE_TRIGGER=16
+      - TIMESTAMP_WIDTH=0
+      - CHANGE_ONLY=false
+
+#=========================================
+scripts:
+#=========================================
+
+  #---------------------------------------
+  # post_run hooks of sim_uart* (cwd = work_root) : the configuration of
+  # the HWLA (hwla2vcd.args) and the list of the VCD files (check_vcd.args)
+  # are written by tb_hwla_uart from its generics
+  #---------------------------------------
+  hwla2vcd :
+    cmd : [python3, hwla2vcd.py, hwla_uart.hex, --format, hex, --args-file, hwla2vcd.args, --bus, probe, -o, hwla_uart.vcd]
+
+  check_vcd :
+    cmd : [python3, check_vcd.py, --args-file, check_vcd.args]
+
+  #---------------------------------------
+  # pre_run hook of lint_ghdl_synth_* (cwd = work_root)
+  #---------------------------------------
+  ghdl_synth :
+    cmd : [bash, ghdl_synth.sh]
+
+  #---------------------------------------
+  # pre_run hook of syn_* (cwd = work_root)
+  #---------------------------------------
+  yosys_synth :
+    cmd : [bash, yosys_synth.sh]
+
+#=========================================
+parameters :
+#=========================================
+
+  #---------------------------------------
+  # Generics of hwla_wrapper (lint_ghdl_synth_*, syn_*) and of tb_hwla (sim_*)
+  #---------------------------------------
+  NB_PROBE :
+    description : Number of probes
+    datatype    : int
+    default     : 8
+    paramtype   : generic
+
+  DEPTH :
+    description : Number of stored samples of a capture (power of 2)
+    datatype    : int
+    default     : 256
+    paramtype   : generic
+
+  PRE_TRIGGER :
+    description : Number of stored samples before the trigger sample (0 to DEPTH-1)
+    datatype    : int
+    default     : 128
+    paramtype   : generic
+
+  TIMESTAMP_WIDTH :
+    description : Width of the timestamp of a sample (0 = no timestamp)
+    datatype    : int
+    default     : 16
+    paramtype   : generic
+
+  CHANGE_ONLY :
+    description : true, store a sample only if the probes changed ; false, store every sample
+    datatype    : bool
+    default     : true
+    paramtype   : generic
+
+  TDATA_WIDTH :
+    description : Width of the AXI-Stream tdata (multiple of 8), 0 = one beat per sample
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+  #---------------------------------------
+  # Generics of tb_hwla (sim_*)
+  #---------------------------------------
+  TRIG_CLK_PERIOD :
+    description : Period of the trigger clock (ns, even)
+    datatype    : int
+    default     : 10
+    paramtype   : generic
+
+  EXTRACT_CLK_PERIOD :
+    description : Period of the extraction clock (ns, even)
+    datatype    : int
+    default     : 18
+    paramtype   : generic
+
+  TESTS_LIST :
+    description : Scenarios of tb_hwla, separated by ',' (empty, build and elaboration only)
+    datatype    : str
+    paramtype   : generic
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-debug-hwla
+  version : asylum-debug-HWLA-3.0.0
+ #version : adbc9b999c0c5dcd49b9e2b2de22fe62b05cd332
+#<PROVIDER_END>
