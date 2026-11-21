@@ -1,0 +1,58 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : Yosys synthesis Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : yosys_synth.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: yosys_synth.sh / yosys_synth.mk / yosys_synth.py (pre_run hook
+#              of the syn_* targets) : Yosys with the GHDL plugin, size on
+#              Xilinx Artix-7 and area on sky130_fd_sc_hd. Without any
+#              dependency, as asylum:utils:ghdl_synth.
+#-----------------------------------------------------------------------------
+# Copyright (c) 2026
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2026-11-20  1.0.0    mrosiere Created
+# 2026-11-21  1.0.1    mrosiere xc7 : merge identical cells (opt_merge -share_all)
+#-----------------------------------------------------------------------------
+
+name       : asylum:utils:yosys_synth:1.0.1
+description: Yosys synthesis (Artix-7 and sky130) of the syn_* targets
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  files_yosys:
+  #---------------------------------------
+    files:
+      - tools/yosys/yosys_synth.sh : {file_type : user, copyto : yosys_synth.sh}
+      - tools/yosys/yosys_synth.mk : {file_type : user, copyto : yosys_synth.mk}
+      - tools/yosys/yosys_synth.py : {file_type : user, copyto : yosys_synth.py}
+    file_type : user
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default:
+  #---------------------------------------
+    description     : Default Target
+    filesets        :
+      - "tool_ghdl?(files_yosys)"
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-utils-generators
+  version : asylum-utils-yosys_synth-1.0.1
+ #version : 40aab38b307ba528bcafb8026bdb30a052d561f0
+#<PROVIDER_END>
