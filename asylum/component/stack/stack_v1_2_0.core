@@ -433,5 +433,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-stack
   version : asylum-component-stack-1.2.0
- #version : 13e7aec676d0ed86a5a6efe221c0c06d16164868
+ #version : 99c60d0af64551ac1e46a5a381bb3d6316c349f3
 #<PROVIDER_END>

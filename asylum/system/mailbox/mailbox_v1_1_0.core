@@ -56,7 +56,6 @@ filesets:
     depend       :
       - ">=asylum:utils:generators:2.10.0"
       - asylum:utils:pkg
-      - asylum:target:techmap
 
   #---------------------------------------
   sim:
@@ -474,5 +473,5 @@ provider  :
   user    : deuskane
   repo    : asylum-system-mailbox
   version : asylum-system-mailbox-1.1.0
- #version : 2f7b6358159ebb3a3b6bf9880a5eb85d4b1766bd
+ #version : 610110b161c232bca9aa553debf519177c8f1ca7
 #<PROVIDER_END>

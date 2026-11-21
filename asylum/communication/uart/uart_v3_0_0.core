@@ -566,5 +566,5 @@ provider  :
   user    : deuskane
   repo    : asylum-communication-uart
   version : asylum-communication-uart-3.0.0
- #version : d7bbb7800edd1196d3f35abfd156a2b8a729ff9b
+ #version : 944c79a6a832bc56fa982e95301e967d6ee12884
 #<PROVIDER_END>

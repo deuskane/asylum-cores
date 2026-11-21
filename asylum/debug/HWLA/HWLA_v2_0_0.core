@@ -701,5 +701,5 @@ provider  :
   user    : deuskane
   repo    : asylum-debug-hwla
   version : asylum-debug-HWLA-2.0.0
- #version : 7e3808cdc727f64eecc03f94cdcdac8253850396
+ #version : 71df9a9ad51c58b0317e79a89913f5b01dd08f54
 #<PROVIDER_END>

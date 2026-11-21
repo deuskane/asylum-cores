@@ -676,5 +676,5 @@ provider  :
   user    : deuskane
   repo    : asylum-utils-pkg
   version : asylum-utils-pkg-1.10.0
- #version : f3cfc6f5357b2d2b4f93417a00e7533728631193
+ #version : 0ee88ab1442daf4676c93341b15d3d0c66c82df0
 #<PROVIDER_END>

@@ -51,7 +51,6 @@ filesets:
     depend       :
       - ">=asylum:utils:generators:2.8.0"
       - asylum:utils:pkg
-      - asylum:target:techmap
 
   #---------------------------------------
   sim:
@@ -289,5 +288,5 @@ provider  :
   user    : deuskane
   repo    : asylum-system-spinlock
   version : asylum-system-spinlock-1.0.2
- #version : 41013d3a0ddcb8536f34fe22fa678af6d4cc6b08
+ #version : 4e4def844dad65bbb2b37f0926dc5c6e2bb8f5aa
 #<PROVIDER_END>

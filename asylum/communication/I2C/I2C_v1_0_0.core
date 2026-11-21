@@ -537,5 +537,5 @@ provider  :
   user    : deuskane
   repo    : asylum-communication-i2c
   version : asylum-communication-I2C-1.0.0
- #version : e5270eb6e2790a9be1f8834bbc8de2ba14efe3eb
+ #version : 2ea6aa6d8ab373c3dba8ec758843a8f21a2dba9c
 #<PROVIDER_END>

@@ -414,5 +414,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-fifo
   version : asylum-component-fifo-1.2.1
- #version : f548b4e77383bc65f543b1882a68e66c7d77d68c
+ #version : d37e93ac89bc93ac1db3223b1cac250a9acc4973
 #<PROVIDER_END>

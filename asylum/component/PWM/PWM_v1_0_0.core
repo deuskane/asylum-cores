@@ -568,5 +568,5 @@ provider  :
   user    : deuskane
   repo    : asylum-component-pwm
   version : asylum-component-PWM-1.0.0
- #version : bae70aa13b4c1ceb31840e6f9105947bc53a9441
+ #version : 3b52ad560f5da2d5ec3a74a8f13b932d1edc9d8c
 #<PROVIDER_END>
