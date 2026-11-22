@@ -1,0 +1,1010 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : Generators Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : generators.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2021-11-03  1.0.0    mrosiere Created
+# 2025-01-12  1.1.0    mrosiere Generators   : Add cflags arguments
+# 2025-01-15  1.2.0    mrosiere picoasm      : dump rom style
+# 2025-01-21  1.3.0    mrosiere pbcc         : fix global variable save after restore context
+# 2025-02-05  1.4.0    mrosiere pbcc         : use sdcc 3.1.0
+# 2025-02-20  2.0.0    mrosiere regtool
+# 2025-03-08  2.0.1    mrosiere regtool      : don't force logical name if unset
+# 2025-03-15  2.1.0    mrosiere regtool      : fix field management
+# 2025-03-22  2.2.0    mrosiere regtool      : Select interface between reg or pbi
+# 2025-04-02  2.2.1    mrosiere regtool      : Select range
+# 2025-04-17  2.2.2    mrosiere regtool      : Header C copy into workdir
+# 2025-06-16  2.3.0    mrosiere pbcc         : support -I
+# 2025-07-09  2.4.0    mrosiere regtool      : Add FIFO in csr_fifo
+# 2025-07-27  2.4.1    mrosiere regtool      : Add flags
+# 2025-08-12  2.4.2    mrosiere Generators   : Use cache type
+# 2025-09-06  2.4.3    mrosiere regtool      : Add component for csr and in package
+# 2025-06-07  2.4.4    mrosiere pbcc         : add logical name option
+# 2025-09-22  2.5.0    mrosiere pbcc/regtool : use Makefile
+# 2025-11-02  2.5.1    mrosiere regtool      : fix init value
+# 2025-11-05  2.5.2    mrosiere Generators   : Use logger
+# 2025-11-22  2.5.3    mrosiere regtool      : support sbi interface
+# 2025-11-27  2.5.3    mrosiere regtool      : crs_reg fix connection sw2hw re/we
+# 2025-12-30  2.5.4    mrosiere picoasm      : update for gcc 13.3
+#                               pbcc         : update for gcc 13.3
+# 2026-01-18  2.5.5    mrosiere regtool      : use info record for sbi
+# 2026-05-12  2.6.0    mrosiere rvcc         : Add tools
+# 2026-05-17  2.6.1    mrosiere pbcc/rvcc    : Generate ROM package
+# 2026-05-27  2.6.2    mrosiere regtool      : Manage empty record and add rsw1c register
+# 2026-06-06  2.6.3    mrosiere regtool      : Add Name
+# 2026-06-25  2.6.4    mrosiere pbcc/rvcc    : Add *gen_csr* in include path
+#                               rvcc         : fix stack in linker script
+# 2026-07-16  2.6.5    mrosiere component.py : add file filter
+# 2026-07-30  2.6.6    mrosiere regtool      : add address in csr pkg and use it in csr module
+# 2026-08-02  2.6.7    mrosiere Add default target for deps
+# 2026-08-21  2.6.8    mrosiere regtool      : Add enum
+# 2026-09-28  2.6.9    mrosiere rvcc         : Update check condition for zicsr
+#                               regtool      : Move copy in Makefile
+#                               pbcc         : Move rom generation in Makefile
+# 2026-10-02  2.7.0    mrosiere rvcc/pbcc/regtool : Use lock for run and write
+# 2026-10-05  2.7.1    mrosiere regtool      : Makefile outputs depend on the regtool sources
+#                                              ($(shell find), was always empty)
+#                               csr_reg      : Add "wo" model
+#                               gen_rom      : Exit with status 1 on error
+# 2026-10-21  2.8.0    mrosiere ghdl         : add script and Makefile to generate ghdl synth option
+# 2026-10-30  2.8.1    mrosiere ghdl         : files moved in the core asylum:utils:ghdl_synth
+#                                              (no dependency), generators depends on it
+# 2026-11-11  2.9.0    mrosiere regtool      : CSR model separated from the generators (csr_model, gen_*)
+#                                              gen_hdl (CSR) -> hdl_model -> generic writers gen_vhdl / gen_verilog
+#                                              memory interface only, buses through the bridges
+#                                              sbi2mem, pbi2mem, apb2mem, axi4lite2mem (interface "reg" = "mem")
+#                                              Verilog and SystemVerilog outputs (parameter language), parameter interface
+#                                              pytest unit tests, sim_regtool_<interface>_<scenario> targets
+# 2026-11-16  2.10.0   mrosiere regtool      : csr_reg wait states (generics RD_WAIT_STATE / WR_WAIT_STATE,
+#                                              hjson rd_wait_state / wr_wait_state, hwtype reg only)
+# 2026-11-22  2.11.0   mrosiere regtool      : testbenches use apb_bfm_pkg of asylum:verification:uvvm
+#                                              (library asylum_uvvm), local copy removed
+#-----------------------------------------------------------------------------
+
+name       : asylum:utils:generators:2.11.0
+description: A collection of useful generators
+
+#=========================================
+generators:
+#=========================================
+
+  #---------------------------------------
+  pbcc_gen:
+  #---------------------------------------
+    interpreter: python3
+    command    : generators/pbcc/pbcc.py
+    description: ROM Generator
+    cache_type : generator
+    usage: |
+      This generator translate a source file (C or Assembler) in ROM
+
+      The generator requires the following parameters:
+
+        file         : (Mandatory)
+                       Source file
+            
+        type         : (Mandatory)
+                       Type of source file
+                       "c"         : c file
+                       "kcpsm3"    : assembler file with kcpsm3 syntax
+                       "pblazeide" : assembler file with kcpsm3 syntax
+
+        entity       : (Optional)
+                       Entity Name
+                       Default     : OpenBlaze8_ROM
+
+        model        : (Optional)
+                       ROM Model 
+                       "generic"   : Generic implementation
+                       "xilinx"    : Xilinx  implementation
+                       Default     : "generic"
+
+        cflags       : (Optional)
+                       Compilation options for C file
+
+        logical_name : (Optional)
+                       Default : work
+
+  #---------------------------------------
+  rvcc_gen:
+  #---------------------------------------
+    interpreter: python3
+    command    : generators/rvcc/rvcc.py
+    description: RISC-V ROM Generator
+    cache_type : generator
+    usage: |
+      This generator translate a source file (C, Assembler or ELF) in ROM
+
+      The generator requires the following parameters:
+
+        file         : (Mandatory)
+                       Source file
+            
+        type         : (Mandatory)
+                       Type of source file
+                       "c"         : c file
+                       "s"         : assembler file
+                       "elf"       : elf file
+
+        entity       : (Optional)
+                       Entity Name
+                       Default     : WardRV_ROM
+
+        model        : (Optional)
+                       ROM Model 
+                       "generic"   : Generic implementation
+                       "xilinx"    : Xilinx  implementation
+                       Default     : "generic"
+
+        addr_width   : (Optional)
+                       ROM address width (ROM of 2**addr_width 32-bit words)
+                       Default     : 10
+
+        cflags       : (Optional)
+                       Compilation options for C file
+
+        stack_size   : (Optional)
+                       Stack size in bytes, reserved in the RAM by link.ld
+                       Default     : 128
+
+        logical_name : (Optional)
+                       Default : work
+
+  #---------------------------------------
+  regtool:
+  #---------------------------------------
+    interpreter: python3
+    command    : generators/regtool/regtool.py
+    description: CSR Generator
+    cache_type : generator
+    usage: |
+      This generator create module with register
+
+      The generator requires the following parameters:
+
+        file         : (Mandatory)
+                       Hjson description file
+
+        name         : (Mandatory)
+                       Name prefix
+
+        copy         : (Optional)
+                       Directory of the calling core where the outputs are copied
+                       Default : None
+
+        logical_name : (Optional)
+                       Default : work
+
+        interface    : (Optional)
+                       Replace the interface of the hjson file
+                       "mem"       : memory interface (cs, re, we, addr, wdata, rdata, busy)
+                       "sbi", "pbi", "apb", "axi4lite" : bus through the bridge <interface>2mem
+                       Default : interface of the hjson file
+
+        language     : (Optional)
+                       "vhdl"      : <name>_csr_pkg.vhd and <name>_csr.vhd
+                       "verilog"   : <name>_csr_pkg.vh  and <name>_csr.v  (mem, apb, axi4lite)
+                       "systemverilog" : <name>_csr_pkg.sv and <name>_csr.sv (mem, apb, axi4lite)
+                       Default : vhdl
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  deps:
+  #---------------------------------------
+    depend       :
+      - asylum:component:fifo
+      # ghdl_synth.sh / ghdl_synth.mk of the lint_ghdl_synth_* targets
+      - asylum:utils:ghdl_synth
+
+  #---------------------------------------
+  # regtool building blocks (added by regtool to the calling core)
+  #---------------------------------------
+  regtool_hdl:
+    files:
+      - tools/regtool/hdl/csr_pkg.vhd
+      - tools/regtool/hdl/csr_reg.vhd
+      - tools/regtool/hdl/csr_ext.vhd
+      - tools/regtool/hdl/csr_fifo.vhd
+    file_type    : vhdlSource
+    logical_name : asylum
+
+  #---------------------------------------
+  # regtool bridges (added by regtool to the calling core for its interface)
+  #---------------------------------------
+  regtool_bridges:
+    files:
+      - tools/regtool/hdl/sbi2mem.vhd
+      - tools/regtool/hdl/pbi2mem.vhd
+      - tools/regtool/hdl/apb2mem.vhd
+      - tools/regtool/hdl/axi4lite2mem.vhd
+    file_type    : vhdlSource-2008
+    logical_name : asylum
+    depend       :
+      # sbi_pkg / pbi_pkg
+      - asylum:utils:pkg
+
+  #---------------------------------------
+  # Wrappers of the lint and synthesis targets : every block at once
+  # (csr_wrapper, lint only), one block (csr_reg, sbi2mem, pbi2mem : generics
+  # without default or unconstrained records). csr_ext, csr_fifo, apb2mem and
+  # axi4lite2mem are their own top.
+  #---------------------------------------
+  syn:
+  #---------------------------------------
+    files        :
+      - syn/csr_wrapper.vhd
+      - syn/csr_reg_wrapper.vhd
+      - syn/sbi2mem_wrapper.vhd
+      - syn/pbi2mem_wrapper.vhd
+    file_type    : vhdlSource-2008
+    logical_name : asylum
+
+  #---------------------------------------
+  syn_yosys:
+  #---------------------------------------
+    # yosys_synth.sh / yosys_synth.mk / yosys_synth.py (pre_run hook of syn_*)
+    depend       :
+      - asylum:utils:yosys_synth
+
+  #---------------------------------------
+  # regtool testbenches (UVVM) : helpers, hardware side, one
+  # package per scenario, list of the scenarios and dispatch
+  #---------------------------------------
+  files_regtool_sim:
+    files:
+      - tools/regtool/sim/tb_regtool_bfm_pkg.vhd
+      - tools/regtool/sim/tb_regtool_hw.vhd
+      - tools/regtool/sim/tb_regtool_reset_pkg.vhd
+      - tools/regtool/sim/tb_regtool_write_read_pkg.vhd
+      - tools/regtool/sim/tb_regtool_hw_write_pkg.vhd
+      - tools/regtool/sim/tb_regtool_ext_pkg.vhd
+      - tools/regtool/sim/tb_regtool_fifo_read_pkg.vhd
+      - tools/regtool/sim/tb_regtool_fifo_write_pkg.vhd
+      - tools/regtool/sim/tb_regtool_unmapped_pkg.vhd
+      - tools/regtool/sim/tb_regtool_wait_duration_pkg.vhd
+      - tools/regtool/sim/tb_regtool_wait_write_pkg.vhd
+      - tools/regtool/sim/tb_regtool_wait_read_pkg.vhd
+      - tools/regtool/sim/tb_regtool_wait_read_clear_pkg.vhd
+      - tools/regtool/sim/tb_regtool_wait_none_pkg.vhd
+      - tools/regtool/sim/tb_regtool_tests_pkg.vhd
+    file_type    : vhdlSource-2008
+    logical_name : asylum
+    depend       :
+      # string_pkg list_length / list_item / list_contains (TESTS_LIST)
+      - ">=asylum:utils:pkg:1.10.0"
+      - bitvis:verification:uvvm
+      # apb_bfm_pkg (library asylum_uvvm)
+      - ">=asylum:verification:uvvm:1.0.0"
+
+  #---------------------------------------
+  files_regtool_sim_mem:
+  #---------------------------------------
+    files:
+      - tools/regtool/sim/tb_regtool_mem.vhd
+    file_type    : vhdlSource-2008
+    logical_name : asylum
+    depend       :
+      - bitvis:verification:uvvm
+
+  #---------------------------------------
+  files_regtool_sim_sbi:
+  #---------------------------------------
+    files:
+      - tools/regtool/sim/tb_regtool_sbi.vhd
+    file_type    : vhdlSource-2008
+    logical_name : asylum
+    depend       :
+      - bitvis:verification:uvvm
+
+  #---------------------------------------
+  files_regtool_sim_pbi:
+  #---------------------------------------
+    files:
+      - tools/regtool/sim/tb_regtool_pbi.vhd
+    file_type    : vhdlSource-2008
+    logical_name : asylum
+    depend       :
+      - bitvis:verification:uvvm
+
+  #---------------------------------------
+  files_regtool_sim_apb:
+  #---------------------------------------
+    files:
+      - tools/regtool/sim/tb_regtool_apb.vhd
+    file_type    : vhdlSource-2008
+    logical_name : asylum
+    depend       :
+      - bitvis:verification:uvvm
+
+  #---------------------------------------
+  files_regtool_sim_axi4lite:
+  #---------------------------------------
+    files:
+      - tools/regtool/sim/tb_regtool_axi4lite.vhd
+    file_type    : vhdlSource-2008
+    logical_name : asylum
+    depend       :
+      - bitvis:verification:uvvm
+
+#=========================================
+generate:
+#=========================================
+
+  #---------------------------------------
+  gen_csr_example1:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : tools/regtool/examples/example1.hjson
+      name         : example1
+      logical_name : asylum
+
+  #---------------------------------------
+  gen_csr_example2:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : tools/regtool/examples/example2.hjson
+      name         : example2
+      logical_name : asylum
+
+  #---------------------------------------
+  gen_csr_example3:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : tools/regtool/examples/example3.hjson
+      name         : example3
+      logical_name : asylum
+
+  #---------------------------------------
+  gen_csr_example4:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : tools/regtool/examples/example4.hjson
+      name         : example4
+      logical_name : asylum
+
+  #---------------------------------------
+  gen_csr_tb_mem:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : tools/regtool/sim/tbcsr.hjson
+      name         : tbcsr
+      logical_name : asylum
+      interface    : mem
+
+  #---------------------------------------
+  gen_csr_tb_sbi:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : tools/regtool/sim/tbcsr.hjson
+      name         : tbcsr
+      logical_name : asylum
+      interface    : sbi
+
+  #---------------------------------------
+  gen_csr_tb_pbi:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : tools/regtool/sim/tbcsr.hjson
+      name         : tbcsr
+      logical_name : asylum
+      interface    : pbi
+
+  #---------------------------------------
+  gen_csr_tb_apb:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : tools/regtool/sim/tbcsr.hjson
+      name         : tbcsr
+      logical_name : asylum
+      interface    : apb
+
+  #---------------------------------------
+  gen_csr_tb_axi4lite:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : tools/regtool/sim/tbcsr.hjson
+      name         : tbcsr
+      logical_name : asylum
+      interface    : axi4lite
+
+#=========================================
+parameters:
+#=========================================
+
+  REG1_ENABLE :
+    datatype    : bool
+    description : Enable the register reg1 of example1
+    paramtype   : generic
+
+  TESTS_LIST :
+    datatype    : str
+    description : Scenarios of the regtool testbenches, separated by ',' (names in tools/regtool/sim/tb_regtool_tests_pkg.vhd), empty = build only
+    default     : ""
+    paramtype   : generic
+
+  #---------------------------------------
+  # Generics of csr_wrapper, csr_reg_wrapper, csr_ext, csr_fifo
+  # (lint_ghdl_synth_*, syn_*)
+  #---------------------------------------
+  MODEL :
+    description : csr_reg_wrapper, software access model of csr_reg
+    datatype    : str
+    default     : rw
+    paramtype   : generic
+
+  WIDTH :
+    description : Register width
+    datatype    : int
+    default     : 8
+    paramtype   : generic
+
+  INIT :
+    description : Register reset value (WIDTH-bit string)
+    datatype    : str
+    default     : "00000000"
+    paramtype   : generic
+
+  RD_WAIT_STATE :
+    description : csr_reg, wait states of a software read
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+  WR_WAIT_STATE :
+    description : csr_reg, wait states of a software write
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+  BLOCKING_READ :
+    description : csr_fifo, blocking read
+    datatype    : bool
+    default     : false
+    paramtype   : generic
+
+  BLOCKING_WRITE :
+    description : csr_fifo, blocking write
+    datatype    : bool
+    default     : true
+    paramtype   : generic
+
+  DEPTH_SW2HW :
+    description : csr_fifo, depth of the SW to HW FIFO (0 = no FIFO)
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+  DEPTH_HW2SW :
+    description : csr_fifo, depth of the HW to SW FIFO (0 = no FIFO)
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target
+    filesets        :
+      - deps
+
+  #---------------------------------------
+  # Lint : -Wall analysis and elaboration (empty simulation)
+  #---------------------------------------
+  lint_ghdl : &lint_ghdl
+    << : *default
+    description     : Lint with GHDL (-Wall analysis of the building blocks, the bridges and the wrappers, elaboration of csr_wrapper)
+    toplevel        : asylum.csr_wrapper
+    filesets_append : [regtool_hdl, regtool_bridges, syn]
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall"]
+
+  #---------------------------------------
+  # Synthesis check : -Wall analysis, ghdl --synth -Wall and elaboration
+  # (no simulation) of one building block (or of csr_wrapper : every block,
+  # every access model of csr_reg) with the generics of the target.
+  # The pre_run hook (ghdl_synth.sh of asylum:utils:ghdl_synth, dependency
+  # of the deps fileset) adds ghdl_synth.mk to the edalize Makefile.
+  # FuseSoC merges tools in depth : analyze_options comes from lint_ghdl.
+  #---------------------------------------
+  lint_ghdl_synth_csr_reg_rw : &lint_ghdl_synth
+    << : *lint_ghdl
+    description     : Synthesis check of csr_reg (csr_reg_wrapper), rw, 8 bits
+    toplevel        : asylum.csr_reg_wrapper
+    parameters      :
+      - WIDTH=8
+      - MODEL=rw
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [ghdl_synth]
+
+  #---------------------------------------
+  lint_ghdl_synth_csr_reg_rw_wait_state :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of csr_reg (csr_reg_wrapper), rw, 8 bits, 2 read and 3 write wait states
+    toplevel        : asylum.csr_reg_wrapper
+    parameters      :
+      - WIDTH=8
+      - MODEL=rw
+      - RD_WAIT_STATE=2
+      - WR_WAIT_STATE=3
+
+  #---------------------------------------
+  lint_ghdl_synth_csr_ext :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of csr_ext, 8 bits
+    toplevel        : asylum.csr_ext
+    parameters      :
+      - WIDTH=8
+
+  #---------------------------------------
+  lint_ghdl_synth_csr_fifo_blocking :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of csr_fifo, 8 bits, FIFOs of depth 4 / 4, blocking read and write
+    toplevel        : asylum.csr_fifo
+    parameters      :
+      - WIDTH=8
+      - DEPTH_SW2HW=4
+      - DEPTH_HW2SW=4
+      - BLOCKING_READ=true
+
+  #---------------------------------------
+  lint_ghdl_synth_csr_fifo_nonblocking :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of csr_fifo, 8 bits, FIFOs of depth 2 / 8, non-blocking write
+    toplevel        : asylum.csr_fifo
+    parameters      :
+      - WIDTH=8
+      - DEPTH_SW2HW=2
+      - DEPTH_HW2SW=8
+      - BLOCKING_WRITE=false
+
+  #---------------------------------------
+  lint_ghdl_synth_sbi2mem :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi2mem (sbi2mem_wrapper), 8-bit address and data
+    toplevel        : asylum.sbi2mem_wrapper
+    parameters      : []
+
+  #---------------------------------------
+  lint_ghdl_synth_pbi2mem :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of pbi2mem (pbi2mem_wrapper), 8-bit address and data
+    toplevel        : asylum.pbi2mem_wrapper
+    parameters      : []
+
+  #---------------------------------------
+  lint_ghdl_synth_apb2mem :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of apb2mem, 8-bit address, 32-bit data
+    toplevel        : asylum.apb2mem
+    parameters      : []
+
+  #---------------------------------------
+  lint_ghdl_synth_axi4lite2mem :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of axi4lite2mem, 8-bit address, 32-bit data
+    toplevel        : asylum.axi4lite2mem
+    parameters      : []
+
+  #---------------------------------------
+  lint_ghdl_synth_width1_init1 :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of csr_wrapper (every block, every access model), WIDTH 1, INIT "1"
+    toplevel        : asylum.csr_wrapper
+    parameters      :
+      - WIDTH=1
+      - INIT=1
+
+  #---------------------------------------
+  lint_ghdl_synth_init_a5 :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of csr_wrapper (every block, every access model), INIT x"A5"
+    toplevel        : asylum.csr_wrapper
+    parameters      :
+      - INIT=10100101
+
+  #---------------------------------------
+  # Synthesis : -Wall analysis, then Yosys with the GHDL plugin : size on
+  # Xilinx Artix-7 (LUT, FF, BRAM, DSP) and area on sky130 of one building
+  # block, same configurations as lint_ghdl_synth_<block>_<config>.
+  # The pre_run hook (yosys_synth.sh of asylum:utils:yosys_synth) adds
+  # yosys_synth.mk to the edalize Makefile.
+  #---------------------------------------
+  syn_csr_reg_rw : &syn
+    << : *lint_ghdl
+    description     : Synthesis (Artix-7, sky130) of csr_reg (csr_reg_wrapper), rw, 8 bits
+    toplevel        : asylum.csr_reg_wrapper
+    parameters      :
+      - WIDTH=8
+      - MODEL=rw
+    filesets_append : [regtool_hdl, regtool_bridges, syn, syn_yosys]
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [yosys_synth]
+
+  #---------------------------------------
+  syn_csr_reg_rw_wait_state :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of csr_reg (csr_reg_wrapper), rw, 8 bits, 2 read and 3 write wait states
+    toplevel        : asylum.csr_reg_wrapper
+    parameters      :
+      - WIDTH=8
+      - MODEL=rw
+      - RD_WAIT_STATE=2
+      - WR_WAIT_STATE=3
+
+  #---------------------------------------
+  syn_csr_ext :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of csr_ext, 8 bits
+    toplevel        : asylum.csr_ext
+    parameters      :
+      - WIDTH=8
+
+  #---------------------------------------
+  syn_csr_fifo_blocking :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of csr_fifo, 8 bits, FIFOs of depth 4 / 4, blocking read and write
+    toplevel        : asylum.csr_fifo
+    parameters      :
+      - WIDTH=8
+      - DEPTH_SW2HW=4
+      - DEPTH_HW2SW=4
+      - BLOCKING_READ=true
+
+  #---------------------------------------
+  syn_csr_fifo_nonblocking :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of csr_fifo, 8 bits, FIFOs of depth 2 / 8, non-blocking write
+    toplevel        : asylum.csr_fifo
+    parameters      :
+      - WIDTH=8
+      - DEPTH_SW2HW=2
+      - DEPTH_HW2SW=8
+      - BLOCKING_WRITE=false
+
+  #---------------------------------------
+  syn_sbi2mem :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of sbi2mem (sbi2mem_wrapper), 8-bit address and data
+    toplevel        : asylum.sbi2mem_wrapper
+    parameters      : []
+
+  #---------------------------------------
+  syn_pbi2mem :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of pbi2mem (pbi2mem_wrapper), 8-bit address and data
+    toplevel        : asylum.pbi2mem_wrapper
+    parameters      : []
+
+  #---------------------------------------
+  syn_apb2mem :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of apb2mem, 8-bit address, 32-bit data
+    toplevel        : asylum.apb2mem
+    parameters      : []
+
+  #---------------------------------------
+  syn_axi4lite2mem :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of axi4lite2mem, 8-bit address, 32-bit data
+    toplevel        : asylum.axi4lite2mem
+    parameters      : []
+
+  #---------------------------------------
+  sim: &sim
+  #---------------------------------------
+    << : *default
+    description     : default run rule
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall"]
+        run_options     : ["--ieee-asserts=disable"]
+
+  #---------------------------------------
+  sim_regtool_example1:
+  #---------------------------------------
+    << : *sim
+    description     : Generate the CSR of regtool example1, analyze and elaborate them with GHDL
+    generate        :
+      - gen_csr_example1
+    toplevel        : asylum.example1_registers
+    parameters      :
+      - REG1_ENABLE=true
+
+  #---------------------------------------
+  # regtool testbenches : one testbench per interface (the CSR tbcsr
+  # generated with that interface), scenarios chosen at run time with
+  # TESTS_LIST (names in tools/regtool/sim/tb_regtool_tests_pkg.vhd), each
+  # one after a reset pulse. Reference configuration : sbi (the bus of the
+  # Asylum IPs), one target per scenario ; every other interface runs the
+  # whole list in one target. FuseSoC replaces the parameters list of an
+  # inherited target.
+  #---------------------------------------
+  sim_regtool_sbi: &sim_regtool_sbi
+    << : *sim
+    description     : regtool testbench, interface sbi - build only (scenarios of TESTS_LIST)
+    filesets        :
+      - deps
+      - files_regtool_sim
+      - files_regtool_sim_sbi
+    generate        :
+      - gen_csr_tb_sbi
+    toplevel        : asylum.tb_regtool_sbi
+    parameters      :
+      - TESTS_LIST
+    tools :
+      ghdl :
+        analyze_options : ["-frelaxed"]
+
+  #---------------------------------------
+  sim_regtool_sbi_reset:
+  #---------------------------------------
+    << : *sim_regtool_sbi
+    description     : regtool testbench, interface sbi, reset values
+    parameters      :
+      - TESTS_LIST=reset
+
+  #---------------------------------------
+  sim_regtool_sbi_write_read:
+  #---------------------------------------
+    << : *sim_regtool_sbi
+    description     : regtool testbench, interface sbi, software write / read back, write only register
+    parameters      :
+      - TESTS_LIST=write_read
+
+  #---------------------------------------
+  sim_regtool_sbi_hw_write:
+  #---------------------------------------
+    << : *sim_regtool_sbi
+    description     : regtool testbench, interface sbi, registers written by the hardware, rw1c
+    parameters      :
+      - TESTS_LIST=hw_write
+
+  #---------------------------------------
+  sim_regtool_sbi_ext:
+  #---------------------------------------
+    << : *sim_regtool_sbi
+    description     : regtool testbench, interface sbi, external register
+    parameters      :
+      - TESTS_LIST=ext
+
+  #---------------------------------------
+  sim_regtool_sbi_fifo_read:
+  #---------------------------------------
+    << : *sim_regtool_sbi
+    description     : regtool testbench, interface sbi, blocking read of an empty FIFO
+    parameters      :
+      - TESTS_LIST=fifo_read
+
+  #---------------------------------------
+  sim_regtool_sbi_fifo_write:
+  #---------------------------------------
+    << : *sim_regtool_sbi
+    description     : regtool testbench, interface sbi, blocking write of a full FIFO
+    parameters      :
+      - TESTS_LIST=fifo_write
+
+  #---------------------------------------
+  sim_regtool_sbi_unmapped:
+  #---------------------------------------
+    << : *sim_regtool_sbi
+    description     : regtool testbench, interface sbi, access to an unmapped address
+    parameters      :
+      - TESTS_LIST=unmapped
+
+  #---------------------------------------
+  sim_regtool_sbi_wait_duration:
+  #---------------------------------------
+    << : *sim_regtool_sbi
+    description     : regtool testbench, interface sbi, wait states, duration of the accesses
+    parameters      :
+      - TESTS_LIST=wait_duration
+
+  #---------------------------------------
+  sim_regtool_sbi_wait_write:
+  #---------------------------------------
+    << : *sim_regtool_sbi
+    description     : regtool testbench, interface sbi, write wait states, write and write strobe once, during the access
+    parameters      :
+      - TESTS_LIST=wait_write
+
+  #---------------------------------------
+  sim_regtool_sbi_wait_read:
+  #---------------------------------------
+    << : *sim_regtool_sbi
+    description     : regtool testbench, interface sbi, read wait states, read data of the last cycle, read strobe once
+    parameters      :
+      - TESTS_LIST=wait_read
+
+  #---------------------------------------
+  sim_regtool_sbi_wait_read_clear:
+  #---------------------------------------
+    << : *sim_regtool_sbi
+    description     : regtool testbench, interface sbi, read wait states, read side effect once, value before the clear
+    parameters      :
+      - TESTS_LIST=wait_read_clear
+
+  #---------------------------------------
+  sim_regtool_sbi_wait_none:
+  #---------------------------------------
+    << : *sim_regtool_sbi
+    description     : regtool testbench, interface sbi, wait states at 0, same as without them
+    parameters      :
+      - TESTS_LIST=wait_none
+
+  #---------------------------------------
+  sim_regtool_mem:
+  #---------------------------------------
+    << : *sim
+    description     : regtool testbench, interface mem, every scenario
+    filesets        :
+      - deps
+      - files_regtool_sim
+      - files_regtool_sim_mem
+    generate        :
+      - gen_csr_tb_mem
+    toplevel        : asylum.tb_regtool_mem
+    parameters      :
+      - TESTS_LIST=reset,write_read,hw_write,ext,fifo_read,fifo_write,unmapped,wait_duration,wait_write,wait_read,wait_read_clear,wait_none
+    tools :
+      ghdl :
+        analyze_options : ["-frelaxed"]
+
+  #---------------------------------------
+  sim_regtool_pbi:
+  #---------------------------------------
+    << : *sim
+    description     : regtool testbench, interface pbi, every scenario
+    filesets        :
+      - deps
+      - files_regtool_sim
+      - files_regtool_sim_pbi
+    generate        :
+      - gen_csr_tb_pbi
+    toplevel        : asylum.tb_regtool_pbi
+    parameters      :
+      - TESTS_LIST=reset,write_read,hw_write,ext,fifo_read,fifo_write,unmapped,wait_duration,wait_write,wait_read,wait_read_clear,wait_none
+    tools :
+      ghdl :
+        analyze_options : ["-frelaxed"]
+
+  #---------------------------------------
+  sim_regtool_apb:
+  #---------------------------------------
+    << : *sim
+    description     : regtool testbench, interface apb, every scenario
+    filesets        :
+      - deps
+      - files_regtool_sim
+      - files_regtool_sim_apb
+    generate        :
+      - gen_csr_tb_apb
+    toplevel        : asylum.tb_regtool_apb
+    parameters      :
+      - TESTS_LIST=reset,write_read,hw_write,ext,fifo_read,fifo_write,unmapped,wait_duration,wait_write,wait_read,wait_read_clear,wait_none
+    tools :
+      ghdl :
+        analyze_options : ["-frelaxed"]
+
+  #---------------------------------------
+  sim_regtool_axi4lite:
+  #---------------------------------------
+    << : *sim
+    description     : regtool testbench, interface axi4lite, every scenario
+    filesets        :
+      - deps
+      - files_regtool_sim
+      - files_regtool_sim_axi4lite
+    generate        :
+      - gen_csr_tb_axi4lite
+    toplevel        : asylum.tb_regtool_axi4lite
+    parameters      :
+      - TESTS_LIST=reset,write_read,hw_write,ext,fifo_read,fifo_write,unmapped,wait_duration,wait_write,wait_read,wait_read_clear,wait_none
+    tools :
+      ghdl :
+        analyze_options : ["-frelaxed"]
+
+#  #---------------------------------------
+#  sim_regtool_example2:
+#  #---------------------------------------
+#    << : *sim
+#    description     : Generate the CSR of regtool example2, analyze and elaborate them with GHDL
+#    generate        :
+#      - gen_csr_example2
+#    toplevel        : asylum.example2_registers
+#
+#  #---------------------------------------
+#  sim_regtool_example3:
+#  #---------------------------------------
+#    << : *sim
+#    description     : Generate the CSR of regtool example3, analyze and elaborate them with GHDL
+#    generate        :
+#      - gen_csr_example3
+#    toplevel        : asylum.example3_registers
+#
+#  #---------------------------------------
+#  sim_regtool_example4:
+#  #---------------------------------------
+#    << : *sim
+#    description     : Generate the CSR of regtool example4, analyze and elaborate them with GHDL
+#    generate        :
+#      - gen_csr_example4
+#    toplevel        : asylum.example4_registers
+
+#=========================================
+scripts:
+#=========================================
+
+  #---------------------------------------
+  # pre_run hook of lint_ghdl_synth_* (cwd = work_root)
+  #---------------------------------------
+  ghdl_synth :
+    cmd : [bash, ghdl_synth.sh]
+
+  #---------------------------------------
+  # pre_run hook of syn_* (cwd = work_root)
+  #---------------------------------------
+  yosys_synth :
+    cmd : [bash, yosys_synth.sh]
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-utils-generators
+  version : asylum-utils-generators-2.11.0
+ #version : 4ee548e68bd75968d5ed46ce45d7e9e59b028a8d
+#<PROVIDER_END>
