@@ -81,7 +81,7 @@ CAPI=2:
 #-----------------------------------------------------------------------------
 
 name        : asylum:soc:PicoSoC:4.0.0
-description : SoC with OpenBlaze8/WardRV, switch, led, UART, SPI, GIC, Timer, RAM, CRC, Spinlock and Mailbox
+description : SoC with OpenBlaze8/WardRV, switch, led, UART, SPI, I2C, PWM, GIC, Timer, RAM, CRC, Spinlock and Mailbox
 
 #=========================================
 generate:
@@ -272,6 +272,24 @@ generate:
     generator : pbcc_gen
     parameters :
       file         : esw/test_mailbox.c
+      type         : c
+      entity       : ROM_user
+      cflags       : -Dpicoblaze -Iesw/include --verbose --all-callee-saves -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=921600
+      logical_name : asylum
+
+  gen_picoblaze3_user_test_i2c :
+    generator : pbcc_gen
+    parameters :
+      file         : esw/test_i2c.c
+      type         : c
+      entity       : ROM_user
+      cflags       : -Dpicoblaze -Iesw/include --verbose --all-callee-saves -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=921600
+      logical_name : asylum
+
+  gen_picoblaze3_user_test_pwm :
+    generator : pbcc_gen
+    parameters :
+      file         : esw/test_pwm.c
       type         : c
       entity       : ROM_user
       cflags       : -Dpicoblaze -Iesw/include --verbose --all-callee-saves -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=921600
@@ -502,6 +520,24 @@ generate:
       cflags       : -Iesw/include --verbose -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=921600
       logical_name : asylum
 
+  gen_rv32i_user_test_i2c :
+    generator : rvcc_gen
+    parameters :
+      file         : esw/test_i2c.c
+      type         : c
+      entity       : ROM_user
+      cflags       : -Iesw/include --verbose -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=921600
+      logical_name : asylum
+
+  gen_rv32i_user_test_pwm :
+    generator : rvcc_gen
+    parameters :
+      file         : esw/test_pwm.c
+      type         : c
+      entity       : ROM_user
+      cflags       : -Iesw/include --verbose -DHAVE_UART -DCLOCK_FREQ=12500000 -DBAUD_RATE=921600
+      logical_name : asylum
+
   gen_rv32i_supervisor_c :
     generator : rvcc_gen
     parameters :
@@ -565,6 +601,9 @@ filesets:
       - ">=asylum:system:GIC:2.0.0"
       - ">=asylum:system:spinlock:1.0.0"
       - ">=asylum:system:mailbox:1.1.0"
+      - ">=asylum:communication:I2C:1.0.0"
+      - ">=asylum:component:PWM:1.0.0"
+      - ">=asylum:debug:HWLA:3.0.0"
       - ">=asylum:component:fifo:1.0.0"
       - ">=asylum:component:timer:2.0.0"
       - ">=asylum:component:ram:1.2.0"
@@ -582,12 +621,15 @@ filesets:
       - sim/picosoc/tb_PicoSoC_fault_lock_step_pkg.vhd
       - sim/picosoc/tb_PicoSoC_fault_tmr_pkg.vhd
       - sim/picosoc/tb_PicoSoC_fault_diff_pkg.vhd
+      - sim/picosoc/tb_PicoSoC_hwla_pkg.vhd
       - sim/picosoc/tb_PicoSoC_hello_pkg.vhd
       - sim/picosoc/tb_PicoSoC_test_gpio_pkg.vhd
       - sim/picosoc/tb_PicoSoC_test_uart_pkg.vhd
       - sim/picosoc/tb_PicoSoC_test_timer_pkg.vhd
       - sim/picosoc/tb_PicoSoC_test_gic_pkg.vhd
       - sim/picosoc/tb_PicoSoC_test_mailbox_pkg.vhd
+      - sim/picosoc/tb_PicoSoC_test_i2c_pkg.vhd
+      - sim/picosoc/tb_PicoSoC_test_pwm_pkg.vhd
       - sim/picosoc/tb_PicoSoC_tests_pkg.vhd
       - sim/picosoc/tb_PicoSoC.vhd
       - sim/modbus_rtu/tb_PicoSoC_modbus_rtu_bfm_pkg.vhd
@@ -1503,6 +1545,31 @@ targets:
       - SPI_MODEL=none
       - FIRMWARE=user
       - TESTS_LIST=switch,it_user,fault_diff
+
+  #---------------------------------------
+  sim_soc2_openblaze8_fault_c_user_hwla:
+  #---------------------------------------
+    << : *sim
+    description  : Simulation of the test esw/user.c            - Without Supervisor, Safety Lock-Step, With    Fault Injection, HWLA capture of the error on debug_uart_tx_o, SoC clock 1.152 MHz (10 cycles per bit at 115200 baud)
+    generate     : [gen_picoblaze3_user_c,gen_picoblaze3_supervisor_c_dummy]
+    parameters   :
+      - CPU_MODEL=OpenBlaze8
+      - FSYS=2304000
+      - FSYS_INT=1152000
+
+      # Platform Configuration
+      - SUPERVISOR=false
+      - USER_SAFETY=lock-step
+      - USER_FAULT_INJECTION=true
+
+      # Debug
+      - DEBUG_ENABLE=true
+
+      # Test Bench Configuration
+      - TB_WATCHDOG=200000
+      - SPI_MODEL=none
+      - FIRMWARE=user
+      - TESTS_LIST=hwla
 
   #---------------------------------------
   sim_soc2_openblaze8_c_user_uart:
@@ -2611,6 +2678,31 @@ targets:
       - TESTS_LIST=basic,sequence
 
   #---------------------------------------
+  sim_soc2_wardrv_fsm_fault_c_user_hwla:
+  #---------------------------------------
+    << : *sim
+    description  : Simulation of the test esw/user.c            - Without Supervisor, Safety Lock-Step, With    Fault Injection, HWLA capture of the error on debug_uart_tx_o, SoC clock 1.152 MHz (10 cycles per bit at 115200 baud)
+    generate     : [gen_rv32i_user_c,gen_rv32i_supervisor_c_dummy]
+    parameters   :
+      - CPU_MODEL=WardRV_fsm
+      - FSYS=2304000
+      - FSYS_INT=1152000
+
+      # Platform Configuration
+      - SUPERVISOR=false
+      - USER_SAFETY=lock-step
+      - USER_FAULT_INJECTION=true
+
+      # Debug
+      - DEBUG_ENABLE=true
+
+      # Test Bench Configuration
+      - TB_WATCHDOG=200000
+      - SPI_MODEL=none
+      - FIRMWARE=user
+      - TESTS_LIST=hwla
+
+  #---------------------------------------
   sim_soc3_wardrv_fsm_c_user:
   #---------------------------------------
     << : *sim
@@ -3282,6 +3374,118 @@ targets:
       - FIRMWARE=test_mailbox
       - TESTS_LIST=test_mailbox
 
+  #---------------------------------------
+  sim_soc1_wardrv_fsm_c_test_i2c:
+  #---------------------------------------
+    << : *sim
+    description  : Integration test esw/test_i2c.c - I2C registers, master and slave transfers with the I2C BFM, NACK, SCL at 100 kHz
+    generate     : [gen_rv32i_user_test_i2c,gen_rv32i_supervisor_c_dummy]
+    parameters   :
+      - CPU_MODEL=WardRV_fsm
+      - FSYS=25000000
+      - FSYS_INT=12500000
+
+      # SoC User Configuration
+      - USER_BAUD_RATE=921600
+
+      # Platform Configuration
+      - SUPERVISOR=false
+      - USER_SAFETY=none
+      - USER_FAULT_INJECTION=false
+
+      # Debug
+      - DEBUG_ENABLE=false
+
+      # Test Bench Configuration
+      - TB_WATCHDOG=200000
+      - SPI_MODEL=none
+      - FIRMWARE=test_i2c
+      - TESTS_LIST=test_i2c
+
+  #---------------------------------------
+  sim_soc1_openblaze8_c_test_i2c:
+  #---------------------------------------
+    << : *sim
+    description  : Integration test esw/test_i2c.c - I2C registers, master and slave transfers with the I2C BFM, NACK, SCL at 100 kHz
+    generate     : [gen_picoblaze3_user_test_i2c,gen_picoblaze3_supervisor_c_dummy]
+    parameters   :
+      - CPU_MODEL=OpenBlaze8
+      - FSYS=25000000
+      - FSYS_INT=12500000
+
+      # SoC User Configuration
+      - USER_BAUD_RATE=921600
+
+      # Platform Configuration
+      - SUPERVISOR=false
+      - USER_SAFETY=none
+      - USER_FAULT_INJECTION=false
+
+      # Debug
+      - DEBUG_ENABLE=false
+
+      # Test Bench Configuration
+      - TB_WATCHDOG=200000
+      - SPI_MODEL=none
+      - FIRMWARE=test_i2c
+      - TESTS_LIST=test_i2c
+
+  #---------------------------------------
+  sim_soc1_wardrv_fsm_c_test_pwm:
+  #---------------------------------------
+    << : *sim
+    description  : Integration test esw/test_pwm.c - PWM registers, period and duty cycle of pwm_o for 2 duties, low when disabled
+    generate     : [gen_rv32i_user_test_pwm,gen_rv32i_supervisor_c_dummy]
+    parameters   :
+      - CPU_MODEL=WardRV_fsm
+      - FSYS=25000000
+      - FSYS_INT=12500000
+
+      # SoC User Configuration
+      - USER_BAUD_RATE=921600
+
+      # Platform Configuration
+      - SUPERVISOR=false
+      - USER_SAFETY=none
+      - USER_FAULT_INJECTION=false
+
+      # Debug
+      - DEBUG_ENABLE=false
+
+      # Test Bench Configuration
+      - TB_WATCHDOG=200000
+      - SPI_MODEL=none
+      - FIRMWARE=test_pwm
+      - TESTS_LIST=test_pwm
+
+  #---------------------------------------
+  sim_soc1_openblaze8_c_test_pwm:
+  #---------------------------------------
+    << : *sim
+    description  : Integration test esw/test_pwm.c - PWM registers, period and duty cycle of pwm_o for 2 duties, low when disabled
+    generate     : [gen_picoblaze3_user_test_pwm,gen_picoblaze3_supervisor_c_dummy]
+    parameters   :
+      - CPU_MODEL=OpenBlaze8
+      - FSYS=25000000
+      - FSYS_INT=12500000
+
+      # SoC User Configuration
+      - USER_BAUD_RATE=921600
+
+      # Platform Configuration
+      - SUPERVISOR=false
+      - USER_SAFETY=none
+      - USER_FAULT_INJECTION=false
+
+      # Debug
+      - DEBUG_ENABLE=false
+
+      # Test Bench Configuration
+      - TB_WATCHDOG=200000
+      - SPI_MODEL=none
+      - FIRMWARE=test_pwm
+      - TESTS_LIST=test_pwm
+
 #=========================================
 scripts:
 #=========================================
@@ -3459,5 +3663,5 @@ provider  :
   user    : deuskane
   repo    : asylum-soc-picosoc
   version : asylum-soc-PicoSoC-4.0.0
- #version : a3de92b6dc8e5165a366a299b22b106ae74d3aaf
+ #version : ba3a3c90ad8f0f884f89052447691ea437300c92
 #<PROVIDER_END>
