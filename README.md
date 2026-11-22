@@ -90,6 +90,7 @@
 | ---                  | ---                  | ---                  | ---                                                                                                  | ---                  | --- |
 | asylum               | debug                | HWLA                 | [2.0.0](asylum/debug/HWLA/HWLA_v2_0_0.core)                                                          | [url](https://github.com/deuskane/asylum-debug-hwla/tree/asylum-debug-HWLA-2.0.0) |  Hardware Logic Analyzer|
 | asylum               | debug                | HWLA                 | [3.0.0](asylum/debug/HWLA/HWLA_v3_0_0.core)                                                          | [url](https://github.com/deuskane/asylum-debug-hwla/tree/asylum-debug-HWLA-3.0.0) |  Hardware Logic Analyzer|
+| asylum               | debug                | jtag                 | [1.0.0](asylum/debug/jtag/jtag_v1_0_0.core)                                                          | [url](https://github.com/deuskane/asylum-debug-jtag/tree/asylum-debug-jtag-1.0.0) |  JTAG TAP, test data registers and pad multiplexer|
 ## infrastructure
 | Vendor               | Library              | Name                 | Version                                                                                              | URL                  | Description |
 | ---                  | ---                  | ---                  | ---                                                                                                  | ---                  | --- |
