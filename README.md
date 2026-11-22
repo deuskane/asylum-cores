@@ -246,6 +246,10 @@
 | asylum               | utils                | pkg                  | [1.10.0](asylum/utils/pkg/utils_pkg_v1_10_0.core)                                                    | [url](https://github.com/deuskane/asylum-utils-pkg/tree/asylum-utils-pkg-1.10.0) |  VHDL Utility Package|
 | asylum               | utils                | yosys_synth          | [1.0.0](asylum/utils/yosys_synth/yosys_synth_v1_0_0.core)                                            | [url](https://github.com/deuskane/asylum-utils-generators/tree/asylum-utils-yosys_synth-1.0.0) |  Yosys synthesis (Artix-7 and sky130) of the syn_* targets|
 | asylum               | utils                | yosys_synth          | [1.0.1](asylum/utils/yosys_synth/yosys_synth_v1_0_1.core)                                            | [url](https://github.com/deuskane/asylum-utils-generators/tree/asylum-utils-yosys_synth-1.0.1) |  Yosys synthesis (Artix-7 and sky130) of the syn_* targets|
+## verification
+| Vendor               | Library              | Name                 | Version                                                                                              | URL                  | Description |
+| ---                  | ---                  | ---                  | ---                                                                                                  | ---                  | --- |
+| asylum               | verification         | uvvm                 | [1.0.0](asylum/verification/uvvm/uvvm_v1_0_0.core)                                                   | [url](https://github.com/deuskane/asylum-verification-uvvm/tree/asylum-verification-uvvm-1.0.0) |  UVVM BFMs of the Asylum testbenches|
 # bitvis
 ## verification
 | Vendor               | Library              | Name                 | Version                                                                                              | URL                  | Description |
