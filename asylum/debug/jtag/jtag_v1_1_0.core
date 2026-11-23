@@ -1,0 +1,751 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : jtag Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : jtag.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: IEEE 1149.1 JTAG Test Access Port (IDCODE, BYPASS, user
+#              instructions decoded outside), test data registers (parallel
+#              in, out, in/out), a generic pad multiplexer and a JTAG
+#              master driven by the OpenOCD remote_bitbang protocol
+#-----------------------------------------------------------------------------
+# Copyright (c) 2026
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2026-11-22  1.0.0    mrosiere Created
+# 2026-11-22  1.1.0    mrosiere jtag_bitbang : JTAG master driven by the OpenOCD
+#                               remote_bitbang byte stream (JTAG over a UART),
+#                               sim_bitbang_*, sim_openocd, lint_ghdl_synth_bitbang,
+#                               syn_bitbang
+#-----------------------------------------------------------------------------
+
+name        : asylum:debug:jtag:1.1.0
+description : JTAG TAP, test data registers and pad multiplexer
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  hdl:
+  #---------------------------------------
+    files        :
+      - hdl/jtag_pkg.vhd
+      - hdl/jtag_tap.vhd
+      - hdl/jtag_tdr_in.vhd
+      - hdl/jtag_tdr_out.vhd
+      - hdl/jtag_tdr_inout.vhd
+      - hdl/jtag_pad_mux.vhd
+      - hdl/jtag_bitbang.vhd
+    file_type    : vhdlSource-2008
+    logical_name : asylum
+
+  #---------------------------------------
+  # Testbench of jtag_tap and of the TDRs : JTAG BFM of
+  # asylum_uvvm, one package per scenario
+  #---------------------------------------
+  sim_jtag:
+    files        :
+      - sim/jtag/tb_jtag_bfm_pkg.vhd
+      - sim/jtag/tb_jtag_reset_trst_pkg.vhd
+      - sim/jtag/tb_jtag_reset_tms_pkg.vhd
+      - sim/jtag/tb_jtag_ir_capture_pkg.vhd
+      - sim/jtag/tb_jtag_idcode_pkg.vhd
+      - sim/jtag/tb_jtag_bypass_pkg.vhd
+      - sim/jtag/tb_jtag_unclaimed_pkg.vhd
+      - sim/jtag/tb_jtag_user_pkg.vhd
+      - sim/jtag/tb_jtag_tdo_en_pkg.vhd
+      - sim/jtag/tb_jtag_pause_pkg.vhd
+      - sim/jtag/tb_jtag_tdr_in_pkg.vhd
+      - sim/jtag/tb_jtag_tdr_out_pkg.vhd
+      - sim/jtag/tb_jtag_tdr_inout_pkg.vhd
+      - sim/jtag/tb_jtag_tdr_reset_pkg.vhd
+      - sim/jtag/tb_jtag_tests_pkg.vhd
+      - sim/jtag/tb_jtag.vhd
+    file_type    : vhdlSource-2008
+    depend       :
+      - asylum:verification:uvvm
+      # string_pkg list_length / list_item / list_contains (TESTS_LIST)
+      - ">=asylum:utils:pkg:1.10.0"
+
+  #---------------------------------------
+  # Testbench of jtag_pad_mux, one package per scenario
+  #---------------------------------------
+  sim_pad_mux:
+    files        :
+      - sim/pad_mux/tb_pad_mux_bfm_pkg.vhd
+      - sim/pad_mux/tb_pad_mux_select_pkg.vhd
+      - sim/pad_mux/tb_pad_mux_default_pkg.vhd
+      - sim/pad_mux/tb_pad_mux_output_enable_pkg.vhd
+      - sim/pad_mux/tb_pad_mux_tests_pkg.vhd
+      - sim/pad_mux/tb_pad_mux.vhd
+    file_type    : vhdlSource-2008
+    depend       :
+      - bitvis:verification:uvvm
+      # string_pkg list_length / list_item / list_contains (TESTS_LIST)
+      - ">=asylum:utils:pkg:1.10.0"
+
+  #---------------------------------------
+  # Testbench of jtag_bitbang : commands as bytes on s_axis, real jtag_tap
+  # and one jtag_tdr_inout, one package per scenario
+  #---------------------------------------
+  sim_bitbang:
+    files        :
+      - sim/bitbang/tb_bitbang_bfm_pkg.vhd
+      - sim/bitbang/tb_bitbang_write_pkg.vhd
+      - sim/bitbang/tb_bitbang_read_pkg.vhd
+      - sim/bitbang/tb_bitbang_reset_pkg.vhd
+      - sim/bitbang/tb_bitbang_blink_pkg.vhd
+      - sim/bitbang/tb_bitbang_ignored_pkg.vhd
+      - sim/bitbang/tb_bitbang_backpressure_pkg.vhd
+      - sim/bitbang/tb_bitbang_idcode_pkg.vhd
+      - sim/bitbang/tb_bitbang_dr_scan_pkg.vhd
+      - sim/bitbang/tb_bitbang_uart_pkg.vhd
+      - sim/bitbang/tb_bitbang_tests_pkg.vhd
+      - sim/bitbang/tb_bitbang.vhd
+    file_type    : vhdlSource-2008
+    depend       :
+      - bitvis:verification:uvvm
+      # string_pkg list_length / list_item / list_contains (TESTS_LIST)
+      - ">=asylum:utils:pkg:1.10.0"
+      # uart_rx_axis, uart_tx_axis, uart_baud_rate_gen (scenario uart)
+      - ">=asylum:communication:uart:3.0.0"
+
+  #---------------------------------------
+  # Co-simulation with OpenOCD (remote_bitbang adapter over TCP), hooks in
+  # sim/openocd/cosim.sh
+  #---------------------------------------
+  sim_openocd:
+    files        :
+      - sim/openocd/rbb_pkg.vhd
+      - sim/openocd/tb_bitbang_openocd.vhd
+      - sim/openocd/rbb_server.c : {file_type : user, copyto : openocd/rbb_server.c}
+      - sim/openocd/jtag.cfg     : {file_type : user, copyto : openocd/jtag.cfg}
+      - sim/openocd/cosim.sh     : {file_type : user, copyto : openocd/cosim.sh}
+    file_type    : vhdlSource-2008
+    depend       :
+      - bitvis:verification:uvvm
+
+  #---------------------------------------
+  syn:
+  #---------------------------------------
+    files        :
+      - syn/jtag_wrapper.vhd
+    file_type    : vhdlSource-2008
+    logical_name : asylum
+    # ghdl_synth.sh / ghdl_synth.mk (pre_run hook of lint_ghdl_synth_*)
+    depend       :
+      - asylum:utils:ghdl_synth
+
+  #---------------------------------------
+  syn_yosys:
+  #---------------------------------------
+    # yosys_synth.sh / yosys_synth.mk / yosys_synth.py (pre_run hook of syn_*)
+    depend       :
+      - asylum:utils:yosys_synth
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target
+    filesets        :
+      - hdl
+    toplevel        : jtag_tap
+    default_tool    : ghdl
+
+  #---------------------------------------
+  # Lint : -Wall analysis and elaboration (empty simulation)
+  #---------------------------------------
+  lint_ghdl : &lint_ghdl
+    << : *default
+    description     : Lint with GHDL (-Wall analysis and elaboration of jtag_wrapper)
+    toplevel        : asylum.jtag_wrapper
+    filesets_append : [syn]
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall"]
+
+  #---------------------------------------
+  # Synthesis check : -Wall analysis, ghdl --synth -Wall and elaboration
+  # (no simulation) of jtag_wrapper with the generics of the target.
+  # The pre_run hook (ghdl_synth.sh of asylum:utils:ghdl_synth) adds
+  # ghdl_synth.mk to the edalize Makefile.
+  # FuseSoC merges tools in depth : analyze_options comes from lint_ghdl.
+  #---------------------------------------
+  lint_ghdl_synth_default : &lint_ghdl_synth
+    << : *lint_ghdl
+    description     : Synthesis check of jtag_wrapper, default generics (5-bit IR, TRST, TDRs of 16 (in), 8 (out) and 8 (in/out) bits, 3 functions on 4 pads)
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [ghdl_synth]
+
+  #---------------------------------------
+  lint_ghdl_synth_min :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of jtag_wrapper, smallest configuration (3-bit IR, no TRST, 1-bit TDRs, 2 functions on 1 pad)
+    parameters      :
+      - IR_WIDTH=3
+      - TRST_ENABLE=false
+      - TDR_IN_WIDTH=1
+      - TDR_OUT_WIDTH=1
+      - TDR_INOUT_WIDTH=1
+      - NB_FUNC=2
+      - NB_PAD=1
+
+  #---------------------------------------
+  # jtag_bitbang alone (no generic, its own figures : not in jtag_wrapper)
+  #---------------------------------------
+  lint_ghdl_synth_bitbang :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of jtag_bitbang (remote_bitbang JTAG master)
+    toplevel        : asylum.jtag_bitbang
+
+  #---------------------------------------
+  # Synthesis : size of jtag_wrapper with the generics of the target,
+  # Xilinx Artix-7 (LUT, FF, BRAM, DSP) and sky130 (area), by Yosys and
+  # its GHDL plugin. Same configurations as lint_ghdl_synth_*.
+  # The pre_run hook (yosys_synth.sh of asylum:utils:yosys_synth) adds
+  # yosys_synth.mk to the edalize Makefile.
+  #---------------------------------------
+  syn_default : &syn
+    << : *lint_ghdl
+    description     : Synthesis (Artix-7, sky130) of jtag_wrapper, default generics (5-bit IR, TRST, TDRs of 16 (in), 8 (out) and 8 (in/out) bits, 3 functions on 4 pads)
+    filesets_append : [syn, syn_yosys]
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [yosys_synth]
+
+  #---------------------------------------
+  syn_min :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of jtag_wrapper, smallest configuration (3-bit IR, no TRST, 1-bit TDRs, 2 functions on 1 pad)
+    parameters      :
+      - IR_WIDTH=3
+      - TRST_ENABLE=false
+      - TDR_IN_WIDTH=1
+      - TDR_OUT_WIDTH=1
+      - TDR_INOUT_WIDTH=1
+      - NB_FUNC=2
+      - NB_PAD=1
+
+  #---------------------------------------
+  syn_bitbang :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of jtag_bitbang (remote_bitbang JTAG master)
+    toplevel        : asylum.jtag_bitbang
+
+  #---------------------------------------
+  # tb_jtag : compiled once per configuration, scenarios chosen at run
+  # time (TESTS_LIST, empty : build and elaboration only). Reference
+  # configuration (5-bit IR, TRST, TDRs of 8 (in), 12 (out) and 16 (in/out) bits) : sim_jtag (build only) and one
+  # sim_jtag_<test> target per scenario ; sim_jtag_ir8 (8-bit IR, no TRST, TDRs of 1 (in), 33 (out) and 5 (in/out) bits)
+  # runs every scenario. Each target repeats the generics of its
+  # configuration : FuseSoC replaces the parameters list of an inherited
+  # target. Generated.
+  #---------------------------------------
+  sim_jtag: &sim_jtag
+    << : *default
+    description     : Simulation of jtag_tap and the TDRs (5-bit IR, TRST, TDRs of 8 (in), 12 (out) and 16 (in/out) bits) - build only (scenarios of TESTS_LIST)
+    filesets_append :
+      - sim_jtag
+    toplevel        : tb_jtag
+    parameters      :
+      - TESTS_LIST
+      - IR_WIDTH=5
+      - TRST_ENABLE=true
+      - TDR_IN_WIDTH=8
+      - TDR_OUT_WIDTH=12
+      - TDR_INOUT_WIDTH=16
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options :
+          - "$(GHDL_ANALYZE_OPTION)"
+          - "-Wall"
+          - "-frelaxed"
+        run_options     :
+          - "$(GHDL_RUN_OPTION)"
+          - "--ieee-asserts=disable"
+
+  #---------------------------------------
+  sim_jtag_reset_trst:
+  #---------------------------------------
+    << : *sim_jtag
+    description     : Simulation of jtag_tap and the TDRs - TRST pulse alone, Test-Logic-Reset and IDCODE selected
+    parameters      :
+      - TESTS_LIST=reset_trst
+      - IR_WIDTH=5
+      - TRST_ENABLE=true
+      - TDR_IN_WIDTH=8
+      - TDR_OUT_WIDTH=12
+      - TDR_INOUT_WIDTH=16
+
+  #---------------------------------------
+  sim_jtag_reset_tms:
+  #---------------------------------------
+    << : *sim_jtag
+    description     : Simulation of jtag_tap and the TDRs - reset by TMS only, IDCODE selected
+    parameters      :
+      - TESTS_LIST=reset_tms
+      - IR_WIDTH=5
+      - TRST_ENABLE=true
+      - TDR_IN_WIDTH=8
+      - TDR_OUT_WIDTH=12
+      - TDR_INOUT_WIDTH=16
+
+  #---------------------------------------
+  sim_jtag_ir_capture:
+  #---------------------------------------
+    << : *sim_jtag
+    description     : Simulation of jtag_tap and the TDRs - Capture-IR loads 0...01, ir_o changes in Update-IR only
+    parameters      :
+      - TESTS_LIST=ir_capture
+      - IR_WIDTH=5
+      - TRST_ENABLE=true
+      - TDR_IN_WIDTH=8
+      - TDR_OUT_WIDTH=12
+      - TDR_INOUT_WIDTH=16
+
+  #---------------------------------------
+  sim_jtag_idcode:
+  #---------------------------------------
+    << : *sim_jtag
+    description     : Simulation of jtag_tap and the TDRs - IDCODE after reset and by IR scan, 32-bit register
+    parameters      :
+      - TESTS_LIST=idcode
+      - IR_WIDTH=5
+      - TRST_ENABLE=true
+      - TDR_IN_WIDTH=8
+      - TDR_OUT_WIDTH=12
+      - TDR_INOUT_WIDTH=16
+
+  #---------------------------------------
+  sim_jtag_bypass:
+  #---------------------------------------
+    << : *sim_jtag
+    description     : Simulation of jtag_tap and the TDRs - BYPASS, one bit delay, captured to 0
+    parameters      :
+      - TESTS_LIST=bypass
+      - IR_WIDTH=5
+      - TRST_ENABLE=true
+      - TDR_IN_WIDTH=8
+      - TDR_OUT_WIDTH=12
+      - TDR_INOUT_WIDTH=16
+
+  #---------------------------------------
+  sim_jtag_unclaimed:
+  #---------------------------------------
+    << : *sim_jtag
+    description     : Simulation of jtag_tap and the TDRs - unclaimed opcodes (all zeros included) select BYPASS
+    parameters      :
+      - TESTS_LIST=unclaimed
+      - IR_WIDTH=5
+      - TRST_ENABLE=true
+      - TDR_IN_WIDTH=8
+      - TDR_OUT_WIDTH=12
+      - TDR_INOUT_WIDTH=16
+
+  #---------------------------------------
+  sim_jtag_user:
+  #---------------------------------------
+    << : *sim_jtag
+    description     : Simulation of jtag_tap and the TDRs - user instructions, TDO from user_tdo_i (TDR of the opcode)
+    parameters      :
+      - TESTS_LIST=user
+      - IR_WIDTH=5
+      - TRST_ENABLE=true
+      - TDR_IN_WIDTH=8
+      - TDR_OUT_WIDTH=12
+      - TDR_INOUT_WIDTH=16
+
+  #---------------------------------------
+  sim_jtag_tdo_en:
+  #---------------------------------------
+    << : *sim_jtag
+    description     : Simulation of jtag_tap and the TDRs - tdo_en high in Shift-IR and Shift-DR only
+    parameters      :
+      - TESTS_LIST=tdo_en
+      - IR_WIDTH=5
+      - TRST_ENABLE=true
+      - TDR_IN_WIDTH=8
+      - TDR_OUT_WIDTH=12
+      - TDR_INOUT_WIDTH=16
+
+  #---------------------------------------
+  sim_jtag_pause:
+  #---------------------------------------
+    << : *sim_jtag
+    description     : Simulation of jtag_tap and the TDRs - Pause-IR, Pause-DR, Exit2 and zero-length scans, every TAP transition
+    parameters      :
+      - TESTS_LIST=pause
+      - IR_WIDTH=5
+      - TRST_ENABLE=true
+      - TDR_IN_WIDTH=8
+      - TDR_OUT_WIDTH=12
+      - TDR_INOUT_WIDTH=16
+
+  #---------------------------------------
+  sim_jtag_tdr_in:
+  #---------------------------------------
+    << : *sim_jtag
+    description     : Simulation of jtag_tap and the TDRs - jtag_tdr_in, capture of data_i, no capture or shift when not selected
+    parameters      :
+      - TESTS_LIST=tdr_in
+      - IR_WIDTH=5
+      - TRST_ENABLE=true
+      - TDR_IN_WIDTH=8
+      - TDR_OUT_WIDTH=12
+      - TDR_INOUT_WIDTH=16
+
+  #---------------------------------------
+  sim_jtag_tdr_out:
+  #---------------------------------------
+    << : *sim_jtag
+    description     : Simulation of jtag_tap and the TDRs - jtag_tdr_out, update of data_o, held during the scans and when not selected
+    parameters      :
+      - TESTS_LIST=tdr_out
+      - IR_WIDTH=5
+      - TRST_ENABLE=true
+      - TDR_IN_WIDTH=8
+      - TDR_OUT_WIDTH=12
+      - TDR_INOUT_WIDTH=16
+
+  #---------------------------------------
+  sim_jtag_tdr_inout:
+  #---------------------------------------
+    << : *sim_jtag
+    description     : Simulation of jtag_tap and the TDRs - jtag_tdr_inout, capture of data_i and update of data_o
+    parameters      :
+      - TESTS_LIST=tdr_inout
+      - IR_WIDTH=5
+      - TRST_ENABLE=true
+      - TDR_IN_WIDTH=8
+      - TDR_OUT_WIDTH=12
+      - TDR_INOUT_WIDTH=16
+
+  #---------------------------------------
+  sim_jtag_tdr_reset:
+  #---------------------------------------
+    << : *sim_jtag
+    description     : Simulation of jtag_tap and the TDRs - reset values of the TDRs (power-on reset, TRST, Test-Logic-Reset)
+    parameters      :
+      - TESTS_LIST=tdr_reset
+      - IR_WIDTH=5
+      - TRST_ENABLE=true
+      - TDR_IN_WIDTH=8
+      - TDR_OUT_WIDTH=12
+      - TDR_INOUT_WIDTH=16
+
+  #---------------------------------------
+  sim_jtag_ir8:
+  #---------------------------------------
+    << : *sim_jtag
+    description     : Simulation of jtag_tap and the TDRs, 8-bit IR, no TRST, TDRs of 1 (in), 33 (out) and 5 (in/out) bits, every scenario
+    parameters      :
+      - TESTS_LIST=reset_trst,reset_tms,ir_capture,idcode,bypass,unclaimed,user,tdo_en,pause,tdr_in,tdr_out,tdr_inout,tdr_reset
+      - IR_WIDTH=8
+      - TRST_ENABLE=false
+      - TDR_IN_WIDTH=1
+      - TDR_OUT_WIDTH=33
+      - TDR_INOUT_WIDTH=5
+
+  #---------------------------------------
+  # tb_pad_mux : reference configuration (3 functions on 4 pads, the use
+  # of PicoSoC) : sim_pad_mux (build only) and one sim_pad_mux_<test>
+  # target per scenario ; sim_pad_mux_5x2 (5 functions on 2 pads) runs
+  # every scenario. Generated.
+  #---------------------------------------
+  sim_pad_mux: &sim_pad_mux
+    << : *default
+    description     : Simulation of jtag_pad_mux (3 functions on 4 pads) - build only (scenarios of TESTS_LIST)
+    filesets_append :
+      - sim_pad_mux
+    toplevel        : tb_pad_mux
+    parameters      :
+      - TESTS_LIST
+      - NB_FUNC=3
+      - NB_PAD=4
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options :
+          - "$(GHDL_ANALYZE_OPTION)"
+          - "-Wall"
+          - "-frelaxed"
+        run_options     :
+          - "$(GHDL_RUN_OPTION)"
+          - "--ieee-asserts=disable"
+
+  #---------------------------------------
+  sim_pad_mux_select:
+  #---------------------------------------
+    << : *sim_pad_mux
+    description     : Simulation of jtag_pad_mux - pads driven by the selected function, which sees the pad inputs
+    parameters      :
+      - TESTS_LIST=select
+      - NB_FUNC=3
+      - NB_PAD=4
+
+  #---------------------------------------
+  sim_pad_mux_default:
+  #---------------------------------------
+    << : *sim_pad_mux
+    description     : Simulation of jtag_pad_mux - unselected functions see PAD_IN_DEFAULT
+    parameters      :
+      - TESTS_LIST=default
+      - NB_FUNC=3
+      - NB_PAD=4
+
+  #---------------------------------------
+  sim_pad_mux_output_enable:
+  #---------------------------------------
+    << : *sim_pad_mux
+    description     : Simulation of jtag_pad_mux - pad output enables from the selected function only
+    parameters      :
+      - TESTS_LIST=output_enable
+      - NB_FUNC=3
+      - NB_PAD=4
+
+  #---------------------------------------
+  sim_pad_mux_5x2:
+  #---------------------------------------
+    << : *sim_pad_mux
+    description     : Simulation of jtag_pad_mux, 5 functions on 2 pads, every scenario
+    parameters      :
+      - TESTS_LIST=select,default,output_enable
+      - NB_FUNC=5
+      - NB_PAD=2
+
+  #---------------------------------------
+  # tb_bitbang : jtag_bitbang has no generic : sim_bitbang (build only) and
+  # one sim_bitbang_<test> target per scenario. Generated.
+  #---------------------------------------
+  sim_bitbang: &sim_bitbang
+    << : *default
+    description     : Simulation of jtag_bitbang with jtag_tap and a TDR - build only (scenarios of TESTS_LIST)
+    filesets_append :
+      - sim_bitbang
+    toplevel        : tb_bitbang
+    parameters      :
+      - TESTS_LIST
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options :
+          - "$(GHDL_ANALYZE_OPTION)"
+          - "-Wall"
+          - "-frelaxed"
+        run_options     :
+          - "$(GHDL_RUN_OPTION)"
+          - "--ieee-asserts=disable"
+
+  #---------------------------------------
+  sim_bitbang_write:
+  #---------------------------------------
+    << : *sim_bitbang
+    description     : "Simulation of jtag_bitbang - write commands '0' to '7', TCK, TMS and TDI"
+    parameters      :
+      - TESTS_LIST=write
+
+  #---------------------------------------
+  sim_bitbang_read:
+  #---------------------------------------
+    << : *sim_bitbang
+    description     : "Simulation of jtag_bitbang - read command 'R', answers '0' or '1' (TDO, pull-up when not driven)"
+    parameters      :
+      - TESTS_LIST=read
+
+  #---------------------------------------
+  sim_bitbang_reset:
+  #---------------------------------------
+    << : *sim_bitbang
+    description     : "Simulation of jtag_bitbang - reset commands 'r' 's' 't' 'u', TRST and SRST"
+    parameters      :
+      - TESTS_LIST=reset
+
+  #---------------------------------------
+  sim_bitbang_blink:
+  #---------------------------------------
+    << : *sim_bitbang
+    description     : "Simulation of jtag_bitbang - blink commands 'B' and 'b'"
+    parameters      :
+      - TESTS_LIST=blink
+
+  #---------------------------------------
+  sim_bitbang_ignored:
+  #---------------------------------------
+    << : *sim_bitbang
+    description     : "Simulation of jtag_bitbang - the 241 other bytes are ignored"
+    parameters      :
+      - TESTS_LIST=ignored
+
+  #---------------------------------------
+  sim_bitbang_backpressure:
+  #---------------------------------------
+    << : *sim_bitbang
+    description     : "Simulation of jtag_bitbang - m_axis back-pressure, s_axis held while an answer is pending"
+    parameters      :
+      - TESTS_LIST=backpressure
+
+  #---------------------------------------
+  sim_bitbang_idcode:
+  #---------------------------------------
+    << : *sim_bitbang
+    description     : "Simulation of jtag_bitbang - IDCODE read through the TAP (TMS reset, IR scans)"
+    parameters      :
+      - TESTS_LIST=idcode
+
+  #---------------------------------------
+  sim_bitbang_dr_scan:
+  #---------------------------------------
+    << : *sim_bitbang
+    description     : "Simulation of jtag_bitbang - IR scan and DR scans of a jtag_tdr_inout"
+    parameters      :
+      - TESTS_LIST=dr_scan
+
+  #---------------------------------------
+  sim_bitbang_uart:
+  #---------------------------------------
+    << : *sim_bitbang
+    description     : "Simulation of jtag_bitbang - through uart_rx_axis and uart_tx_axis with the UVVM UART BFM (IDCODE, DR scan, TRST, SRST, LED)"
+    parameters      :
+      - TESTS_LIST=uart
+
+  #---------------------------------------
+  # Co-simulation : OpenOCD 0.12 (remote_bitbang adapter, TCP) drives
+  # jtag_bitbang, jtag_tap and a TDR ; checks of sim/openocd/jtag.cfg.
+  # Needs openocd and gcc (sim/openocd/cosim.sh, hooks run in the work root)
+  #---------------------------------------
+  sim_openocd:
+  #---------------------------------------
+    << : *default
+    description     : Co-simulation of jtag_bitbang with OpenOCD (remote_bitbang over TCP) - IDCODE, DR scans, TRST, SRST
+    filesets_append :
+      - sim_openocd
+    toplevel        : tb_bitbang_openocd
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options :
+          - "$(GHDL_ANALYZE_OPTION)"
+          - "-Wall"
+          - "-frelaxed"
+        run_options     :
+          - "$(GHDL_RUN_OPTION)"
+          - "--ieee-asserts=disable"
+    hooks :
+      pre_build     : [cosim_build]
+      pre_run       : [cosim_start]
+      post_run      : [cosim_check]
+
+#=========================================
+scripts:
+#=========================================
+
+  #---------------------------------------
+  # pre_run hook of lint_ghdl_synth_* (cwd = work_root)
+  #---------------------------------------
+  ghdl_synth :
+    cmd : [bash, ghdl_synth.sh]
+
+  #---------------------------------------
+  # pre_run hook of syn_* (cwd = work_root)
+  #---------------------------------------
+  yosys_synth :
+    cmd : [bash, yosys_synth.sh]
+
+  #---------------------------------------
+  # Hooks of sim_openocd (cwd = work_root)
+  #---------------------------------------
+  cosim_build :
+    cmd : [bash, openocd/cosim.sh, build]
+
+  cosim_start :
+    cmd : [bash, openocd/cosim.sh, start]
+
+  cosim_check :
+    cmd : [bash, openocd/cosim.sh, check]
+
+#=========================================
+parameters :
+#=========================================
+
+  TESTS_LIST :
+    description : Scenarios of the testbench, separated by ',' (empty, build and elaboration only)
+    datatype    : str
+    paramtype   : generic
+
+  #---------------------------------------
+  # Generics of tb_jtag (sim_jtag*) and of jtag_wrapper (lint_ghdl_synth_*, syn_*)
+  #---------------------------------------
+  IR_WIDTH :
+    description : Width of the instruction register of the TAP
+    datatype    : int
+    default     : 5
+    paramtype   : generic
+
+  TRST_ENABLE :
+    description : true, the TAP uses TRST
+    datatype    : bool
+    default     : true
+    paramtype   : generic
+
+  TDR_IN_WIDTH :
+    description : Width of the jtag_tdr_in register
+    datatype    : int
+    default     : 16
+    paramtype   : generic
+
+  TDR_OUT_WIDTH :
+    description : Width of the jtag_tdr_out register
+    datatype    : int
+    default     : 8
+    paramtype   : generic
+
+  TDR_INOUT_WIDTH :
+    description : Width of the jtag_tdr_inout register
+    datatype    : int
+    default     : 8
+    paramtype   : generic
+
+  #---------------------------------------
+  # Generics of tb_pad_mux (sim_pad_mux*) and of jtag_wrapper
+  #---------------------------------------
+  NB_FUNC :
+    description : Number of functions of the pad multiplexer
+    datatype    : int
+    default     : 3
+    paramtype   : generic
+
+  NB_PAD :
+    description : Number of pads of the pad multiplexer
+    datatype    : int
+    default     : 4
+    paramtype   : generic
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-debug-jtag
+  version : asylum-debug-jtag-1.1.0
+ #version : 0494d2c3ea5784829c8e43ceb69ea0689cd473ed
+#<PROVIDER_END>
