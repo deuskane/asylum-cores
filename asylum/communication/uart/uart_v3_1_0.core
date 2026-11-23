@@ -1,0 +1,772 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : UART
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : uart.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2025
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2025-01-21  1.0.0    mrosiere Created
+# 2025-02-05  1.1.0    mrosiere UART RX + check with loopback
+# 2025-03-09  1.2.0    mrosiere use unconstrained pbi
+# 2025-03-12  1.3.0    mrosiere Add CSR
+# 2025-03-22  1.4.0    mrosiere Use pbi instead reg interface for csr
+# 2025-04-02  1.5.0    mrosiere Remove pbi_target_wrapper
+# 2025-05-14  1.6.0    mrosiere Add parameter USER_DEFINE_BAUD_TICK and default value
+# 2025-06-21  1.6.1    mrosiere Dump FIFO activity in file
+# 2025-07-09  1.7.0    mrosiere Configure FIFO Depth
+# 2025-07-27  1.8.0    mrosiere Add Interruption
+# 2025-08-02  1.9.0    mrosiere Add CTS/RTS ports
+# 2025-09-05  1.9.1    mrosiere Add Package
+# 2025-11-10  1.10.0   mrosiere Update counter with shift register
+# 2025-11-22  1.10.1   mrosiere Use sbi instead pbi
+# 2026-05-30  1.10.2   mrosiere Generate 2 dumps file : one raw, one debug
+# 2026-06-06  1.10.3   mrosiere Add Name
+# 2026-06-10  1.10.4   mrosiere Add state in rx to support start glitch
+# 2026-09-21  1.10.5   mrosiere Move cts_b sync2dff from to to sbi_uart
+# 2026-10-05  1.11.0   mrosiere Fix RX data bit 0 lost with parity, restore RX
+#                               parity check (debug_o.uart_rx.parity_error),
+#                               default toplevel sbi_UART, depend on generators,
+#                               parity tests in tb_uart
+# 2026-11-15  2.0.0    mrosiere asylum:system:GIC >= 2.0.0 : isr records the masked
+#                               sources too (polling), imr only masks it_o
+# 2026-11-16  3.0.0    mrosiere isr / imr source 0 : TX FIFO empty (was TX FIFO
+#                               not empty), isr read wait state (polling,
+#                               generators >= 2.10.0), new sources : RX
+#                               overrun (4), framing error (5), parity
+#                               error (6), break (7), RTS# at DEPTH_RX-2,
+#                               generic RX_PARITY_ERROR (byte with a parity
+#                               error : "keep", "drop", or "halt" : stored,
+#                               then RX halted until isr bit 6 is cleared),
+#                               targets sim_rx_parity_drop,
+#                               sim_rx_parity_halt,
+#                               lint_ghdl_synth_parity_drop and
+#                               lint_ghdl_synth_parity_halt
+# 2026-11-23  3.1.0    mrosiere uart_core : TX and RX with their baud rate
+#                               generators, TX_ENABLE / RX_ENABLE (constant
+#                               outputs of a removed direction), sbi_UART
+#                               on uart_core, targets sim_core*,
+#                               lint_ghdl_synth_core* and syn_core*,
+#                               synchronizers of uart_rx_i / uart_cts_b_i
+#                               moved into uart_core (internal loopbacks
+#                               of sbi_UART : 2 more clock cycles)
+#-----------------------------------------------------------------------------
+
+name        : asylum:communication:uart:3.1.0
+description : UART TX and RX
+
+#=========================================
+generate:
+#=========================================
+
+  #---------------------------------------
+  gen_csr:
+  #---------------------------------------
+    generator : regtool
+    parameters:
+      file         : hdl/csr/UART.hjson
+      name         : UART
+      copy         : hdl/csr
+      logical_name : asylum
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  rtl:
+  #---------------------------------------
+    files:
+      - hdl/uart_pkg.vhd
+      - hdl/uart_baud_rate_gen.vhd
+      - hdl/uart_rx_axis.vhd
+      - hdl/uart_tx_axis.vhd
+      - hdl/uart_core.vhd
+      - hdl/sbi_uart.vhd
+    file_type    : vhdlSource
+    logical_name : asylum
+    depend :
+      - asylum:utils:pkg
+      - asylum:component:fifo
+      - ">=asylum:system:GIC:2.0.0"
+      - asylum:target:techmap
+      - ">=asylum:utils:generators:2.10.0"
+
+  #---------------------------------------
+  sim_basic:
+  #---------------------------------------
+    files        :
+      - sim/basic/tb_UART_bfm_pkg.vhd
+      - sim/basic/tb_UART_reset_values_pkg.vhd
+      - sim/basic/tb_UART_rx_pkg.vhd
+      - sim/basic/tb_UART_rx_drift_pkg.vhd
+      - sim/basic/tb_UART_rx_glitch_pkg.vhd
+      - sim/basic/tb_UART_rx_parity_pkg.vhd
+      - sim/basic/tb_UART_tx_pkg.vhd
+      - sim/basic/tb_UART_loopback_pkg.vhd
+      - sim/basic/tb_UART_tx_flow_pkg.vhd
+      - sim/basic/tb_UART_rx_overrun_pkg.vhd
+      - sim/basic/tb_UART_rx_pending_pkg.vhd
+      - sim/basic/tb_UART_rx_errors_pkg.vhd
+      - sim/basic/tb_UART_tx_irq_pkg.vhd
+      - sim/basic/tb_UART_rts_pkg.vhd
+      - sim/basic/tb_UART_echo_pkg.vhd
+      - sim/basic/tb_UART_parity_policy_pkg.vhd
+      - sim/basic/tb_UART_baud_pkg.vhd
+      - sim/basic/tb_UART_tests_pkg.vhd
+      - sim/basic/tb_UART.vhd
+    file_type    : vhdlSource-2008
+    depend       :
+      - bitvis:verification:uvvm
+      # string_pkg list_length / list_item / list_contains (TESTS_LIST)
+      - ">=asylum:utils:pkg:1.10.0"
+
+  #---------------------------------------
+  sim_core:
+  #---------------------------------------
+    files        :
+      - sim/core/tb_uart_core_bfm_pkg.vhd
+      - sim/core/tb_uart_core_tx_pkg.vhd
+      - sim/core/tb_uart_core_rx_pkg.vhd
+      - sim/core/tb_uart_core_loopback_pkg.vhd
+      - sim/core/tb_uart_core_cts_pkg.vhd
+      - sim/core/tb_uart_core_rx_errors_pkg.vhd
+      - sim/core/tb_uart_core_tx_disabled_pkg.vhd
+      - sim/core/tb_uart_core_rx_disabled_pkg.vhd
+      - sim/core/tb_uart_core_tests_pkg.vhd
+      - sim/core/tb_uart_core.vhd
+    file_type    : vhdlSource-2008
+    depend       :
+      - bitvis:verification:uvvm
+      # string_pkg list_length / list_item / list_contains (TESTS_LIST)
+      - ">=asylum:utils:pkg:1.10.0"
+
+  #---------------------------------------
+  syn:
+  #---------------------------------------
+    files        :
+      - syn/sbi_UART_wrapper.vhd
+      - syn/uart_core_wrapper.vhd
+    file_type    : vhdlSource-2008
+    logical_name : asylum
+    # ghdl_synth.sh / ghdl_synth.mk (pre_run hook of lint_ghdl_synth_*)
+    depend       :
+      - asylum:utils:ghdl_synth
+
+  #---------------------------------------
+  syn_yosys:
+  #---------------------------------------
+    # yosys_synth.sh / yosys_synth.mk / yosys_synth.py (pre_run hook of syn_*)
+    depend       :
+      - asylum:utils:yosys_synth
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target
+    filesets        :
+      - rtl
+    toplevel        : sbi_UART
+    generate        :
+      - gen_csr
+
+  #---------------------------------------
+  # Lint : -Wall analysis and elaboration (empty simulation)
+  #---------------------------------------
+  lint_ghdl : &lint_ghdl
+    << : *default
+    description     : Lint with GHDL (-Wall analysis and elaboration of sbi_UART_wrapper)
+    toplevel        : asylum.sbi_UART_wrapper
+    filesets_append : [syn]
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall"]
+
+  #---------------------------------------
+  # Synthesis check : -Wall analysis, ghdl --synth -Wall and elaboration
+  # (no simulation) of sbi_UART_wrapper with the generics of the target.
+  # The pre_run hook (ghdl_synth.sh of asylum:utils:ghdl_synth) adds
+  # ghdl_synth.mk to the edalize Makefile.
+  # FuseSoC merges tools in depth : analyze_options comes from lint_ghdl.
+  #---------------------------------------
+  lint_ghdl_synth_default : &lint_ghdl_synth
+    << : *lint_ghdl
+    description     : Synthesis check of sbi_UART_wrapper, default generics (PicoSoC)
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [ghdl_synth]
+
+  #---------------------------------------
+  lint_ghdl_synth_fifo16 :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi_UART_wrapper, FIFO depths 16 (tb_UART)
+    parameters      :
+      - DEPTH_TX=16
+      - DEPTH_RX=16
+
+  #---------------------------------------
+  lint_ghdl_synth_tx_only :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi_UART_wrapper, TX only
+    parameters      :
+      - UART_RX_ENABLE=false
+      - DEPTH_TX=4
+
+  #---------------------------------------
+  lint_ghdl_synth_rx_only :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi_UART_wrapper, RX only
+    parameters      :
+      - UART_TX_ENABLE=false
+      - DEPTH_RX=4
+
+  #---------------------------------------
+  lint_ghdl_synth_fixed_baud :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi_UART_wrapper, fixed baud tick
+    parameters      :
+      - USER_DEFINE_BAUD_TICK=false
+
+  #---------------------------------------
+  lint_ghdl_synth_parity_drop :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi_UART_wrapper, bytes with a parity error dropped
+    parameters      :
+      - RX_PARITY_ERROR=drop
+
+  #---------------------------------------
+  lint_ghdl_synth_parity_halt :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi_UART_wrapper, RX halted after a byte with a parity error
+    parameters      :
+      - RX_PARITY_ERROR=halt
+
+  #---------------------------------------
+  # Synthesis check of uart_core_wrapper : uart_core alone (TX and RX, TX
+  # only), 8 data bits, 16-bit baud tick counter
+  #---------------------------------------
+  lint_ghdl_synth_core :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of uart_core_wrapper, TX and RX
+    toplevel        : asylum.uart_core_wrapper
+    parameters      :
+      - TX_ENABLE=true
+      - RX_ENABLE=true
+
+  #---------------------------------------
+  lint_ghdl_synth_core_tx_only :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of uart_core_wrapper, TX only
+    toplevel        : asylum.uart_core_wrapper
+    parameters      :
+      - TX_ENABLE=true
+      - RX_ENABLE=false
+
+  #---------------------------------------
+  # Synthesis : size of sbi_UART_wrapper with the generics of the target,
+  # Xilinx Artix-7 (LUT, FF, BRAM, DSP) and sky130 (area), by Yosys and
+  # its GHDL plugin. Same configurations as lint_ghdl_synth_*.
+  # The pre_run hook (yosys_synth.sh of asylum:utils:yosys_synth) adds
+  # yosys_synth.mk to the edalize Makefile.
+  #---------------------------------------
+  syn_default : &syn
+    << : *lint_ghdl
+    description     : Synthesis (Artix-7, sky130) of sbi_UART_wrapper, default generics (PicoSoC)
+    filesets_append : [syn, syn_yosys]
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [yosys_synth]
+
+  #---------------------------------------
+  syn_fifo16 :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of sbi_UART_wrapper, FIFO depths 16 (tb_UART)
+    parameters      :
+      - DEPTH_TX=16
+      - DEPTH_RX=16
+
+  #---------------------------------------
+  syn_tx_only :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of sbi_UART_wrapper, TX only
+    parameters      :
+      - UART_RX_ENABLE=false
+      - DEPTH_TX=4
+
+  #---------------------------------------
+  syn_rx_only :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of sbi_UART_wrapper, RX only
+    parameters      :
+      - UART_TX_ENABLE=false
+      - DEPTH_RX=4
+
+  #---------------------------------------
+  syn_fixed_baud :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of sbi_UART_wrapper, fixed baud tick
+    parameters      :
+      - USER_DEFINE_BAUD_TICK=false
+
+  #---------------------------------------
+  syn_parity_drop :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of sbi_UART_wrapper, bytes with a parity error dropped
+    parameters      :
+      - RX_PARITY_ERROR=drop
+
+  #---------------------------------------
+  syn_parity_halt :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of sbi_UART_wrapper, RX halted after a byte with a parity error
+    parameters      :
+      - RX_PARITY_ERROR=halt
+
+  #---------------------------------------
+  # Synthesis : size of uart_core_wrapper, same configurations as
+  # lint_ghdl_synth_core*
+  #---------------------------------------
+  syn_core :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of uart_core_wrapper, TX and RX
+    toplevel        : asylum.uart_core_wrapper
+    parameters      :
+      - TX_ENABLE=true
+      - RX_ENABLE=true
+
+  #---------------------------------------
+  syn_core_tx_only :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of uart_core_wrapper, TX only
+    toplevel        : asylum.uart_core_wrapper
+    parameters      :
+      - TX_ENABLE=true
+      - RX_ENABLE=false
+
+  #---------------------------------------
+  # tb_UART (sim/basic) : compiled once per configuration
+  # (RX_PARITY_ERROR), scenarios chosen at run time (TESTS_LIST, empty :
+  # build and elaboration only). Reference configuration "keep" :
+  # sim_basic (build only) and one sim_basic_<test> target per scenario ;
+  # sim_rx_parity_drop and sim_rx_parity_halt run the whole list. Each
+  # target repeats the generics of its configuration : FuseSoC replaces
+  # the parameters list of an inherited target.
+  #---------------------------------------
+  sim_basic: &sim_basic
+  #---------------------------------------
+    << : *default
+    description     : Simulation of sbi_UART (UVVM) - build only (scenarios of TESTS_LIST)
+    filesets_append :
+      - sim_basic
+    toplevel        : tb_UART
+    parameters      :
+      - TESTS_LIST
+      - RX_PARITY_ERROR=keep
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options :
+          - "$(GHDL_ANALYZE_OPTION)"
+          - "-Wall"
+          - "-frelaxed"
+        run_options     :
+          - "$(GHDL_RUN_OPTION)"
+          - "--ieee-asserts=disable"
+
+  #---------------------------------------
+  sim_basic_reset_values:
+  #---------------------------------------
+    << : *sim_basic
+    description     : Simulation of sbi_UART (UVVM) - reset values of the pads and registers, read / write of the registers
+    parameters      :
+      - TESTS_LIST=reset_values
+      - RX_PARITY_ERROR=keep
+
+  #---------------------------------------
+  sim_basic_rx:
+  #---------------------------------------
+    << : *sim_basic
+    description     : Simulation of sbi_UART (UVVM) - reception without parity, every pattern
+    parameters      :
+      - TESTS_LIST=rx
+      - RX_PARITY_ERROR=keep
+
+  #---------------------------------------
+  sim_basic_rx_drift:
+  #---------------------------------------
+    << : *sim_basic
+    description     : Simulation of sbi_UART (UVVM) - reception with a bit period +3 % and -3 %
+    parameters      :
+      - TESTS_LIST=rx_drift
+      - RX_PARITY_ERROR=keep
+
+  #---------------------------------------
+  sim_basic_rx_glitch:
+  #---------------------------------------
+    << : *sim_basic
+    description     : Simulation of sbi_UART (UVVM) - glitch shorter than half a bit, RX FIFO not empty interrupt, isr records the masked sources
+    parameters      :
+      - TESTS_LIST=rx_glitch
+      - RX_PARITY_ERROR=keep
+
+  #---------------------------------------
+  sim_basic_rx_parity:
+  #---------------------------------------
+    << : *sim_basic
+    description     : Simulation of sbi_UART (UVVM) - reception with even and odd parity, good and corrupted parity bit
+    parameters      :
+      - TESTS_LIST=rx_parity
+      - RX_PARITY_ERROR=keep
+
+  #---------------------------------------
+  sim_basic_tx:
+  #---------------------------------------
+    << : *sim_basic
+    description     : Simulation of sbi_UART (UVVM) - transmission without, with even and with odd parity, back to back frames
+    parameters      :
+      - TESTS_LIST=tx
+      - RX_PARITY_ERROR=keep
+
+  #---------------------------------------
+  sim_basic_loopback:
+  #---------------------------------------
+    << : *sim_basic
+    description     : Simulation of sbi_UART (UVVM) - internal loopback without, with even and with odd parity, parity mismatch
+    parameters      :
+      - TESTS_LIST=loopback
+      - RX_PARITY_ERROR=keep
+
+  #---------------------------------------
+  sim_basic_tx_flow:
+  #---------------------------------------
+    << : *sim_basic
+    description     : Simulation of sbi_UART (UVVM) - TX disabled and CTS# inactive keep the TX bytes, CTS# ignored while cts_enable = 0
+    parameters      :
+      - TESTS_LIST=tx_flow
+      - RX_PARITY_ERROR=keep
+
+  #---------------------------------------
+  sim_basic_rx_overrun:
+  #---------------------------------------
+    << : *sim_basic
+    description     : Simulation of sbi_UART (UVVM) - blocking read, RTS# threshold, RX overrun event and interrupt
+    parameters      :
+      - TESTS_LIST=rx_overrun
+      - RX_PARITY_ERROR=keep
+
+  #---------------------------------------
+  sim_basic_rx_pending:
+  #---------------------------------------
+    << : *sim_basic
+    description     : Simulation of sbi_UART (UVVM) - read of data during a frame lets the byte waiting in the receiver in, no overrun
+    parameters      :
+      - TESTS_LIST=rx_pending
+      - RX_PARITY_ERROR=keep
+
+  #---------------------------------------
+  sim_basic_rx_errors:
+  #---------------------------------------
+    << : *sim_basic
+    description     : Simulation of sbi_UART (UVVM) - framing error, break and parity error events and interrupts
+    parameters      :
+      - TESTS_LIST=rx_errors
+      - RX_PARITY_ERROR=keep
+
+  #---------------------------------------
+  sim_basic_tx_irq:
+  #---------------------------------------
+    << : *sim_basic
+    description     : Simulation of sbi_UART (UVVM) - isr polling of the TX FIFO state, TX FIFO empty interrupt
+    parameters      :
+      - TESTS_LIST=tx_irq
+      - RX_PARITY_ERROR=keep
+
+  #---------------------------------------
+  sim_basic_rts:
+  #---------------------------------------
+    << : *sim_basic
+    description     : Simulation of sbi_UART (UVVM) - RTS# with a full RX FIFO, rts_enable
+    parameters      :
+      - TESTS_LIST=rts
+      - RX_PARITY_ERROR=keep
+
+  #---------------------------------------
+  sim_basic_echo:
+  #---------------------------------------
+    << : *sim_basic
+    description     : Simulation of sbi_UART (UVVM) - echo mode (tx_use_loopback), CTS# = internal RTS#
+    parameters      :
+      - TESTS_LIST=echo
+      - RX_PARITY_ERROR=keep
+
+  #---------------------------------------
+  sim_basic_parity_policy:
+  #---------------------------------------
+    << : *sim_basic
+    description     : Simulation of sbi_UART (UVVM) - policy on a byte with a parity error (RX_PARITY_ERROR), with a full RX FIFO
+    parameters      :
+      - TESTS_LIST=parity_policy
+      - RX_PARITY_ERROR=keep
+
+  #---------------------------------------
+  sim_basic_baud:
+  #---------------------------------------
+    << : *sim_basic
+    description     : Simulation of sbi_UART (UVVM) - baud rate written by software (57600 baud)
+    parameters      :
+      - TESTS_LIST=baud
+      - RX_PARITY_ERROR=keep
+
+  #---------------------------------------
+  sim_rx_parity_drop:
+  #---------------------------------------
+    << : *sim_basic
+    description     : Simulation of sbi_UART (UVVM) - bytes with a parity error dropped (RX_PARITY_ERROR drop), every scenario
+    parameters      :
+      - TESTS_LIST=reset_values,rx,rx_drift,rx_glitch,rx_parity,tx,loopback,tx_flow,rx_overrun,rx_pending,rx_errors,tx_irq,rts,echo,parity_policy,baud
+      - RX_PARITY_ERROR=drop
+
+  #---------------------------------------
+  sim_rx_parity_halt:
+  #---------------------------------------
+    << : *sim_basic
+    description     : Simulation of sbi_UART (UVVM) - RX halted after a byte with a parity error (RX_PARITY_ERROR halt), every scenario
+    parameters      :
+      - TESTS_LIST=reset_values,rx,rx_drift,rx_glitch,rx_parity,tx,loopback,tx_flow,rx_overrun,rx_pending,rx_errors,tx_irq,rts,echo,parity_policy,baud
+      - RX_PARITY_ERROR=halt
+
+  #---------------------------------------
+  # tb_uart_core (sim/core) : compiled once per configuration (TX_ENABLE,
+  # RX_ENABLE), scenarios chosen at run time (TESTS_LIST, empty : build and
+  # elaboration only). Reference configuration TX and RX : sim_core (build
+  # only) and one sim_core_<test> target per scenario ; sim_core_tx_only,
+  # sim_core_rx_only and sim_core_disabled run the scenarios of their
+  # configuration. Each target repeats the generics of its configuration.
+  #---------------------------------------
+  sim_core: &sim_core
+  #---------------------------------------
+    << : *default
+    description     : Simulation of uart_core (UVVM) - build only (scenarios of TESTS_LIST)
+    filesets_append :
+      - sim_core
+    toplevel        : tb_uart_core
+    parameters      :
+      - TESTS_LIST
+      - TX_ENABLE=true
+      - RX_ENABLE=true
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options :
+          - "$(GHDL_ANALYZE_OPTION)"
+          - "-Wall"
+          - "-frelaxed"
+        run_options     :
+          - "$(GHDL_RUN_OPTION)"
+          - "--ieee-asserts=disable"
+
+  #---------------------------------------
+  sim_core_tx:
+  #---------------------------------------
+    << : *sim_core
+    description     : Simulation of uart_core (UVVM) - transmission without, with even and with odd parity, cfg_tx_enable_i
+    parameters      :
+      - TESTS_LIST=tx
+      - TX_ENABLE=true
+      - RX_ENABLE=true
+
+  #---------------------------------------
+  sim_core_rx:
+  #---------------------------------------
+    << : *sim_core
+    description     : Simulation of uart_core (UVVM) - reception without, with even and with odd parity, parity error, cfg_rx_enable_i
+    parameters      :
+      - TESTS_LIST=rx
+      - TX_ENABLE=true
+      - RX_ENABLE=true
+
+  #---------------------------------------
+  sim_core_loopback:
+  #---------------------------------------
+    << : *sim_core
+    description     : Simulation of uart_core (UVVM) - TX looped back to RX at two baud rates, every parity, TX and RX parities set separately
+    parameters      :
+      - TESTS_LIST=loopback
+      - TX_ENABLE=true
+      - RX_ENABLE=true
+
+  #---------------------------------------
+  sim_core_cts:
+  #---------------------------------------
+    << : *sim_core
+    description     : Simulation of uart_core (UVVM) - CTS# back-pressure
+    parameters      :
+      - TESTS_LIST=cts
+      - TX_ENABLE=true
+      - RX_ENABLE=true
+
+  #---------------------------------------
+  sim_core_rx_errors:
+  #---------------------------------------
+    << : *sim_core
+    description     : Simulation of uart_core (UVVM) - framing error, break and overrun pulses
+    parameters      :
+      - TESTS_LIST=rx_errors
+      - TX_ENABLE=true
+      - RX_ENABLE=true
+
+  #---------------------------------------
+  sim_core_tx_only:
+  #---------------------------------------
+    << : *sim_core
+    description     : Simulation of uart_core (UVVM) - TX only (RX_ENABLE false), predefined outputs of RX
+    parameters      :
+      - TESTS_LIST=tx,cts,rx_disabled
+      - TX_ENABLE=true
+      - RX_ENABLE=false
+
+  #---------------------------------------
+  sim_core_rx_only:
+  #---------------------------------------
+    << : *sim_core
+    description     : Simulation of uart_core (UVVM) - RX only (TX_ENABLE false), predefined outputs of TX
+    parameters      :
+      - TESTS_LIST=rx,rx_errors,tx_disabled
+      - TX_ENABLE=false
+      - RX_ENABLE=true
+
+  #---------------------------------------
+  sim_core_disabled:
+  #---------------------------------------
+    << : *sim_core
+    description     : Simulation of uart_core (UVVM) - TX and RX disabled, predefined outputs
+    parameters      :
+      - TESTS_LIST=tx_disabled,rx_disabled
+      - TX_ENABLE=false
+      - RX_ENABLE=false
+
+#=========================================
+scripts:
+#=========================================
+
+  #---------------------------------------
+  # pre_run hook of lint_ghdl_synth_* (cwd = work_root)
+  #---------------------------------------
+  ghdl_synth :
+    cmd : [bash, ghdl_synth.sh]
+
+  #---------------------------------------
+  # pre_run hook of syn_* (cwd = work_root)
+  #---------------------------------------
+  yosys_synth :
+    cmd : [bash, yosys_synth.sh]
+
+#=========================================
+parameters :
+#=========================================
+
+  #---------------------------------------
+  # Generics of sbi_UART_wrapper (lint_ghdl_synth_*, syn_*)
+  #---------------------------------------
+  UART_TX_ENABLE :
+    description : true, UART TX instantiated
+    datatype    : bool
+    default     : true
+    paramtype   : generic
+
+  UART_RX_ENABLE :
+    description : true, UART RX instantiated
+    datatype    : bool
+    default     : true
+    paramtype   : generic
+
+  USER_DEFINE_BAUD_TICK :
+    description : true, baud tick register writable by software ; false, fixed baud tick
+    datatype    : bool
+    default     : true
+    paramtype   : generic
+
+  DEPTH_TX :
+    description : Depth of the TX FIFO (0 = no FIFO)
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+  DEPTH_RX :
+    description : Depth of the RX FIFO (0 = no FIFO)
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+  TESTS_LIST :
+    description : Scenarios run in sequence, separated by ',' (names in sim/basic/tb_UART_tests_pkg.vhd or sim/core/tb_uart_core_tests_pkg.vhd), empty = build only
+    datatype    : str
+    default     : ""
+    paramtype   : generic
+
+  #---------------------------------------
+  # Generics of tb_uart_core (sim_core*) and uart_core_wrapper
+  # (lint_ghdl_synth_core*, syn_core*)
+  #---------------------------------------
+  TX_ENABLE :
+    description : true, uart_core with its transmitter
+    datatype    : bool
+    default     : true
+    paramtype   : generic
+
+  RX_ENABLE :
+    description : true, uart_core with its receiver
+    datatype    : bool
+    default     : true
+    paramtype   : generic
+
+  #---------------------------------------
+  # Generic of sbi_UART_wrapper (lint_ghdl_synth_*, syn_*) and tb_UART (sim_*)
+  #---------------------------------------
+  RX_PARITY_ERROR :
+    description : byte received with a parity error, keep (stored in the RX FIFO), drop, or halt (stored, then RX halted until isr bit 6 is cleared)
+    datatype    : str
+    default     : keep
+    paramtype   : generic
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-communication-uart
+  version : asylum-communication-uart-3.1.0
+ #version : e816cab48d8e021320e3909fe1c8277391b5a0e1
+#<PROVIDER_END>
