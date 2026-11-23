@@ -53,5 +53,5 @@ provider  :
   user    : deuskane
   repo    : asylum-utils-generators
   version : asylum-utils-ghdl_synth-1.0.0
- #version : 4ee548e68bd75968d5ed46ce45d7e9e59b028a8d
+ #version : af7d1cc33a4ee5d7b2f72f00311d22557bf11ebb
 #<PROVIDER_END>
