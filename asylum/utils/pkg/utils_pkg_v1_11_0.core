@@ -1,0 +1,683 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : VHDL Package Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : utils_pkg.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2021-10-26  1.0.0    mrosiere math_pkg   : Created
+#                               pbi_pkg    : Created
+# 2025-01-11  1.1.0    mrosiere pbi_pkg    : Surcharge and / or
+# 2025-03-08  1.2.0    mrosiere pbi_pkg    : Use unconstrainted pbi
+# 2025-03-19  1.3.0    mrosiere logic_pkg  : Created
+#                               string_pkg : Created
+# 2025-03-26  1.4.0    mrosiere pbi_pkg    : Add type for unconstrainted array
+# 2025-04-05  1.5.0    mrosiere convert_pkg: Add convertion one hot to  integer
+# 2025-11-22  1.5.1    mrosiere sbi_pkg    : Add sbi pkg (replace pbi busy with ready)
+# 2025-11-29  1.5.2    mrosiere logic_pkg  : Add mux2 and reverse_bits
+# 2025-12-06  1.5.3    mrosiere logic_pkg  : override mux2 for natural
+# 2025-12-30  1.6.0    mrosiere IEEE_dummy : add fake vital
+# 2026-01-18  1.6.1    mrosiere sbi_pkg    : Add info record
+# 2026-06-05  1.6.2    mrosiere convert_pkg: Add to_slv function
+# 2026-06-16  1.6.3    mrosiere sbi_pkg    : Add null function
+#                               logic_pkg  : Add count_ones
+# 2026-07-09  1.7.0    mrosiere ft_pkg     : Add fault tolerant package
+# 2026-07-29  1.7.1    mrosiere string_pkg : Add to_string
+# 2026-09-05  1.7.2    mrosiere ft_pkg     : Add testbench
+# 2026-09-19  1.7.3    mrosiere ft_pkg     : Add testbench (ecc32)
+#                                            Add Synthesis top
+# 2026-10-05  1.8.0    mrosiere logic_pkg  : Fix reduce_and (always returned '0')
+#                               types_pkg  : Created, naturals_t declared once
+#                                            (alias in sbi_pkg and pbi_pkg)
+#                               ft_dff     : Fix SELF_REFRESH for all algorithms
+#                                            Reset value is a valid code word
+#                               core       : FT_ALGO emu parameter is ft_algo_t
+#                                            Add tb_logic_pkg and tb_ft_dff
+# 2026-11-19  1.9.0    mrosiere sbi_pkg    : "=" / "/=" of sbi_ini_t compare addr
+#                                            only when cs = '1' and wdata only
+#                                            when we = '1'; tb_sbi_pkg
+# 2026-11-19  1.10.0   mrosiere string_pkg : list_length, list_item and list_contains;
+#                                            tb_string_pkg
+# 2026-11-23  1.11.0   mrosiere sbi_pkg    : vote of three sbi_ini_t / sbi_tgt_t
+#                                            (TMR majority); tb_pkg sbi checks
+#                               ft_pkg     : no redundant "when others" (-Wothers)
+#-----------------------------------------------------------------------------
+
+name        : asylum:utils:pkg:1.11.0
+description : VHDL Utility Package
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  # Source Files
+  #---------------------------------------
+
+  #---------------------------------------
+  hdl:
+  #---------------------------------------
+    files:
+      - hdl/convert_pkg.vhd
+      - hdl/logic_pkg.vhd
+      - hdl/math_pkg.vhd
+      - hdl/types_pkg.vhd
+      - hdl/pbi_pkg.vhd
+      - hdl/sbi_pkg.vhd
+      - hdl/string_pkg.vhd
+      - hdl/ft_pkg.vhd
+      - hdl/ft_pkg_body.vhd
+
+      - hdl/ft_enc.vhd
+      - hdl/ft_dec.vhd
+      - hdl/ft_dff.vhd
+      
+    file_type    : vhdlSource-2008
+    logical_name : asylum
+
+  #---------------------------------------
+  pkg_ieee_dummy:
+  #---------------------------------------
+    files:
+      - hdl/vital/vital_timing.vhdl
+      - hdl/vital/vital_timing-body.vhdl
+      - hdl/vital/vital_primitives.vhdl
+      - hdl/vital/vital_primitives-body.vhdl
+    logical_name : IEEE_dummy
+    file_type    : vhdlSource-2008    
+
+  #---------------------------------------
+  sim_ft:
+  #---------------------------------------
+    files:
+      - sim/ft/tb_ft_inj_pkg.vhd
+      - sim/ft/tb_ft_enc_inj.vhd
+      - sim/ft/tb_ft_bfm_pkg.vhd
+      - sim/ft/tb_ft_codec_pkg.vhd
+      - sim/ft/tb_ft_ecc_pkg.vhd
+      - sim/ft/tb_ft_size_pkg.vhd
+      - sim/ft/tb_ft_dff_pkg.vhd
+      - sim/ft/tb_ft_tests_pkg.vhd
+      - sim/ft/tb_ft.vhd
+      - sim/ft/tb_ft_cfg.vhd
+    file_type : vhdlSource-2008
+    depend       :
+      - bitvis:verification:uvvm
+
+  #---------------------------------------
+  sim_pkg:
+  #---------------------------------------
+    files:
+      - sim/pkg/tb_pkg_bfm_pkg.vhd
+      - sim/pkg/tb_pkg_logic_pkg.vhd
+      - sim/pkg/tb_pkg_convert_pkg.vhd
+      - sim/pkg/tb_pkg_math_pkg.vhd
+      - sim/pkg/tb_pkg_string_pkg.vhd
+      - sim/pkg/tb_pkg_list_pkg.vhd
+      - sim/pkg/tb_pkg_sbi_pkg.vhd
+      - sim/pkg/tb_pkg_pbi_pkg.vhd
+      - sim/pkg/tb_pkg_ft_ranges_pkg.vhd
+      - sim/pkg/tb_pkg_tests_pkg.vhd
+      - sim/pkg/tb_pkg.vhd
+    file_type : vhdlSource-2008
+    depend       :
+      - bitvis:verification:uvvm
+
+  #---------------------------------------
+  syn:
+  #---------------------------------------
+    files:
+      - syn/top_ft_dff.vhd
+      - syn/constraints/options.py : {file_type : nx_options}
+
+    file_type : vhdlSource-2008
+    logical_name : asylum
+
+  #---------------------------------------
+  # Lint / synthesis check : wrapper, and ghdl_synth.sh / ghdl_synth.mk
+  # (pre_run hook of lint_ghdl_synth_*) of asylum:utils:ghdl_synth, a core
+  # without dependency (utils_pkg cannot depend on generators : cycle
+  # generators -> fifo -> ram -> pkg)
+  #---------------------------------------
+  syn_ghdl:
+    files        :
+      - syn/ft_enc_wrapper.vhd
+      - syn/ft_dec_wrapper.vhd
+    file_type    : vhdlSource-2008
+    logical_name : asylum
+    depend       :
+      - asylum:utils:ghdl_synth
+
+  #---------------------------------------
+  syn_yosys:
+  #---------------------------------------
+    # yosys_synth.sh / yosys_synth.mk / yosys_synth.py (pre_run hook of syn_*)
+    depend       :
+      - asylum:utils:yosys_synth
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description : Default Target
+    filesets    :
+      - hdl
+      - pkg_ieee_dummy
+
+  #---------------------------------------
+  # Lint : -Wall analysis and elaboration (empty simulation)
+  #---------------------------------------
+  lint_ghdl : &lint_ghdl
+    << : *default
+    description     : Lint with GHDL (-Wall analysis and elaboration of ft_enc_wrapper, which uses every package)
+    toplevel        : asylum.ft_enc_wrapper
+    filesets_append : [syn_ghdl]
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall"]
+
+  #---------------------------------------
+  # Synthesis check : -Wall analysis, ghdl --synth -Wall and elaboration
+  # (no simulation) of one entity with the generics of the target : ft_dff
+  # (constrained ports, its own top), ft_enc_wrapper, ft_dec_wrapper.
+  # The pre_run hook (ghdl_synth.sh of asylum:utils:ghdl_synth) adds
+  # ghdl_synth.mk to the edalize Makefile.
+  # FuseSoC merges tools in depth : analyze_options comes from lint_ghdl.
+  #---------------------------------------
+  lint_ghdl_synth_ft_dff_default : &lint_ghdl_synth
+    << : *lint_ghdl
+    description     : Synthesis check of ft_dff, USE_NONE, 32 bits (default generics)
+    toplevel        : asylum.ft_dff
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [ghdl_synth]
+
+  #---------------------------------------
+  lint_ghdl_synth_ft_dff_ecc :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of ft_dff, USE_ECC with SELF_REFRESH, 32 bits
+    toplevel        : asylum.ft_dff
+    parameters      :
+      - FT_ALGO=USE_ECC
+      - SELF_REFRESH=true
+
+  #---------------------------------------
+  lint_ghdl_synth_ft_enc_parity_odd :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of ft_enc_wrapper, USE_PARITY_ODD, 32 bits
+    toplevel        : asylum.ft_enc_wrapper
+    parameters      :
+      - FT_ALGO=USE_PARITY_ODD
+
+  #---------------------------------------
+  lint_ghdl_synth_ft_enc_ecc :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of ft_enc_wrapper, USE_ECC, 32 bits
+    toplevel        : asylum.ft_enc_wrapper
+    parameters      :
+      - FT_ALGO=USE_ECC
+
+  #---------------------------------------
+  lint_ghdl_synth_ft_dec_tmr :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of ft_dec_wrapper, USE_TMR, 32 bits
+    toplevel        : asylum.ft_dec_wrapper
+    parameters      :
+      - FT_ALGO=USE_TMR
+
+  #---------------------------------------
+  lint_ghdl_synth_ft_dec_ecc :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of ft_dec_wrapper, USE_ECC, 32 bits
+    toplevel        : asylum.ft_dec_wrapper
+    parameters      :
+      - FT_ALGO=USE_ECC
+
+  #---------------------------------------
+  # Synthesis : size of one entity with the generics of the target,
+  # Xilinx Artix-7 (LUT, FF, BRAM, DSP) and sky130 (area), by Yosys and
+  # its GHDL plugin. Same configurations as lint_ghdl_synth_*.
+  # The pre_run hook (yosys_synth.sh of asylum:utils:yosys_synth) adds
+  # yosys_synth.mk to the edalize Makefile.
+  #---------------------------------------
+  syn_ft_dff_default : &syn
+    << : *lint_ghdl
+    description     : Synthesis (Artix-7, sky130) of ft_dff, USE_NONE, 32 bits (default generics)
+    toplevel        : asylum.ft_dff
+    filesets_append : [syn_ghdl, syn_yosys]
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [yosys_synth]
+
+  #---------------------------------------
+  syn_ft_dff_ecc :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of ft_dff, USE_ECC with SELF_REFRESH, 32 bits
+    toplevel        : asylum.ft_dff
+    parameters      :
+      - FT_ALGO=USE_ECC
+      - SELF_REFRESH=true
+
+  #---------------------------------------
+  syn_ft_enc_parity_odd :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of ft_enc_wrapper, USE_PARITY_ODD, 32 bits
+    toplevel        : asylum.ft_enc_wrapper
+    parameters      :
+      - FT_ALGO=USE_PARITY_ODD
+
+  #---------------------------------------
+  syn_ft_enc_ecc :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of ft_enc_wrapper, USE_ECC, 32 bits
+    toplevel        : asylum.ft_enc_wrapper
+    parameters      :
+      - FT_ALGO=USE_ECC
+
+  #---------------------------------------
+  syn_ft_dec_tmr :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of ft_dec_wrapper, USE_TMR, 32 bits
+    toplevel        : asylum.ft_dec_wrapper
+    parameters      :
+      - FT_ALGO=USE_TMR
+
+  #---------------------------------------
+  syn_ft_dec_ecc :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of ft_dec_wrapper, USE_ECC, 32 bits
+    toplevel        : asylum.ft_dec_wrapper
+    parameters      :
+      - FT_ALGO=USE_ECC
+
+  #---------------------------------------
+  sim: &sim
+  #---------------------------------------
+    << : *default
+    description     : Default Target for Simulation (base of the sim_* targets)
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options :
+          - "$(GHDL_ANALYZE_OPTION)"
+          - "-Wall"
+          - "-frelaxed"
+        run_options     :
+          - "$(GHDL_RUN_OPTION)"
+          - "--ieee-asserts=disable"
+
+  #---------------------------------------
+  # tb_ft : ft_enc, ft_dec and ft_dff of one algorithm (FT_ALGO, WIDTH).
+  # Reference configuration USE_ECC 32 bits : one target per scenario.
+  #---------------------------------------
+  #---------------------------------------
+  sim_ft_ecc32: &sim_ft
+  #---------------------------------------
+    << : *sim
+    description     : tb_ft, USE_ECC, 32 bits - build only (scenarios of TESTS_LIST)
+    filesets_append :
+      - sim_ft
+    toplevel        : tb_ft_cfg
+    parameters      :
+      - TESTS_LIST
+      - FT_ALGO=USE_ECC
+      - WIDTH=32
+
+  #---------------------------------------
+  sim_ft_ecc32_no_error:
+  #---------------------------------------
+    << : *sim_ft
+    description     : tb_ft, USE_ECC, 32 bits - encoded word and decoded word without error
+    parameters      :
+      - TESTS_LIST=no_error
+      - FT_ALGO=USE_ECC
+      - WIDTH=32
+
+  #---------------------------------------
+  sim_ft_ecc32_single:
+  #---------------------------------------
+    << : *sim_ft
+    description     : tb_ft, USE_ECC, 32 bits - every single bit flip of the encoded word
+    parameters      :
+      - TESTS_LIST=single
+      - FT_ALGO=USE_ECC
+      - WIDTH=32
+
+  #---------------------------------------
+  sim_ft_ecc32_double:
+  #---------------------------------------
+    << : *sim_ft
+    description     : tb_ft, USE_ECC, 32 bits - every pair of bit flips
+    parameters      :
+      - TESTS_LIST=double
+      - FT_ALGO=USE_ECC
+      - WIDTH=32
+
+  #---------------------------------------
+  sim_ft_ecc32_ecc_syndrome:
+  #---------------------------------------
+    << : *sim_ft
+    description     : tb_ft, USE_ECC, 32 bits - SEC-DED limits, wrong correction and syndromes outside the word
+    parameters      :
+      - TESTS_LIST=ecc_syndrome
+      - FT_ALGO=USE_ECC
+      - WIDTH=32
+
+  #---------------------------------------
+  sim_ft_ecc32_sizes:
+  #---------------------------------------
+    << : *sim_ft
+    description     : tb_ft, USE_ECC, 32 bits - encoded_size and decoded_size of 1 to 502 data bits
+    parameters      :
+      - TESTS_LIST=sizes
+      - FT_ALGO=USE_ECC
+      - WIDTH=32
+
+  #---------------------------------------
+  sim_ft_ecc32_empty_word:
+  #---------------------------------------
+    << : *sim_ft
+    description     : tb_ft, USE_ECC, 32 bits - 0 data bit, sizes, encode and decode, ft_dff of 0 bit
+    parameters      :
+      - TESTS_LIST=empty_word
+      - FT_ALGO=USE_ECC
+      - WIDTH=32
+
+  #---------------------------------------
+  sim_ft_ecc32_dff_reset:
+  #---------------------------------------
+    << : *sim_ft
+    description     : tb_ft, USE_ECC, 32 bits - ft_dff reset value, no error flag
+    parameters      :
+      - TESTS_LIST=dff_reset
+      - FT_ALGO=USE_ECC
+      - WIDTH=32
+
+  #---------------------------------------
+  sim_ft_ecc32_dff_write:
+  #---------------------------------------
+    << : *sim_ft
+    description     : tb_ft, USE_ECC, 32 bits - ft_dff write and hold
+    parameters      :
+      - TESTS_LIST=dff_write
+      - FT_ALGO=USE_ECC
+      - WIDTH=32
+
+  #---------------------------------------
+  sim_ft_ecc32_dff_inject:
+  #---------------------------------------
+    << : *sim_ft
+    description     : tb_ft, USE_ECC, 32 bits - ft_dff fault injection, error flags and self refresh
+    parameters      :
+      - TESTS_LIST=dff_inject
+      - FT_ALGO=USE_ECC
+      - WIDTH=32
+
+  #---------------------------------------
+  sim_ft_ecc32_dff_reset_fault:
+  #---------------------------------------
+    << : *sim_ft
+    description     : tb_ft, USE_ECC, 32 bits - ft_dff asynchronous reset after a fault
+    parameters      :
+      - TESTS_LIST=dff_reset_fault
+      - FT_ALGO=USE_ECC
+      - WIDTH=32
+
+  #---------------------------------------
+  sim_ft_none:
+  #---------------------------------------
+    << : *sim_ft
+    description     : tb_ft, USE_NONE, 4 bits - every scenario
+    parameters      :
+      - TESTS_LIST=no_error,single,double,triple,sizes,empty_word,dff_reset,dff_write,dff_inject,dff_reset_fault
+      - FT_ALGO=USE_NONE
+      - WIDTH=4
+
+  #---------------------------------------
+  sim_ft_parity_odd:
+  #---------------------------------------
+    << : *sim_ft
+    description     : tb_ft, USE_PARITY_ODD, 4 bits - every scenario
+    parameters      :
+      - TESTS_LIST=no_error,single,double,triple,sizes,empty_word,dff_reset,dff_write,dff_inject,dff_reset_fault
+      - FT_ALGO=USE_PARITY_ODD
+      - WIDTH=4
+
+  #---------------------------------------
+  sim_ft_parity_even:
+  #---------------------------------------
+    << : *sim_ft
+    description     : tb_ft, USE_PARITY_EVEN, 4 bits - every scenario
+    parameters      :
+      - TESTS_LIST=no_error,single,double,triple,sizes,empty_word,dff_reset,dff_write,dff_inject,dff_reset_fault
+      - FT_ALGO=USE_PARITY_EVEN
+      - WIDTH=4
+
+  #---------------------------------------
+  sim_ft_tmr:
+  #---------------------------------------
+    << : *sim_ft
+    description     : tb_ft, USE_TMR, 4 bits - every scenario
+    parameters      :
+      - TESTS_LIST=no_error,single,double,triple,sizes,empty_word,dff_reset,dff_write,dff_inject,dff_reset_fault
+      - FT_ALGO=USE_TMR
+      - WIDTH=4
+
+  #---------------------------------------
+  sim_ft_ecc4:
+  #---------------------------------------
+    << : *sim_ft
+    description     : tb_ft, USE_ECC, 4 bits - every scenario
+    parameters      :
+      - TESTS_LIST=no_error,single,double,ecc_syndrome,sizes,empty_word,dff_reset,dff_write,dff_inject,dff_reset_fault
+      - FT_ALGO=USE_ECC
+      - WIDTH=4
+
+  #---------------------------------------
+  # tb_pkg : functions of the packages, one target per scenario
+  #---------------------------------------
+  #---------------------------------------
+  sim_pkg: &sim_pkg
+  #---------------------------------------
+    << : *sim
+    description     : tb_pkg - build only (scenarios of TESTS_LIST)
+    filesets_append :
+      - sim_pkg
+    toplevel        : tb_pkg
+    parameters      :
+      - TESTS_LIST
+
+  #---------------------------------------
+  sim_pkg_logic:
+  #---------------------------------------
+    << : *sim_pkg
+    description     : tb_pkg - logic_pkg, reductions, count_ones, mux2, reverse_bits
+    parameters      :
+      - TESTS_LIST=logic
+
+  #---------------------------------------
+  sim_pkg_convert:
+  #---------------------------------------
+    << : *sim_pkg
+    description     : tb_pkg - convert_pkg, onehot_to_integer, to_slv, to_stdulogic
+    parameters      :
+      - TESTS_LIST=convert
+
+  #---------------------------------------
+  sim_pkg_math:
+  #---------------------------------------
+    << : *sim_pkg
+    description     : tb_pkg - math_pkg, clog2, log2, max, min, is_pow2
+    parameters      :
+      - TESTS_LIST=math
+
+  #---------------------------------------
+  sim_pkg_string:
+  #---------------------------------------
+    << : *sim_pkg
+    description     : tb_pkg - string_pkg, to_string, string_eq, string_ne
+    parameters      :
+      - TESTS_LIST=string
+
+  #---------------------------------------
+  sim_pkg_list:
+  #---------------------------------------
+    << : *sim_pkg
+    description     : tb_pkg - string_pkg, list_length, list_item, list_contains
+    parameters      :
+      - TESTS_LIST=list
+
+  #---------------------------------------
+  sim_pkg_sbi:
+  #---------------------------------------
+    << : *sim_pkg
+    description     : tb_pkg - sbi_pkg, comparison of sbi_ini_t, or of sbi_tgts_t, to_sbi_name, vote
+    parameters      :
+      - TESTS_LIST=sbi
+
+  #---------------------------------------
+  sim_pkg_pbi:
+  #---------------------------------------
+    << : *sim_pkg
+    description     : tb_pkg - pbi_pkg, or of pbi_tgts_t, naturals_t of types_pkg
+    parameters      :
+      - TESTS_LIST=pbi
+
+  #---------------------------------------
+  sim_pkg_ft_ranges:
+  #---------------------------------------
+    << : *sim_pkg
+    description     : tb_pkg - ft_pkg, encode and decode on any index range
+    parameters      :
+      - TESTS_LIST=ft_ranges
+
+  #---------------------------------------
+  emu_ng_medium_ft_dff_none : &emu_ng_medium_ft_dff_none
+  #---------------------------------------
+    << : *default
+    description  : NanoXplore NG_MEDIUM with tf_dff none
+    default_tool : nxmap
+    filesets_append :
+      - syn
+    parameters   :
+      - WIDTH=32
+      - FT_ALGO=USE_NONE
+      - SELF_REFRESH=false
+    tools:
+      nxmap:
+        fpga         : NG-MEDIUM-EMBEDDED
+        program      : False
+        logical_name : asylum
+    toplevel : top_ft_dff
+
+  #---------------------------------------
+  emu_ng_medium_ft_dff_parity_odd:
+  #---------------------------------------
+    << : *emu_ng_medium_ft_dff_none
+    description  : NanoXplore NG_MEDIUM with tf_dff parity_odd
+    parameters_append   :
+      - FT_ALGO=USE_PARITY_ODD
+
+  #---------------------------------------
+  emu_ng_medium_ft_dff_parity_even:
+  #---------------------------------------
+    << : *emu_ng_medium_ft_dff_none
+    description  : NanoXplore NG_MEDIUM with tf_dff parity_even
+    parameters_append   :
+      - FT_ALGO=USE_PARITY_EVEN
+
+  #---------------------------------------
+  emu_ng_medium_ft_dff_tmr:
+  #---------------------------------------
+    << : *emu_ng_medium_ft_dff_none
+    description  : NanoXplore NG_MEDIUM with tf_dff tmr
+    parameters_append   :
+      - FT_ALGO=USE_TMR
+
+  #---------------------------------------
+  emu_ng_medium_ft_dff_ecc:
+  #---------------------------------------
+    << : *emu_ng_medium_ft_dff_none
+    description  : NanoXplore NG_MEDIUM with tf_dff ecc
+    parameters_append   :
+      - FT_ALGO=USE_ECC
+
+#=========================================
+scripts:
+#=========================================
+
+  #---------------------------------------
+  # pre_run hook of lint_ghdl_synth_* (cwd = work_root)
+  #---------------------------------------
+  ghdl_synth :
+    cmd : [bash, ghdl_synth.sh]
+
+  #---------------------------------------
+  # pre_run hook of syn_* (cwd = work_root)
+  #---------------------------------------
+  yosys_synth :
+    cmd : [bash, yosys_synth.sh]
+
+#=========================================
+parameters :
+#=========================================
+
+  TESTS_LIST :
+    description : Scenarios run in sequence, separated by ',' (names in sim/ft/tb_ft_tests_pkg.vhd, sim/pkg/tb_pkg_tests_pkg.vhd), empty = build only
+    datatype    : str
+    default     : ""
+    paramtype   : generic
+
+  WIDTH :
+    description : Data Width
+    datatype    : int
+    default     : 32
+    paramtype   : generic
+
+  FT_ALGO :
+    description : Fault Tolerant Algo (ft_algo_t literal USE_NONE, USE_PARITY_ODD, USE_PARITY_EVEN, USE_TMR, USE_ECC)
+    datatype    : str
+    default     : USE_NONE
+    paramtype   : generic
+
+  SELF_REFRESH :
+    description : Rewrite in DFF
+    datatype    : bool
+    default     : false
+    paramtype   : generic
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-utils-pkg
+  version : asylum-utils-pkg-1.11.0
+ #version : 4afbbe6e6c63f9b5df09c85a3d429d30d85898ff
+#<PROVIDER_END>
