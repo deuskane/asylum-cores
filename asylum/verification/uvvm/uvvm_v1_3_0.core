@@ -1,0 +1,600 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : uvvm Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : uvvm.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: Library of UVVM BFMs for the Asylum testbenches, in the form
+#              of UVVM Light : one core, one VHDL library (asylum_uvvm),
+#              one package per BFM in src_bfm/, BFMs only (no VVC)
+#-----------------------------------------------------------------------------
+# Copyright (c) 2026
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2026-11-22  1.0.0    mrosiere Created
+# 2026-11-22  1.1.0    mrosiere jtag_bfm_pkg : jtag_trst, Capture-IR monitor
+#                               jtag_ir_capture_monitor
+# 2026-11-23  1.2.0    mrosiere jtag_bfm_pkg : chain of TAPs (head_ir,
+#                               tail_ir, head_dr, tail_dr)
+# 2026-11-24  1.3.0    mrosiere rbb_bfm_pkg : OpenOCD remote_bitbang BFM ;
+#                               sim_openocd_* : co-simulation of the kit
+#                               asylum:verification:openocd (openocd.core)
+#-----------------------------------------------------------------------------
+
+name        : asylum:verification:uvvm:1.3.0
+description : UVVM BFMs of the Asylum testbenches
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  src_bfm:
+  #---------------------------------------
+    files        :
+      - src_bfm/apb_bfm_pkg.vhd
+      - src_bfm/jtag_bfm_pkg.vhd
+      - src_bfm/rbb_bfm_pkg.vhd
+    file_type    : vhdlSource-2008
+    logical_name : asylum_uvvm
+    depend       :
+      - bitvis:verification:uvvm
+
+  #---------------------------------------
+  # Testbench of apb_bfm_pkg : APB slave model, one package per scenario
+  #---------------------------------------
+  sim_apb:
+    files        :
+      - sim/apb/tb_apb_bfm_pkg.vhd
+      - sim/apb/tb_apb_slave.vhd
+      - sim/apb/tb_apb_reset_values_pkg.vhd
+      - sim/apb/tb_apb_write_read_pkg.vhd
+      - sim/apb/tb_apb_back_to_back_pkg.vhd
+      - sim/apb/tb_apb_wait_states_pkg.vhd
+      - sim/apb/tb_apb_pslverr_pkg.vhd
+      - sim/apb/tb_apb_timeout_pkg.vhd
+      - sim/apb/tb_apb_tests_pkg.vhd
+      - sim/apb/tb_apb.vhd
+    file_type    : vhdlSource-2008
+    depend       :
+      # string_pkg list_length / list_item / list_contains (TESTS_LIST)
+      - ">=asylum:utils:pkg:1.10.0"
+
+  #---------------------------------------
+  # Testbench of jtag_bfm_pkg : IEEE 1149.1 TAP model, one package per
+  # scenario
+  #---------------------------------------
+  sim_jtag:
+    files        :
+      - sim/jtag/tb_jtag_bfm_pkg.vhd
+      - sim/jtag/tb_jtag_tap.vhd
+      - sim/jtag/tb_jtag_reset_trst_pkg.vhd
+      - sim/jtag/tb_jtag_reset_tms_pkg.vhd
+      - sim/jtag/tb_jtag_idcode_pkg.vhd
+      - sim/jtag/tb_jtag_bypass_pkg.vhd
+      - sim/jtag/tb_jtag_user_dr_pkg.vhd
+      - sim/jtag/tb_jtag_idle_pkg.vhd
+      - sim/jtag/tb_jtag_trst_pkg.vhd
+      - sim/jtag/tb_jtag_ir_capture_pkg.vhd
+      - sim/jtag/tb_jtag_ir_capture_error_pkg.vhd
+      - sim/jtag/tb_jtag_chain_idcode_pkg.vhd
+      - sim/jtag/tb_jtag_chain_bypass_pkg.vhd
+      - sim/jtag/tb_jtag_chain_user_dr_pkg.vhd
+      - sim/jtag/tb_jtag_chain_ir_capture_pkg.vhd
+      - sim/jtag/tb_jtag_tests_pkg.vhd
+      - sim/jtag/tb_jtag.vhd
+    file_type    : vhdlSource-2008
+    depend       :
+      # string_pkg list_length / list_item / list_contains (TESTS_LIST)
+      - ">=asylum:utils:pkg:1.10.0"
+
+  #---------------------------------------
+  # Testbench of rbb_bfm_pkg : remote_bitbang decoder and the chain of TAP
+  # models of tb_jtag, one package per scenario
+  #---------------------------------------
+  sim_rbb:
+    files        :
+      - sim/jtag/tb_jtag_bfm_pkg.vhd
+      - sim/jtag/tb_jtag_tap.vhd
+      - sim/rbb/tb_rbb_decoder.vhd
+      - sim/rbb/tb_rbb_bfm_pkg.vhd
+      - sim/rbb/tb_rbb_commands_pkg.vhd
+      - sim/rbb/tb_rbb_tms_pkg.vhd
+      - sim/rbb/tb_rbb_read_pkg.vhd
+      - sim/rbb/tb_rbb_idcode_pkg.vhd
+      - sim/rbb/tb_rbb_user_dr_pkg.vhd
+      - sim/rbb/tb_rbb_uart_pkg.vhd
+      - sim/rbb/tb_rbb_errors_pkg.vhd
+      - sim/rbb/tb_rbb_tests_pkg.vhd
+      - sim/rbb/tb_rbb.vhd
+    file_type    : vhdlSource-2008
+    depend       :
+      # string_pkg list_length / list_item / list_contains (TESTS_LIST)
+      - ">=asylum:utils:pkg:1.10.0"
+
+  #---------------------------------------
+  # Co-simulation of the OpenOCD kit (asylum:verification:openocd) :
+  # OpenOCD against the TAP model of tb_jtag, hooks in rbb/cosim.sh of the
+  # kit
+  #---------------------------------------
+  sim_openocd:
+    files        :
+      - sim/jtag/tb_jtag_bfm_pkg.vhd
+      - sim/jtag/tb_jtag_tap.vhd
+      - sim/rbb/tb_rbb_decoder.vhd
+      - sim/openocd/tb_openocd.vhd
+      - sim/openocd/tap.cfg : {file_type : user, copyto : openocd/tap.cfg}
+    file_type    : vhdlSource-2008
+    depend       :
+      - ">=asylum:verification:openocd:1.0.0"
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Library only (no toplevel), used as a dependency
+    filesets        :
+      - src_bfm
+    default_tool    : ghdl
+
+  #---------------------------------------
+  # tb_apb : compiled once, scenarios chosen at run time (TESTS_LIST,
+  # empty : build and elaboration only). sim_apb (build only) and one
+  # sim_apb_<test> target per scenario. Generated.
+  #---------------------------------------
+  sim_apb: &sim_apb
+    << : *default
+    description     : Simulation of apb_bfm_pkg against an APB slave model - build only (scenarios of TESTS_LIST)
+    filesets_append :
+      - sim_apb
+    toplevel        : tb_apb
+    parameters      :
+      - TESTS_LIST
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options :
+          - "$(GHDL_ANALYZE_OPTION)"
+          - "-Wall"
+          - "-frelaxed"
+        run_options     :
+          - "$(GHDL_RUN_OPTION)"
+          - "--ieee-asserts=disable"
+
+  #---------------------------------------
+  sim_apb_reset_values:
+  #---------------------------------------
+    << : *sim_apb
+    description     : Simulation of apb_bfm_pkg - read of the slave memory after the reset
+    parameters      :
+      - TESTS_LIST=reset_values
+
+  #---------------------------------------
+  sim_apb_write_read:
+  #---------------------------------------
+    << : *sim_apb
+    description     : Simulation of apb_bfm_pkg - write then read back, don't care bits, mismatch of apb_check
+    parameters      :
+      - TESTS_LIST=write_read
+
+  #---------------------------------------
+  sim_apb_back_to_back:
+  #---------------------------------------
+    << : *sim_apb
+    description     : Simulation of apb_bfm_pkg - back to back writes and reads, 2 cycles per transfer
+    parameters      :
+      - TESTS_LIST=back_to_back
+
+  #---------------------------------------
+  sim_apb_wait_states:
+  #---------------------------------------
+    << : *sim_apb
+    description     : Simulation of apb_bfm_pkg - 1, 3 and max_wait_cycles wait states
+    parameters      :
+      - TESTS_LIST=wait_states
+
+  #---------------------------------------
+  sim_apb_pslverr:
+  #---------------------------------------
+    << : *sim_apb
+    description     : Simulation of apb_bfm_pkg - pslverr expected, not expected and missing
+    parameters      :
+      - TESTS_LIST=pslverr
+
+  #---------------------------------------
+  sim_apb_timeout:
+  #---------------------------------------
+    << : *sim_apb
+    description     : Simulation of apb_bfm_pkg - timeout of the BFM, then a normal transfer
+    parameters      :
+      - TESTS_LIST=timeout
+
+  #---------------------------------------
+  # tb_jtag : compiled once, scenarios chosen at run time (TESTS_LIST,
+  # empty : build and elaboration only), TAP model and BFM configuration
+  # from the generics. Reference configuration (5-bit IR, 40-bit user data
+  # register, TCK 100 ns) : sim_jtag (build only) and one sim_jtag_<test>
+  # target per scenario ; sim_jtag_ir8 (8-bit IR, 7-bit user data register,
+  # TCK 30 ns) runs every scenario. Chain of 3 TAPs (MODEL chain) :
+  # sim_jtag_chain (build only) and one sim_jtag_chain_<test> target per
+  # scenario. Each target repeats the generics of its configuration :
+  # FuseSoC replaces the parameters list of an inherited target. Generated.
+  #---------------------------------------
+  sim_jtag: &sim_jtag
+    << : *default
+    description     : Simulation of jtag_bfm_pkg against an IEEE 1149.1 TAP model - build only (scenarios of TESTS_LIST)
+    filesets_append :
+      - sim_jtag
+    toplevel        : tb_jtag
+    parameters      :
+      - TESTS_LIST
+      - IR_WIDTH=5
+      - DR_WIDTH=40
+      - TCK_PERIOD_NS=100
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options :
+          - "$(GHDL_ANALYZE_OPTION)"
+          - "-Wall"
+          - "-frelaxed"
+        run_options     :
+          - "$(GHDL_RUN_OPTION)"
+          - "--ieee-asserts=disable"
+
+  #---------------------------------------
+  sim_jtag_reset_trst:
+  #---------------------------------------
+    << : *sim_jtag
+    description     : Simulation of jtag_bfm_pkg - TRST pulse then TMS reset, IDCODE selected
+    parameters      :
+      - TESTS_LIST=reset_trst
+      - IR_WIDTH=5
+      - DR_WIDTH=40
+      - TCK_PERIOD_NS=100
+
+  #---------------------------------------
+  sim_jtag_reset_tms:
+  #---------------------------------------
+    << : *sim_jtag
+    description     : Simulation of jtag_bfm_pkg - reset by TMS only (no TRST pulse), IDCODE selected
+    parameters      :
+      - TESTS_LIST=reset_tms
+      - IR_WIDTH=5
+      - DR_WIDTH=40
+      - TCK_PERIOD_NS=100
+
+  #---------------------------------------
+  sim_jtag_idcode:
+  #---------------------------------------
+    << : *sim_jtag
+    description     : Simulation of jtag_bfm_pkg - IDCODE read, don't care bits, mismatch of jtag_check_dr
+    parameters      :
+      - TESTS_LIST=idcode
+      - IR_WIDTH=5
+      - DR_WIDTH=40
+      - TCK_PERIOD_NS=100
+
+  #---------------------------------------
+  sim_jtag_bypass:
+  #---------------------------------------
+    << : *sim_jtag
+    description     : Simulation of jtag_bfm_pkg - BYPASS and undecoded opcode, one bit delay
+    parameters      :
+      - TESTS_LIST=bypass
+      - IR_WIDTH=5
+      - DR_WIDTH=40
+      - TCK_PERIOD_NS=100
+
+  #---------------------------------------
+  sim_jtag_user_dr:
+  #---------------------------------------
+    << : *sim_jtag
+    description     : Simulation of jtag_bfm_pkg - wide user data register, IR then DR scans
+    parameters      :
+      - TESTS_LIST=user_dr
+      - IR_WIDTH=5
+      - DR_WIDTH=40
+      - TCK_PERIOD_NS=100
+
+  #---------------------------------------
+  sim_jtag_idle:
+  #---------------------------------------
+    << : *sim_jtag
+    description     : Simulation of jtag_bfm_pkg - number of TCK cycles of each procedure, idle cycles
+    parameters      :
+      - TESTS_LIST=idle
+      - IR_WIDTH=5
+      - DR_WIDTH=40
+      - TCK_PERIOD_NS=100
+
+  #---------------------------------------
+  sim_jtag_trst:
+  #---------------------------------------
+    << : *sim_jtag
+    description     : Simulation of jtag_bfm_pkg - TRST pulse alone (jtag_trst), no TCK edge, TB_ERROR without TRST
+    parameters      :
+      - TESTS_LIST=trst
+      - IR_WIDTH=5
+      - DR_WIDTH=40
+      - TCK_PERIOD_NS=100
+
+  #---------------------------------------
+  sim_jtag_ir_capture:
+  #---------------------------------------
+    << : *sim_jtag
+    description     : Simulation of jtag_bfm_pkg - Capture-IR monitor, IR scans checked, TRST in Shift-IR, longer IR scan
+    parameters      :
+      - TESTS_LIST=ir_capture
+      - IR_WIDTH=5
+      - DR_WIDTH=40
+      - TCK_PERIOD_NS=100
+
+  #---------------------------------------
+  sim_jtag_ir_capture_error:
+  #---------------------------------------
+    << : *sim_jtag
+    description     : Simulation of jtag_bfm_pkg - Capture-IR monitor, wrong captured value and shorter IR scan alerts
+    parameters      :
+      - TESTS_LIST=ir_capture_error
+      - IR_WIDTH=5
+      - DR_WIDTH=40
+      - TCK_PERIOD_NS=100
+
+  #---------------------------------------
+  sim_jtag_ir8:
+  #---------------------------------------
+    << : *sim_jtag
+    description     : Simulation of jtag_bfm_pkg, 8-bit IR, 7-bit user data register, TCK 30 ns, every scenario
+    parameters      :
+      - TESTS_LIST=reset_trst,reset_tms,idcode,bypass,user_dr,idle,trst,ir_capture,ir_capture_error
+      - IR_WIDTH=8
+      - DR_WIDTH=7
+      - TCK_PERIOD_NS=30
+
+  #---------------------------------------
+  sim_jtag_chain:
+  #---------------------------------------
+    << : *sim_jtag
+    description     : Simulation of jtag_bfm_pkg against a chain of 3 TAP models - build only (scenarios of TESTS_LIST)
+    parameters      :
+      - TESTS_LIST
+      - MODEL=chain
+      - TCK_PERIOD_NS=100
+
+  #---------------------------------------
+  sim_jtag_chain_idcode:
+  #---------------------------------------
+    << : *sim_jtag
+    description     : Simulation of jtag_bfm_pkg, chain of 3 TAPs - IDCODE of each TAP, the others in BYPASS
+    parameters      :
+      - TESTS_LIST=chain_idcode
+      - MODEL=chain
+      - TCK_PERIOD_NS=100
+
+  #---------------------------------------
+  sim_jtag_chain_bypass:
+  #---------------------------------------
+    << : *sim_jtag
+    description     : Simulation of jtag_bfm_pkg, chain of 3 TAPs - BYPASS of the chain and of each TAP
+    parameters      :
+      - TESTS_LIST=chain_bypass
+      - MODEL=chain
+      - TCK_PERIOD_NS=100
+
+  #---------------------------------------
+  sim_jtag_chain_user_dr:
+  #---------------------------------------
+    << : *sim_jtag
+    description     : Simulation of jtag_bfm_pkg, chain of 3 TAPs - user data register of each TAP, then the whole chain
+    parameters      :
+      - TESTS_LIST=chain_user_dr
+      - MODEL=chain
+      - TCK_PERIOD_NS=100
+
+  #---------------------------------------
+  sim_jtag_chain_ir_capture:
+  #---------------------------------------
+    << : *sim_jtag
+    description     : Simulation of jtag_bfm_pkg, chain of 3 TAPs - Capture-IR monitors of the chain and of one TAP, wrong head_ir
+    parameters      :
+      - TESTS_LIST=chain_ir_capture
+      - MODEL=chain
+      - TCK_PERIOD_NS=100
+
+  #---------------------------------------
+  # tb_rbb : compiled once, scenarios chosen at run time (TESTS_LIST,
+  # empty : build and elaboration only), chain of the 3 TAP models of
+  # tb_jtag behind a remote_bitbang decoder. sim_rbb (build only) and one
+  # sim_rbb_<test> target per scenario. Generated.
+  #---------------------------------------
+  sim_rbb: &sim_rbb
+    << : *default
+    description     : Simulation of rbb_bfm_pkg against a remote_bitbang decoder and a chain of 3 TAP models - build only (scenarios of TESTS_LIST)
+    filesets_append :
+      - sim_rbb
+    toplevel        : tb_rbb
+    parameters      :
+      - TESTS_LIST
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options :
+          - "$(GHDL_ANALYZE_OPTION)"
+          - "-Wall"
+          - "-frelaxed"
+        run_options     :
+          - "$(GHDL_RUN_OPTION)"
+          - "--ieee-asserts=disable"
+
+  #---------------------------------------
+  sim_rbb_commands:
+  #---------------------------------------
+    << : *sim_rbb
+    description     : Simulation of rbb_bfm_pkg - command bytes of rbb_write_cmd, rbb_reset_cmd, rbb_blink_cmd on the outputs of the decoder
+    parameters      :
+      - TESTS_LIST=commands
+
+  #---------------------------------------
+  sim_rbb_tms:
+  #---------------------------------------
+    << : *sim_rbb
+    description     : Simulation of rbb_bfm_pkg - TMS moves, reset without and with TRST, idle cycles - state of the TAPs, commands and TCK cycles
+    parameters      :
+      - TESTS_LIST=tms
+
+  #---------------------------------------
+  sim_rbb_read:
+  #---------------------------------------
+    << : *sim_rbb
+    description     : Simulation of rbb_bfm_pkg - rbb_read in Run-Test/Idle (pull-up) and bit by bit in Shift-DR (IDCODE)
+    parameters      :
+      - TESTS_LIST=read
+
+  #---------------------------------------
+  sim_rbb_idcode:
+  #---------------------------------------
+    << : *sim_rbb
+    description     : Simulation of rbb_bfm_pkg - IDCODE of the chain, then of each TAP as the target (head / tail bits), BYPASS delay of the chain
+    parameters      :
+      - TESTS_LIST=idcode
+
+  #---------------------------------------
+  sim_rbb_user_dr:
+  #---------------------------------------
+    << : *sim_rbb
+    description     : Simulation of rbb_bfm_pkg - user data register of each TAP with idle cycles, then the whole chain
+    parameters      :
+      - TESTS_LIST=user_dr
+
+  #---------------------------------------
+  sim_rbb_uart:
+  #---------------------------------------
+    << : *sim_rbb
+    description     : Simulation of rbb_bfm_pkg - commands and answers as UART frames - IDCODE, user data register, rbb_read, TRST, SRST, LED
+    parameters      :
+      - TESTS_LIST=uart
+
+  #---------------------------------------
+  sim_rbb_errors:
+  #---------------------------------------
+    << : *sim_rbb
+    description     : Simulation of rbb_bfm_pkg - alerts - mismatch and don't care of rbb_check_dr, answers missing, command not taken, wrong head_ir
+    parameters      :
+      - TESTS_LIST=errors
+
+  #---------------------------------------
+  # Co-simulation of the OpenOCD kit : OpenOCD 0.12 (remote_bitbang adapter)
+  # runs the checks of sim/openocd/tap.cfg on the TAP model of tb_jtag,
+  # through rbb_jtag (PIN mode) or through rbb_axis and the remote_bitbang
+  # decoder of tb_rbb (BYTE mode). Needs gcc and openocd (hooks run in the
+  # work root).
+  #---------------------------------------
+  sim_openocd_pin: &sim_openocd
+    << : *default
+    description     : Co-simulation of the OpenOCD kit, PIN mode (rbb_jtag, TAP model) - IDCODE, DR scans, TRST, SRST
+    filesets_append :
+      - sim_openocd
+    toplevel        : tb_openocd
+    parameters      :
+      - MODE=pin
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options :
+          - "$(GHDL_ANALYZE_OPTION)"
+          - "-Wall"
+          - "-frelaxed"
+        run_options     :
+          - "$(GHDL_RUN_OPTION)"
+          - "--ieee-asserts=disable"
+    hooks :
+      pre_build     : [cosim_build]
+      pre_run       : [cosim_start]
+      post_run      : [cosim_check]
+
+  #---------------------------------------
+  sim_openocd_byte:
+  #---------------------------------------
+    << : *sim_openocd
+    description     : Co-simulation of the OpenOCD kit, BYTE mode (rbb_axis, remote_bitbang decoder, TAP model) - IDCODE, DR scans, TRST, SRST
+    parameters      :
+      - MODE=byte
+
+#=========================================
+scripts:
+#=========================================
+
+  #---------------------------------------
+  # Hooks of sim_openocd_* (cwd = work_root, rbb/cosim.sh of the kit)
+  #---------------------------------------
+  cosim_build :
+    cmd : [bash, rbb/cosim.sh, build]
+
+  cosim_start :
+    cmd : [bash, rbb/cosim.sh, start, openocd/tap.cfg]
+
+  cosim_check :
+    cmd : [bash, rbb/cosim.sh, check]
+
+#=========================================
+parameters :
+#=========================================
+
+  TESTS_LIST :
+    description : Scenarios of the testbench, separated by ',' (empty, build and elaboration only)
+    datatype    : str
+    paramtype   : generic
+
+  #---------------------------------------
+  # Generics of tb_jtag (sim_jtag*)
+  #---------------------------------------
+  IR_WIDTH :
+    description : Width of the instruction register of the TAP model (config.ir_width of the BFM)
+    datatype    : int
+    default     : 5
+    paramtype   : generic
+
+  DR_WIDTH :
+    description : Width of the user data register of the TAP model
+    datatype    : int
+    default     : 40
+    paramtype   : generic
+
+  TCK_PERIOD_NS :
+    description : Period of TCK (ns, even, config.tck_period of the BFM)
+    datatype    : int
+    default     : 100
+    paramtype   : generic
+
+  MODEL :
+    description : TAP models, single (one TAP) or chain (3 TAPs)
+    datatype    : str
+    default     : single
+    paramtype   : generic
+
+  #---------------------------------------
+  # Generic of tb_openocd (sim_openocd_*)
+  #---------------------------------------
+  MODE :
+    description : Kit mode of tb_openocd, pin (rbb_jtag) or byte (rbb_axis and the remote_bitbang decoder)
+    datatype    : str
+    default     : pin
+    paramtype   : generic
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-verification-uvvm
+  version : asylum-verification-uvvm-1.3.0
+ #version : f29ae6f7b85672fb1185a86b19015be819ccb729
+#<PROVIDER_END>

@@ -1,0 +1,82 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : OpenOCD co-simulation kit Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : openocd.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: OpenOCD co-simulation kit of the Asylum testbenches : OpenOCD
+#              (remote_bitbang adapter, TCP) connected to a GHDL testbench.
+#              One C server (rbb_server.c : BYTE mode for a DUT that decodes
+#              the remote_bitbang bytes, PIN mode for the JTAG pins of a
+#              TAP), its VHPIDIRECT binding rbb_pkg and the testbench
+#              entities rbb_axis (BYTE) and rbb_jtag (PIN) in the library
+#              asylum_uvvm, the hooks cosim.sh and the Tcl procedures
+#              check.tcl of the OpenOCD scripts. No dependency.
+#              The kit files are copied to rbb/ in the work root ; the
+#              co-simulation target declares the hook scripts :
+#                cosim_build : [bash, rbb/cosim.sh, build]
+#                cosim_start : [bash, rbb/cosim.sh, start, <cfg>, <gdb.py>]
+#                cosim_check : [bash, rbb/cosim.sh, check]
+#-----------------------------------------------------------------------------
+# Copyright (c) 2026
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2026-11-24  1.0.0    mrosiere Created from the co-simulations of
+#                               asylum-debug-jtag and of
+#                               asylum-processor-WardRV
+#-----------------------------------------------------------------------------
+
+name        : asylum:verification:openocd:1.0.0
+description : OpenOCD co-simulation kit (remote_bitbang server, GHDL binding, hooks)
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  src_openocd:
+  #---------------------------------------
+    files        :
+      - src_openocd/rbb_pkg.vhd
+      - src_openocd/rbb_axis.vhd
+      - src_openocd/rbb_jtag.vhd
+    file_type    : vhdlSource-2008
+    logical_name : asylum_uvvm
+
+  #---------------------------------------
+  # Hooks of the co-simulation targets, copied to rbb/ in the work root
+  #---------------------------------------
+  files_cosim:
+  #---------------------------------------
+    files        :
+      - src_openocd/rbb_server.c : {copyto : rbb/rbb_server.c}
+      - src_openocd/cosim.sh     : {copyto : rbb/cosim.sh}
+      - src_openocd/check.tcl    : {copyto : rbb/check.tcl}
+    file_type    : user
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default:
+  #---------------------------------------
+    description     : Library only (no toplevel), used as a dependency by the co-simulation targets
+    filesets        :
+      - src_openocd
+      - files_cosim
+    default_tool    : ghdl
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-verification-uvvm
+  version : asylum-verification-openocd-1.0.0
+ #version : f29ae6f7b85672fb1185a86b19015be819ccb729
+#<PROVIDER_END>

@@ -263,9 +263,11 @@
 ## verification
 | Vendor               | Library              | Name                 | Version                                                                                              | URL                  | Description |
 | ---                  | ---                  | ---                  | ---                                                                                                  | ---                  | --- |
+| asylum               | verification         | openocd              | [1.0.0](asylum/verification/openocd/openocd_v1_0_0.core)                                             | [url](https://github.com/deuskane/asylum-verification-uvvm/tree/asylum-verification-openocd-1.0.0) |  OpenOCD co-simulation kit (remote_bitbang server, GHDL binding, hooks)|
 | asylum               | verification         | uvvm                 | [1.0.0](asylum/verification/uvvm/uvvm_v1_0_0.core)                                                   | [url](https://github.com/deuskane/asylum-verification-uvvm/tree/asylum-verification-uvvm-1.0.0) |  UVVM BFMs of the Asylum testbenches|
 | asylum               | verification         | uvvm                 | [1.1.0](asylum/verification/uvvm/uvvm_v1_1_0.core)                                                   | [url](https://github.com/deuskane/asylum-verification-uvvm/tree/asylum-verification-uvvm-1.1.0) |  UVVM BFMs of the Asylum testbenches|
 | asylum               | verification         | uvvm                 | [1.2.0](asylum/verification/uvvm/uvvm_v1_2_0.core)                                                   | [url](https://github.com/deuskane/asylum-verification-uvvm/tree/asylum-verification-uvvm-1.2.0) |  UVVM BFMs of the Asylum testbenches|
+| asylum               | verification         | uvvm                 | [1.3.0](asylum/verification/uvvm/uvvm_v1_3_0.core)                                                   | [url](https://github.com/deuskane/asylum-verification-uvvm/tree/asylum-verification-uvvm-1.3.0) |  UVVM BFMs of the Asylum testbenches|
 # bitvis
 ## verification
 | Vendor               | Library              | Name                 | Version                                                                                              | URL                  | Description |
