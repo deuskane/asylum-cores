@@ -1,0 +1,67 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : 
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : target_medium.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: Technology Cells for FPGA NG_MEDIUM from NanoXplore
+#-----------------------------------------------------------------------------
+# Copyright (c) 2025
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2025-08-11  1.0.0    mrosiere Created
+# 2025-09-06  1.0.1    mrosiere Add package
+# 2026-08-02  1.0.2    mrosiere Add iobuf
+# 2026-08-24  1.0.3    mrosiere Add ibuf and obuf
+# 2026-09-19  1.0.4    mrosiere Move package from generic to common
+# 2026-10-05  1.0.5    mrosiere ibuf : drive 'Z' on buf_io
+# 2026-11-27  1.0.6    mrosiere sync2dffrn : comment of the attributes reworded
+#                               (read as a pragma by ghdl --synth)
+#-----------------------------------------------------------------------------
+
+name        : nanoxplore:target:ng_medium:1.0.6
+description : Technology Cells for FPGA NG_MEDIUM from NanoXplore
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  hdl:
+  #---------------------------------------
+    files:
+      - hdl/common/techmap_pkg.vhd
+      - hdl/ng_medium/cbufg.vhd
+      - hdl/generic/cgate.vhd
+      - hdl/generic/sync2dff.vhd
+      - hdl/generic/sync2dffrn.vhd
+      - hdl/generic/iobuf.vhd
+      - hdl/generic/obuf.vhd
+      - hdl/generic/ibuf.vhd
+    file_type    : vhdlSource
+    logical_name : asylum
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target (DON'T RUN)
+    filesets        :
+      - hdl
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-target-techmap
+  version : nanoxplore-target-ng_medium-1.0.6
+ #version : 4f9fe50cfb2590781d12da3c06f7225c797aa6c5
+#<PROVIDER_END>

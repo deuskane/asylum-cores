@@ -1,0 +1,368 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : 
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : target_generic.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: Inferred Technology Cells
+#-----------------------------------------------------------------------------
+# Copyright (c) 2025
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2025-01-06  1.0.0    mrosiere Created
+# 2025-08-11  1.1.0    mrosiere Add cbufg
+# 2025-09-06  1.1.1    mrosiere Add package
+# 2026-08-02  1.1.2    mrosiere Add iobuf
+# 2026-08-24  1.1.3    mrosiere Add ibuf and obuf
+# 2026-09-19  1.1.4    mrosiere Move package from generic to common
+# 2026-10-05  1.1.5    mrosiere Add UVVM testbench tb_techmap (sim_techmap)
+#                               Rename lint target to lint_generic
+#                               ibuf : drive 'Z' on buf_io
+# 2026-11-27  1.1.6    mrosiere sync2dffrn : comment of the attributes reworded
+#                               (read as a pragma by ghdl --synth)
+#-----------------------------------------------------------------------------
+
+name        : asylum:target:generic:1.1.6
+description : Inferred Technology Cells
+
+#=========================================
+filesets:
+#=========================================
+
+  #---------------------------------------
+  hdl:
+  #---------------------------------------
+    files:
+      - hdl/common/techmap_pkg.vhd
+      - hdl/generic/cbufg.vhd
+      - hdl/generic/cgate.vhd
+      - hdl/generic/sync2dff.vhd
+      - hdl/generic/sync2dffrn.vhd
+      - hdl/generic/iobuf.vhd
+      - hdl/generic/obuf.vhd
+      - hdl/generic/ibuf.vhd
+    file_type    : vhdlSource
+    logical_name : asylum
+
+  #---------------------------------------
+  sim:
+  #---------------------------------------
+    files:
+      - sim/src/tb_dummy.vhd
+    file_type : vhdlSource
+
+  #---------------------------------------
+  sim_uvvm:
+  #---------------------------------------
+    files:
+      - sim/techmap/tb_techmap_bfm_pkg.vhd
+      - sim/techmap/tb_techmap_cbufg_pkg.vhd
+      - sim/techmap/tb_techmap_cgate_pkg.vhd
+      - sim/techmap/tb_techmap_sync2dff_pkg.vhd
+      - sim/techmap/tb_techmap_sync2dffrn_pkg.vhd
+      - sim/techmap/tb_techmap_ibuf_pkg.vhd
+      - sim/techmap/tb_techmap_obuf_pkg.vhd
+      - sim/techmap/tb_techmap_iobuf_pkg.vhd
+      - sim/techmap/tb_techmap_tests_pkg.vhd
+      - sim/techmap/tb_techmap.vhd
+    file_type : vhdlSource-2008
+    depend       :
+      - bitvis:verification:uvvm
+      # string_pkg list_length / list_item (TESTS_LIST)
+      - ">=asylum:utils:pkg:1.10.0"
+
+  #---------------------------------------
+  syn:
+  #---------------------------------------
+    files        :
+      - syn/techmap_wrapper.vhd
+    file_type    : vhdlSource
+    logical_name : asylum
+    # ghdl_synth.sh / ghdl_synth.mk (pre_run hook of lint_ghdl_synth_*)
+    depend       :
+      - asylum:utils:ghdl_synth
+
+  #---------------------------------------
+  syn_yosys:
+  #---------------------------------------
+    # yosys_synth.sh / yosys_synth.mk / yosys_synth.py (pre_run hook of syn_*)
+    depend       :
+      - asylum:utils:yosys_synth
+
+#=========================================
+targets:
+#=========================================
+
+  #---------------------------------------
+  default: &default
+  #---------------------------------------
+    description     : Default Target (DON'T RUN)
+    filesets        :
+      - hdl
+    default_tool    : ghdl
+
+  #---------------------------------------
+  lint_generic: &lint_generic
+  #---------------------------------------
+    << : *default
+    description     : Lint (elaboration of every generic cell)
+    default_tool    : ghdl
+    toplevel        : tb_dummy
+    filesets_append :
+      - sim
+    tools :
+      ghdl :
+        analyze_options : ["-fsynopsys"]
+
+  #---------------------------------------
+  # Lint : -Wall analysis and elaboration (empty simulation)
+  #---------------------------------------
+  lint_ghdl : &lint_ghdl
+    << : *default
+    description     : Lint with GHDL (-Wall analysis and elaboration of techmap_wrapper)
+    toplevel        : asylum.techmap_wrapper
+    filesets_append : [syn]
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall"]
+
+  #---------------------------------------
+  # Synthesis check : -Wall analysis, ghdl --synth -Wall and elaboration
+  # (no simulation) of techmap_wrapper with the generics of the target.
+  # The pre_run hook (ghdl_synth.sh of asylum:utils:ghdl_synth) adds
+  # ghdl_synth.mk to the edalize Makefile.
+  # FuseSoC merges tools in depth : analyze_options comes from lint_ghdl.
+  #---------------------------------------
+  lint_ghdl_synth_no_cgate : &lint_ghdl_synth
+    << : *lint_ghdl
+    description     : Synthesis check of techmap_wrapper, without cgate
+    parameters      :
+      - WITH_CGATE=false
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [ghdl_synth]
+
+  #---------------------------------------
+  lint_ghdl_synth_no_cgate_inverted :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of techmap_wrapper, without cgate, I/O buffer generics at 1
+    parameters      :
+      - WITH_CGATE=false
+      - INPUT_VALUE_DISABLED=1
+      - INVERT_D_I=1
+      - INVERT_D_O=1
+      - INVERT_OE_I=1
+      - INVERT_IE_I=1
+
+  #---------------------------------------
+  lint_ghdl_synth_sync :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of techmap_wrapper, cbufg and synchronizers (without cgate and I/O buffers)
+    parameters      :
+      - WITH_CGATE=false
+      - WITH_IO_BUFFERS=false
+
+  #---------------------------------------
+  # cgate latches its clock enable by design : every cell, ghdl --synth
+  # with --latches (GHDL_SYNTH_OPTIONS added by ghdl_synth_latches)
+  #---------------------------------------
+  lint_ghdl_synth_cgate_latch :
+    << : *lint_ghdl
+    description     : Synthesis check of techmap_wrapper, every cell, latches allowed (cgate)
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [ghdl_synth, ghdl_synth_latches]
+
+  #---------------------------------------
+  # Synthesis : size of techmap_wrapper with the generics of the target,
+  # Xilinx Artix-7 (LUT, FF, BRAM, DSP) and sky130 (area), by Yosys and
+  # its GHDL plugin. Same configuration as lint_ghdl_synth_sync : the
+  # Artix-7 flow (synth_xilinx -noiopad) rejects tri-states (ibuf, obuf,
+  # iobuf) and the GHDL plugin rejects latches (cgate).
+  # The pre_run hook (yosys_synth.sh of asylum:utils:yosys_synth) adds
+  # yosys_synth.mk to the edalize Makefile.
+  #---------------------------------------
+  syn_sync :
+    << : *lint_ghdl
+    description     : Synthesis (Artix-7, sky130) of techmap_wrapper, cbufg and synchronizers (without cgate and I/O buffers)
+    filesets_append : [syn_yosys]
+    parameters      :
+      - WITH_CGATE=false
+      - WITH_IO_BUFFERS=false
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [yosys_synth]
+
+  #---------------------------------------
+  # tb_techmap : one configuration (every generic combination of the I/O
+  # buffers is instantiated), scenarios chosen at run time (TESTS_LIST,
+  # empty : build and elaboration only) : sim_techmap (build only) and
+  # one sim_techmap_<test> target per scenario (one per cell).
+  #---------------------------------------
+  sim_techmap: &sim_techmap
+    << : *default
+    description     : Self-checking UVVM testbench of the generic cells - build only (scenarios of TESTS_LIST)
+    toplevel        : tb_techmap
+    filesets_append :
+      - sim_uvvm
+    parameters      :
+      - TESTS_LIST
+    tools :
+      ghdl :
+        analyze_options : ["-Wall","-frelaxed"]
+
+  #---------------------------------------
+  sim_techmap_cbufg:
+  #---------------------------------------
+    << : *sim_techmap
+    description     : Self-checking UVVM testbench of the generic cells - cbufg, d_o = d_i and clock without delay
+    parameters      :
+      - TESTS_LIST=cbufg
+
+  #---------------------------------------
+  sim_techmap_cgate:
+  #---------------------------------------
+    << : *sim_techmap
+    description     : Self-checking UVVM testbench of the generic cells - cgate, clock gating glitch-free, enable latched while the clock is low, test enable
+    parameters      :
+      - TESTS_LIST=cgate
+
+  #---------------------------------------
+  sim_techmap_sync2dff:
+  #---------------------------------------
+    << : *sim_techmap
+    description     : Self-checking UVVM testbench of the generic cells - sync2dff, 2-edge latency, 1-cycle pulse
+    parameters      :
+      - TESTS_LIST=sync2dff
+
+  #---------------------------------------
+  sim_techmap_sync2dffrn:
+  #---------------------------------------
+    << : *sim_techmap
+    description     : Self-checking UVVM testbench of the generic cells - sync2dffrn, reset held, 2-edge latency, asynchronous reset of the chain
+    parameters      :
+      - TESTS_LIST=sync2dffrn
+
+  #---------------------------------------
+  sim_techmap_ibuf:
+  #---------------------------------------
+    << : *sim_techmap
+    description     : Self-checking UVVM testbench of the generic cells - ibuf, every generic combination, pad never driven
+    parameters      :
+      - TESTS_LIST=ibuf
+
+  #---------------------------------------
+  sim_techmap_obuf:
+  #---------------------------------------
+    << : *sim_techmap
+    description     : Self-checking UVVM testbench of the generic cells - obuf, every generic combination, Z when the output is disabled
+    parameters      :
+      - TESTS_LIST=obuf
+
+  #---------------------------------------
+  sim_techmap_iobuf:
+  #---------------------------------------
+    << : *sim_techmap
+    description     : Self-checking UVVM testbench of the generic cells - iobuf, every generic combination, loopback, Z when the output is disabled
+    parameters      :
+      - TESTS_LIST=iobuf
+
+#=========================================
+scripts:
+#=========================================
+
+  #---------------------------------------
+  # pre_run hook of lint_ghdl_synth_* (cwd = work_root)
+  #---------------------------------------
+  ghdl_synth :
+    cmd : [bash, ghdl_synth.sh]
+
+  #---------------------------------------
+  # pre_run hook of lint_ghdl_synth_cgate_latch : ghdl --synth --latches
+  #---------------------------------------
+  ghdl_synth_latches :
+    cmd : [sh, -c, "echo GHDL_SYNTH_OPTIONS=--latches >> Makefile"]
+
+  #---------------------------------------
+  # pre_run hook of syn_* (cwd = work_root)
+  #---------------------------------------
+  yosys_synth :
+    cmd : [bash, yosys_synth.sh]
+
+#=========================================
+parameters :
+#=========================================
+
+  TESTS_LIST :
+    description : Scenarios run in sequence, separated by ',' (names in sim/techmap/tb_techmap_tests_pkg.vhd), empty = build only
+    datatype    : str
+    default     : ""
+    paramtype   : generic
+
+  #---------------------------------------
+  # Generics of techmap_wrapper (lint_ghdl_synth_*)
+  #---------------------------------------
+  WITH_CGATE :
+    description : true, cgate instantiated (it latches its clock enable)
+    datatype    : bool
+    default     : true
+    paramtype   : generic
+
+  WITH_IO_BUFFERS :
+    description : true, ibuf, obuf and iobuf instantiated (they drive Z on their pad)
+    datatype    : bool
+    default     : true
+    paramtype   : generic
+
+  INPUT_VALUE_DISABLED :
+    description : I/O buffers, input value when disabled (0 / 1)
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+  INVERT_D_I :
+    description : I/O buffers, invert d_i (0 / 1)
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+  INVERT_D_O :
+    description : I/O buffers, invert d_o (0 / 1)
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+  INVERT_OE_I :
+    description : I/O buffers, invert oe_i (0 / 1)
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+  INVERT_IE_I :
+    description : I/O buffers, invert ie_i (0 / 1)
+    datatype    : int
+    default     : 0
+    paramtype   : generic
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-target-techmap
+  version : asylum-target-generic-1.1.6
+ #version : 4f9fe50cfb2590781d12da3c06f7225c797aa6c5
+#<PROVIDER_END>
