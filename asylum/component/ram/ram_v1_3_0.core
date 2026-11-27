@@ -1,0 +1,926 @@
+CAPI=2:
+
+#-----------------------------------------------------------------------------
+# Title      : Ram Core file
+# Project    : Asylum
+#-----------------------------------------------------------------------------
+# File       : ram.core
+# Author     : mrosiere
+#-----------------------------------------------------------------------------
+# Description: 
+#-----------------------------------------------------------------------------
+# Copyright (c) 2021
+#-----------------------------------------------------------------------------
+# Revisions  :
+# Date        Version  Author   Description
+# 2021-10-26  1.0.0    mrosiere Created
+# 2025-08-01  1.1.0    mrosiere Add option to have asynchronous or synchronous read port
+# 2025-09-05  1.1.1    mrosiere Add Package
+# 2026-05-16  1.2.0    mrosiere Add ram_1rw and sbi_ram_1rw
+# 2026-06-06  1.2.1    mrosiere Add Name
+# 2026-09-15  1.2.2    mrosiere Add ram_2r1w
+# 2026-10-05  1.2.3    mrosiere Remove unused std.textio, assert DEPTH power of 2
+#                               UVVM testbench of all the RAMs (replaces
+#                               tb_ram_1r1w), targets use WIDTH/DEPTH/SYNC_READ
+# 2026-11-27  1.3.0    mrosiere Add ram_1r1w_2c (simple dual-port RAM, one
+#                               clock per port) and ram_2rw_2c (true dual-port
+#                               RAM, one clock per port), their testbenches ;
+#                               syn_ram_2rw_2c_* on yosys_synth >= 1.1.1
+#-----------------------------------------------------------------------------
+
+name        : asylum:component:ram:1.3.0
+description : RAM with 1 read port and 1 write port
+
+filesets:
+
+  #---------------------------------------
+  # Source Files
+  #---------------------------------------
+  files_hdl:
+    files:
+      - hdl/ram_pkg.vhd
+      - hdl/ram_1r1w.vhd
+      - hdl/ram_2r1w.vhd
+      - hdl/ram_1rw.vhd
+      - hdl/ram_2rw_2c.vhd
+      - hdl/ram_1r1w_2c.vhd
+      - hdl/sbi_ram.vhd
+    file_type    : vhdlSource-2008
+    logical_name : asylum
+    depend :
+      - asylum:utils:pkg
+      
+  #---------------------------------------
+  # Testbench Files
+  #---------------------------------------
+  files_sim:
+    files:
+      - sim/ram/tb_ram_bfm_pkg.vhd
+      - sim/ram/tb_ram_write_read_pkg.vhd
+      - sim/ram/tb_ram_read_during_write_pkg.vhd
+      - sim/ram/tb_ram_clock_enable_pkg.vhd
+      - sim/ram/tb_ram_read_enable_pkg.vhd
+      - sim/ram/tb_ram_write_enable_pkg.vhd
+      - sim/ram/tb_ram_random_pkg.vhd
+      - sim/ram/tb_ram_sbi_write_read_pkg.vhd
+      - sim/ram/tb_ram_sbi_aliasing_pkg.vhd
+      - sim/ram/tb_ram_sbi_name_pkg.vhd
+      - sim/ram/tb_ram_tests_pkg.vhd
+      - sim/ram/tb_ram.vhd
+    file_type : vhdlSource-2008
+    depend    :
+      - bitvis:verification:uvvm
+      # string_pkg list_length / list_item / list_contains (TESTS_LIST)
+      - ">=asylum:utils:pkg:1.10.0"
+
+  #---------------------------------------
+  # Testbench of ram_2rw_2c (two clocks), one package per scenario
+  #---------------------------------------
+  files_sim_2rw_2c:
+    files:
+      - sim/ram_2rw_2c/tb_ram_2rw_2c_bfm_pkg.vhd
+      - sim/ram_2rw_2c/tb_ram_2rw_2c_port0_pkg.vhd
+      - sim/ram_2rw_2c/tb_ram_2rw_2c_port1_pkg.vhd
+      - sim/ram_2rw_2c/tb_ram_2rw_2c_cross_pkg.vhd
+      - sim/ram_2rw_2c/tb_ram_2rw_2c_concurrent_pkg.vhd
+      - sim/ram_2rw_2c/tb_ram_2rw_2c_read_during_write_pkg.vhd
+      - sim/ram_2rw_2c/tb_ram_2rw_2c_enables_pkg.vhd
+      - sim/ram_2rw_2c/tb_ram_2rw_2c_tests_pkg.vhd
+      - sim/ram_2rw_2c/tb_ram_2rw_2c.vhd
+    file_type : vhdlSource-2008
+    depend    :
+      - bitvis:verification:uvvm
+      # string_pkg list_length / list_item / list_contains (TESTS_LIST)
+      - ">=asylum:utils:pkg:1.10.0"
+
+  #---------------------------------------
+  # Testbench of ram_1r1w_2c (two clocks), one package per scenario, port
+  # helpers of tb_ram_2rw_2c_bfm_pkg
+  #---------------------------------------
+  files_sim_1r1w_2c:
+    files:
+      - sim/ram_2rw_2c/tb_ram_2rw_2c_bfm_pkg.vhd
+      - sim/ram_1r1w_2c/tb_ram_1r1w_2c_write_read_pkg.vhd
+      - sim/ram_1r1w_2c/tb_ram_1r1w_2c_concurrent_pkg.vhd
+      - sim/ram_1r1w_2c/tb_ram_1r1w_2c_read_during_write_pkg.vhd
+      - sim/ram_1r1w_2c/tb_ram_1r1w_2c_enables_pkg.vhd
+      - sim/ram_1r1w_2c/tb_ram_1r1w_2c_tests_pkg.vhd
+      - sim/ram_1r1w_2c/tb_ram_1r1w_2c.vhd
+    file_type : vhdlSource-2008
+    depend    :
+      - bitvis:verification:uvvm
+      # string_pkg list_length / list_item / list_contains (TESTS_LIST)
+      - ">=asylum:utils:pkg:1.10.0"
+
+  #---------------------------------------
+  # Lint / synthesis check : wrapper of sbi_ram, and ghdl_synth.sh /
+  # ghdl_synth.mk (pre_run hook of lint_ghdl_synth_*) of
+  # asylum:utils:ghdl_synth, a core without dependency (ram cannot depend
+  # on generators : cycle generators -> fifo -> ram -> pkg)
+  #---------------------------------------
+  syn:
+    files        :
+      - syn/sbi_ram_wrapper.vhd
+    file_type    : vhdlSource-2008
+    logical_name : asylum
+    depend       :
+      - asylum:utils:ghdl_synth
+
+  #---------------------------------------
+  # Synthesis : yosys_synth.sh / yosys_synth.mk / yosys_synth.py (pre_run
+  # hook of syn_*) of asylum:utils:yosys_synth, a core without dependency
+  #---------------------------------------
+  syn_yosys:
+    depend       :
+      - asylum:utils:yosys_synth
+
+  #---------------------------------------
+  # syn_ram_2rw_2c_* only : a memory written on two clocks needs
+  # yosys_synth >= 1.1.1 (write priority cleared after the GHDL import)
+  #---------------------------------------
+  syn_yosys_2w:
+    depend       :
+      - ">=asylum:utils:yosys_synth:1.1.1"
+
+targets:
+
+  #---------------------------------------
+  # Default Target
+  #---------------------------------------
+  default: &default
+    description     : Default Target
+    filesets        :
+      - files_hdl
+    toplevel        : ram_1r1w
+    default_tool    : ghdl
+
+  #---------------------------------------
+  # Lint : -Wall analysis and elaboration (empty simulation)
+  #---------------------------------------
+  lint_ghdl : &lint_ghdl
+    << : *default
+    description     : Lint with GHDL (-Wall analysis of all the RAMs, elaboration of sbi_ram_wrapper)
+    toplevel        : asylum.sbi_ram_wrapper
+    filesets_append : [syn]
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options : ["-Wall"]
+
+  #---------------------------------------
+  # Synthesis check : -Wall analysis, ghdl --synth -Wall and elaboration
+  # (no simulation) of one RAM with the generics of the target : ram_1r1w,
+  # ram_2r1w, ram_1rw, ram_2rw_2c and ram_1r1w_2c are their own toplevel, sbi_ram is in
+  # sbi_ram_wrapper (flat SBI ports).
+  # The pre_run hook (ghdl_synth.sh of asylum:utils:ghdl_synth) adds
+  # ghdl_synth.mk to the edalize Makefile.
+  # FuseSoC merges tools in depth : analyze_options comes from lint_ghdl.
+  #---------------------------------------
+  lint_ghdl_synth_ram_1r1w_32x32b_read_async : &lint_ghdl_synth
+    << : *lint_ghdl
+    description     : Synthesis check of ram_1r1w, 32x32 bits, asynchronous read (default generics)
+    toplevel        : asylum.ram_1r1w
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [ghdl_synth]
+    parameters      :
+      - WIDTH=32
+      - DEPTH=32
+      - SYNC_READ=false
+
+  #---------------------------------------
+  lint_ghdl_synth_ram_1r1w_256x8b_read_sync :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of ram_1r1w, 256x8 bits, synchronous read
+    toplevel        : asylum.ram_1r1w
+    parameters      :
+      - WIDTH=8
+      - DEPTH=256
+      - SYNC_READ=true
+
+  #---------------------------------------
+  lint_ghdl_synth_ram_2r1w_32x32b_read_async :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of ram_2r1w, 32x32 bits, asynchronous read (default generics)
+    toplevel        : asylum.ram_2r1w
+    parameters      :
+      - WIDTH=32
+      - DEPTH=32
+      - SYNC_READ=false
+
+  #---------------------------------------
+  lint_ghdl_synth_ram_2r1w_256x8b_read_sync :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of ram_2r1w, 256x8 bits, synchronous read
+    toplevel        : asylum.ram_2r1w
+    parameters      :
+      - WIDTH=8
+      - DEPTH=256
+      - SYNC_READ=true
+
+  #---------------------------------------
+  lint_ghdl_synth_ram_1rw_32x32b_read_async :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of ram_1rw, 32x32 bits, asynchronous read (default generics)
+    toplevel        : asylum.ram_1rw
+    parameters      :
+      - WIDTH=32
+      - DEPTH=32
+      - SYNC_READ=false
+
+  #---------------------------------------
+  lint_ghdl_synth_ram_1rw_256x8b_read_sync :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of ram_1rw, 256x8 bits, synchronous read
+    toplevel        : asylum.ram_1rw
+    parameters      :
+      - WIDTH=8
+      - DEPTH=256
+      - SYNC_READ=true
+
+  #---------------------------------------
+  lint_ghdl_synth_ram_2rw_2c_32x32b :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of ram_2rw_2c, 32x32 bits (default generics)
+    toplevel        : asylum.ram_2rw_2c
+    parameters      :
+      - WIDTH=32
+      - DEPTH=32
+
+  #---------------------------------------
+  lint_ghdl_synth_ram_2rw_2c_256x8b :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of ram_2rw_2c, 256x8 bits
+    toplevel        : asylum.ram_2rw_2c
+    parameters      :
+      - WIDTH=8
+      - DEPTH=256
+
+  #---------------------------------------
+  lint_ghdl_synth_ram_1r1w_2c_32x32b :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of ram_1r1w_2c, 32x32 bits (default generics)
+    toplevel        : asylum.ram_1r1w_2c
+    parameters      :
+      - WIDTH=32
+      - DEPTH=32
+
+  #---------------------------------------
+  lint_ghdl_synth_ram_1r1w_2c_256x8b :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of ram_1r1w_2c, 256x8 bits
+    toplevel        : asylum.ram_1r1w_2c
+    parameters      :
+      - WIDTH=8
+      - DEPTH=256
+
+  #---------------------------------------
+  lint_ghdl_synth_sbi_ram_32x8b_read_async :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi_ram (sbi_ram_wrapper), 32x8 bits, asynchronous read
+    toplevel        : asylum.sbi_ram_wrapper
+    parameters      :
+      - DEPTH=32
+      - SYNC_READ=false
+
+  #---------------------------------------
+  lint_ghdl_synth_sbi_ram_256x8b_read_sync :
+  #---------------------------------------
+    << : *lint_ghdl_synth
+    description     : Synthesis check of sbi_ram (sbi_ram_wrapper), 256x8 bits, synchronous read
+    toplevel        : asylum.sbi_ram_wrapper
+    parameters      :
+      - DEPTH=256
+      - SYNC_READ=true
+
+  #---------------------------------------
+  # Synthesis : size of one RAM with the generics of the target, Xilinx
+  # Artix-7 (LUT, LUTRAM, FF, BRAM, DSP) and sky130 (area, the memory
+  # becomes flip-flops), by Yosys and its GHDL plugin. Same configurations
+  # as lint_ghdl_synth_*.
+  # The pre_run hook (yosys_synth.sh of asylum:utils:yosys_synth) adds
+  # yosys_synth.mk to the edalize Makefile.
+  #---------------------------------------
+  syn_ram_1r1w_32x32b_read_async : &syn
+    << : *lint_ghdl
+    description     : Synthesis (Artix-7, sky130) of ram_1r1w, 32x32 bits, asynchronous read (default generics)
+    toplevel        : asylum.ram_1r1w
+    filesets_append : [syn, syn_yosys]
+    tools :
+      ghdl :
+        run_options     : ["--no-run"]
+    hooks :
+      pre_run : [yosys_synth]
+    parameters      :
+      - WIDTH=32
+      - DEPTH=32
+      - SYNC_READ=false
+
+  #---------------------------------------
+  syn_ram_1r1w_256x8b_read_sync :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of ram_1r1w, 256x8 bits, synchronous read
+    toplevel        : asylum.ram_1r1w
+    parameters      :
+      - WIDTH=8
+      - DEPTH=256
+      - SYNC_READ=true
+
+  #---------------------------------------
+  syn_ram_2r1w_32x32b_read_async :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of ram_2r1w, 32x32 bits, asynchronous read (default generics)
+    toplevel        : asylum.ram_2r1w
+    parameters      :
+      - WIDTH=32
+      - DEPTH=32
+      - SYNC_READ=false
+
+  #---------------------------------------
+  syn_ram_2r1w_256x8b_read_sync :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of ram_2r1w, 256x8 bits, synchronous read
+    toplevel        : asylum.ram_2r1w
+    parameters      :
+      - WIDTH=8
+      - DEPTH=256
+      - SYNC_READ=true
+
+  #---------------------------------------
+  syn_ram_1rw_32x32b_read_async :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of ram_1rw, 32x32 bits, asynchronous read (default generics)
+    toplevel        : asylum.ram_1rw
+    parameters      :
+      - WIDTH=32
+      - DEPTH=32
+      - SYNC_READ=false
+
+  #---------------------------------------
+  syn_ram_1rw_256x8b_read_sync :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of ram_1rw, 256x8 bits, synchronous read
+    toplevel        : asylum.ram_1rw
+    parameters      :
+      - WIDTH=8
+      - DEPTH=256
+      - SYNC_READ=true
+
+  #---------------------------------------
+  syn_ram_2rw_2c_32x32b :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of ram_2rw_2c, 32x32 bits (default generics)
+    filesets_append : [syn, syn_yosys, syn_yosys_2w]
+    toplevel        : asylum.ram_2rw_2c
+    parameters      :
+      - WIDTH=32
+      - DEPTH=32
+
+  #---------------------------------------
+  syn_ram_2rw_2c_256x8b :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of ram_2rw_2c, 256x8 bits
+    filesets_append : [syn, syn_yosys, syn_yosys_2w]
+    toplevel        : asylum.ram_2rw_2c
+    parameters      :
+      - WIDTH=8
+      - DEPTH=256
+
+  #---------------------------------------
+  syn_ram_1r1w_2c_32x32b :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of ram_1r1w_2c, 32x32 bits (default generics)
+    toplevel        : asylum.ram_1r1w_2c
+    parameters      :
+      - WIDTH=32
+      - DEPTH=32
+
+  #---------------------------------------
+  syn_ram_1r1w_2c_256x8b :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of ram_1r1w_2c, 256x8 bits
+    toplevel        : asylum.ram_1r1w_2c
+    parameters      :
+      - WIDTH=8
+      - DEPTH=256
+
+  #---------------------------------------
+  syn_sbi_ram_32x8b_read_async :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of sbi_ram (sbi_ram_wrapper), 32x8 bits, asynchronous read
+    toplevel        : asylum.sbi_ram_wrapper
+    parameters      :
+      - DEPTH=32
+      - SYNC_READ=false
+
+  #---------------------------------------
+  syn_sbi_ram_256x8b_read_sync :
+  #---------------------------------------
+    << : *syn
+    description     : Synthesis (Artix-7, sky130) of sbi_ram (sbi_ram_wrapper), 256x8 bits, synchronous read
+    toplevel        : asylum.sbi_ram_wrapper
+    parameters      :
+      - DEPTH=256
+      - SYNC_READ=true
+
+  #---------------------------------------
+  # tb_ram : compiled once per configuration (WIDTH, DEPTH, SYNC_READ),
+  # scenarios chosen at run time (TESTS_LIST, empty : build and
+  # elaboration only).
+  # Reference configuration : 16x8 bits, synchronous read :
+  # sim_16x8b_sync_read (build only) and one sim_16x8b_sync_read_<test>
+  # target per scenario ; the other configurations run the whole list.
+  # Each target repeats the generics of its configuration : FuseSoC
+  # replaces the parameters list of an inherited target.
+  #---------------------------------------
+  sim_16x8b_sync_read: &sim_ram
+    << : *default
+    description     : All RAMs and sbi_ram, synchronous read (WIDTH=8, DEPTH=16) - build only (scenarios of TESTS_LIST)
+    filesets_append :
+      - files_sim
+    toplevel        : tb_ram
+    parameters      :
+      - TESTS_LIST
+      - WIDTH=8
+      - DEPTH=16
+      - SYNC_READ=true
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options :
+          - "$(GHDL_ANALYZE_OPTION)"
+          - "-Wall"
+          - "-frelaxed"
+        run_options     :
+          - "$(GHDL_RUN_OPTION)"
+          - "--ieee-asserts=disable"
+
+  #---------------------------------------
+  sim_16x8b_sync_read_write_read:
+  #---------------------------------------
+    << : *sim_ram
+    description     : All RAMs and sbi_ram, synchronous read (WIDTH=8, DEPTH=16), scenario write_read
+    parameters      :
+      - TESTS_LIST=write_read
+      - WIDTH=8
+      - DEPTH=16
+      - SYNC_READ=true
+
+  #---------------------------------------
+  sim_16x8b_sync_read_read_during_write:
+  #---------------------------------------
+    << : *sim_ram
+    description     : All RAMs and sbi_ram, synchronous read (WIDTH=8, DEPTH=16), scenario read_during_write
+    parameters      :
+      - TESTS_LIST=read_during_write
+      - WIDTH=8
+      - DEPTH=16
+      - SYNC_READ=true
+
+  #---------------------------------------
+  sim_16x8b_sync_read_clock_enable:
+  #---------------------------------------
+    << : *sim_ram
+    description     : All RAMs and sbi_ram, synchronous read (WIDTH=8, DEPTH=16), scenario clock_enable
+    parameters      :
+      - TESTS_LIST=clock_enable
+      - WIDTH=8
+      - DEPTH=16
+      - SYNC_READ=true
+
+  #---------------------------------------
+  sim_16x8b_sync_read_read_enable:
+  #---------------------------------------
+    << : *sim_ram
+    description     : All RAMs and sbi_ram, synchronous read (WIDTH=8, DEPTH=16), scenario read_enable
+    parameters      :
+      - TESTS_LIST=read_enable
+      - WIDTH=8
+      - DEPTH=16
+      - SYNC_READ=true
+
+  #---------------------------------------
+  sim_16x8b_sync_read_write_enable:
+  #---------------------------------------
+    << : *sim_ram
+    description     : All RAMs and sbi_ram, synchronous read (WIDTH=8, DEPTH=16), scenario write_enable
+    parameters      :
+      - TESTS_LIST=write_enable
+      - WIDTH=8
+      - DEPTH=16
+      - SYNC_READ=true
+
+  #---------------------------------------
+  sim_16x8b_sync_read_random:
+  #---------------------------------------
+    << : *sim_ram
+    description     : All RAMs and sbi_ram, synchronous read (WIDTH=8, DEPTH=16), scenario random
+    parameters      :
+      - TESTS_LIST=random
+      - WIDTH=8
+      - DEPTH=16
+      - SYNC_READ=true
+
+  #---------------------------------------
+  sim_16x8b_sync_read_sbi_write_read:
+  #---------------------------------------
+    << : *sim_ram
+    description     : All RAMs and sbi_ram, synchronous read (WIDTH=8, DEPTH=16), scenario sbi_write_read
+    parameters      :
+      - TESTS_LIST=sbi_write_read
+      - WIDTH=8
+      - DEPTH=16
+      - SYNC_READ=true
+
+  #---------------------------------------
+  sim_16x8b_sync_read_sbi_aliasing:
+  #---------------------------------------
+    << : *sim_ram
+    description     : All RAMs and sbi_ram, synchronous read (WIDTH=8, DEPTH=16), scenario sbi_aliasing
+    parameters      :
+      - TESTS_LIST=sbi_aliasing
+      - WIDTH=8
+      - DEPTH=16
+      - SYNC_READ=true
+
+  #---------------------------------------
+  sim_16x8b_sync_read_sbi_name:
+  #---------------------------------------
+    << : *sim_ram
+    description     : All RAMs and sbi_ram, synchronous read (WIDTH=8, DEPTH=16), scenario sbi_name
+    parameters      :
+      - TESTS_LIST=sbi_name
+      - WIDTH=8
+      - DEPTH=16
+      - SYNC_READ=true
+
+  #---------------------------------------
+  sim_16x8b_async_read:
+  #---------------------------------------
+    << : *sim_ram
+    description     : All RAMs and sbi_ram, asynchronous read (WIDTH=8, DEPTH=16), every scenario
+    parameters      :
+      - TESTS_LIST=write_read,read_during_write,clock_enable,read_enable,write_enable,random,sbi_write_read,sbi_aliasing,sbi_name
+      - WIDTH=8
+      - DEPTH=16
+      - SYNC_READ=false
+
+  #---------------------------------------
+  sim_64x32b_sync_read:
+  #---------------------------------------
+    << : *sim_ram
+    description     : All RAMs and sbi_ram, synchronous read (WIDTH=32, DEPTH=64), every scenario
+    parameters      :
+      - TESTS_LIST=write_read,read_during_write,clock_enable,read_enable,write_enable,random,sbi_write_read,sbi_aliasing,sbi_name
+      - WIDTH=32
+      - DEPTH=64
+      - SYNC_READ=true
+
+  #---------------------------------------
+  sim_64x32b_async_read:
+  #---------------------------------------
+    << : *sim_ram
+    description     : All RAMs and sbi_ram, asynchronous read (WIDTH=32, DEPTH=64), every scenario
+    parameters      :
+      - TESTS_LIST=write_read,read_during_write,clock_enable,read_enable,write_enable,random,sbi_write_read,sbi_aliasing,sbi_name
+      - WIDTH=32
+      - DEPTH=64
+      - SYNC_READ=false
+
+  #---------------------------------------
+  # tb_ram_2rw_2c : compiled once per configuration (WIDTH, DEPTH),
+  # clock periods and scenarios chosen at run time (CLK0_PERIOD,
+  # CLK1_PERIOD in ns, TESTS_LIST).
+  # Reference configuration : 16x8 bits, clk0 10 ns, clk1 13 ns
+  # (unrelated clocks) : sim_2rw_2c_16x8b (build only) and one
+  # sim_2rw_2c_16x8b_<test> target per scenario ; the other
+  # configurations run the whole list. Generated.
+  #---------------------------------------
+  sim_2rw_2c_16x8b: &sim_ram_2rw_2c
+    << : *default
+    description     : ram_2rw_2c (WIDTH=8, DEPTH=16), clk0 10 ns, clk1 13 ns - build only (scenarios of TESTS_LIST)
+    filesets_append :
+      - files_sim_2rw_2c
+    toplevel        : tb_ram_2rw_2c
+    parameters      :
+      - TESTS_LIST
+      - WIDTH=8
+      - DEPTH=16
+      - CLK0_PERIOD=10
+      - CLK1_PERIOD=13
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options :
+          - "$(GHDL_ANALYZE_OPTION)"
+          - "-Wall"
+          - "-frelaxed"
+        run_options     :
+          - "$(GHDL_RUN_OPTION)"
+          - "--ieee-asserts=disable"
+
+  #---------------------------------------
+  sim_2rw_2c_16x8b_port0:
+  #---------------------------------------
+    << : *sim_ram_2rw_2c
+    description     : ram_2rw_2c (WIDTH=8, DEPTH=16), clk0 10 ns, clk1 13 ns - port 0 alone, every address written then read back
+    parameters      :
+      - TESTS_LIST=port0
+      - WIDTH=8
+      - DEPTH=16
+      - CLK0_PERIOD=10
+      - CLK1_PERIOD=13
+
+  #---------------------------------------
+  sim_2rw_2c_16x8b_port1:
+  #---------------------------------------
+    << : *sim_ram_2rw_2c
+    description     : ram_2rw_2c (WIDTH=8, DEPTH=16), clk0 10 ns, clk1 13 ns - port 1 alone, every address written then read back
+    parameters      :
+      - TESTS_LIST=port1
+      - WIDTH=8
+      - DEPTH=16
+      - CLK0_PERIOD=10
+      - CLK1_PERIOD=13
+
+  #---------------------------------------
+  sim_2rw_2c_16x8b_cross:
+  #---------------------------------------
+    << : *sim_ram_2rw_2c
+    description     : ram_2rw_2c (WIDTH=8, DEPTH=16), clk0 10 ns, clk1 13 ns - words written by one port read back by the other (other clock), both directions
+    parameters      :
+      - TESTS_LIST=cross
+      - WIDTH=8
+      - DEPTH=16
+      - CLK0_PERIOD=10
+      - CLK1_PERIOD=13
+
+  #---------------------------------------
+  sim_2rw_2c_16x8b_concurrent:
+  #---------------------------------------
+    << : *sim_ram_2rw_2c
+    description     : ram_2rw_2c (WIDTH=8, DEPTH=16), clk0 10 ns, clk1 13 ns - both ports busy at the same time on their own clocks (writes, then reads of the words of the other port)
+    parameters      :
+      - TESTS_LIST=concurrent
+      - WIDTH=8
+      - DEPTH=16
+      - CLK0_PERIOD=10
+      - CLK1_PERIOD=13
+
+  #---------------------------------------
+  sim_2rw_2c_16x8b_read_during_write:
+  #---------------------------------------
+    << : *sim_ram_2rw_2c
+    description     : ram_2rw_2c (WIDTH=8, DEPTH=16), clk0 10 ns, clk1 13 ns - one port reads the same word on every cycle while the other writes every other address, both directions
+    parameters      :
+      - TESTS_LIST=read_during_write
+      - WIDTH=8
+      - DEPTH=16
+      - CLK0_PERIOD=10
+      - CLK1_PERIOD=13
+
+  #---------------------------------------
+  sim_2rw_2c_16x8b_enables:
+  #---------------------------------------
+    << : *sim_ram_2rw_2c
+    description     : ram_2rw_2c (WIDTH=8, DEPTH=16), clk0 10 ns, clk1 13 ns - cke and cs block the accesses, rdata held by a write and between reads, each port
+    parameters      :
+      - TESTS_LIST=enables
+      - WIDTH=8
+      - DEPTH=16
+      - CLK0_PERIOD=10
+      - CLK1_PERIOD=13
+
+  #---------------------------------------
+  sim_2rw_2c_64x32b_port0_fast:
+  #---------------------------------------
+    << : *sim_ram_2rw_2c
+    description     : ram_2rw_2c (WIDTH=32, DEPTH=64), clk0 7 ns, clk1 23 ns (port 0 faster), every scenario
+    parameters      :
+      - TESTS_LIST=port0,port1,cross,concurrent,read_during_write,enables
+      - WIDTH=32
+      - DEPTH=64
+      - CLK0_PERIOD=7
+      - CLK1_PERIOD=23
+
+  #---------------------------------------
+  sim_2rw_2c_16x8b_port1_fast:
+  #---------------------------------------
+    << : *sim_ram_2rw_2c
+    description     : ram_2rw_2c (WIDTH=8, DEPTH=16), clk0 23 ns, clk1 7 ns (port 1 faster), every scenario
+    parameters      :
+      - TESTS_LIST=port0,port1,cross,concurrent,read_during_write,enables
+      - WIDTH=8
+      - DEPTH=16
+      - CLK0_PERIOD=23
+      - CLK1_PERIOD=7
+
+  #---------------------------------------
+  sim_2rw_2c_2x8b_same_clock:
+  #---------------------------------------
+    << : *sim_ram_2rw_2c
+    description     : ram_2rw_2c (WIDTH=8, DEPTH=2), same clock period (10 ns, edges together), every scenario
+    parameters      :
+      - TESTS_LIST=port0,port1,cross,concurrent,read_during_write,enables
+      - WIDTH=8
+      - DEPTH=2
+      - CLK0_PERIOD=10
+      - CLK1_PERIOD=10
+
+  #---------------------------------------
+  # tb_ram_1r1w_2c : compiled once per configuration (WIDTH, DEPTH),
+  # clock periods and scenarios chosen at run time. Reference
+  # configuration : 16x8 bits, clk0 10 ns, clk1 13 ns (unrelated clocks) :
+  # sim_1r1w_2c_16x8b (build only) and one sim_1r1w_2c_16x8b_<test> target
+  # per scenario ; the other configurations run the whole list. Generated.
+  #---------------------------------------
+  sim_1r1w_2c_16x8b: &sim_ram_1r1w_2c
+    << : *default
+    description     : ram_1r1w_2c (WIDTH=8, DEPTH=16), clk0 10 ns, clk1 13 ns - build only (scenarios of TESTS_LIST)
+    filesets_append :
+      - files_sim_1r1w_2c
+    toplevel        : tb_ram_1r1w_2c
+    parameters      :
+      - TESTS_LIST
+      - WIDTH=8
+      - DEPTH=16
+      - CLK0_PERIOD=10
+      - CLK1_PERIOD=13
+    default_tool    : ghdl
+    tools :
+      ghdl :
+        analyze_options :
+          - "$(GHDL_ANALYZE_OPTION)"
+          - "-Wall"
+          - "-frelaxed"
+        run_options     :
+          - "$(GHDL_RUN_OPTION)"
+          - "--ieee-asserts=disable"
+
+  #---------------------------------------
+  sim_1r1w_2c_16x8b_write_read:
+  #---------------------------------------
+    << : *sim_ram_1r1w_2c
+    description     : ram_1r1w_2c (WIDTH=8, DEPTH=16), clk0 10 ns, clk1 13 ns - every address written on clk0, read back on clk1, two patterns
+    parameters      :
+      - TESTS_LIST=write_read
+      - WIDTH=8
+      - DEPTH=16
+      - CLK0_PERIOD=10
+      - CLK1_PERIOD=13
+
+  #---------------------------------------
+  sim_1r1w_2c_16x8b_concurrent:
+  #---------------------------------------
+    << : *sim_ram_1r1w_2c
+    description     : ram_1r1w_2c (WIDTH=8, DEPTH=16), clk0 10 ns, clk1 13 ns - both ports busy at the same time on their clocks, every word read after its write
+    parameters      :
+      - TESTS_LIST=concurrent
+      - WIDTH=8
+      - DEPTH=16
+      - CLK0_PERIOD=10
+      - CLK1_PERIOD=13
+
+  #---------------------------------------
+  sim_1r1w_2c_16x8b_read_during_write:
+  #---------------------------------------
+    << : *sim_ram_1r1w_2c
+    description     : ram_1r1w_2c (WIDTH=8, DEPTH=16), clk0 10 ns, clk1 13 ns - the read port reads the same word on every cycle while the write port writes every other address
+    parameters      :
+      - TESTS_LIST=read_during_write
+      - WIDTH=8
+      - DEPTH=16
+      - CLK0_PERIOD=10
+      - CLK1_PERIOD=13
+
+  #---------------------------------------
+  sim_1r1w_2c_16x8b_enables:
+  #---------------------------------------
+    << : *sim_ram_1r1w_2c
+    description     : ram_1r1w_2c (WIDTH=8, DEPTH=16), clk0 10 ns, clk1 13 ns - cke0 / we0 block the write, cke1 / re1 block the read (rdata held)
+    parameters      :
+      - TESTS_LIST=enables
+      - WIDTH=8
+      - DEPTH=16
+      - CLK0_PERIOD=10
+      - CLK1_PERIOD=13
+
+  #---------------------------------------
+  sim_1r1w_2c_64x32b_write_fast:
+  #---------------------------------------
+    << : *sim_ram_1r1w_2c
+    description     : ram_1r1w_2c (WIDTH=32, DEPTH=64), clk0 7 ns, clk1 23 ns (write faster), every scenario
+    parameters      :
+      - TESTS_LIST=write_read,concurrent,read_during_write,enables
+      - WIDTH=32
+      - DEPTH=64
+      - CLK0_PERIOD=7
+      - CLK1_PERIOD=23
+
+  #---------------------------------------
+  sim_1r1w_2c_16x8b_read_fast:
+  #---------------------------------------
+    << : *sim_ram_1r1w_2c
+    description     : ram_1r1w_2c (WIDTH=8, DEPTH=16), clk0 23 ns, clk1 7 ns (read faster), every scenario
+    parameters      :
+      - TESTS_LIST=write_read,concurrent,read_during_write,enables
+      - WIDTH=8
+      - DEPTH=16
+      - CLK0_PERIOD=23
+      - CLK1_PERIOD=7
+
+  #---------------------------------------
+  sim_1r1w_2c_2x8b_same_clock:
+  #---------------------------------------
+    << : *sim_ram_1r1w_2c
+    description     : ram_1r1w_2c (WIDTH=8, DEPTH=2), same clock period (10 ns, edges together), every scenario
+    parameters      :
+      - TESTS_LIST=write_read,concurrent,read_during_write,enables
+      - WIDTH=8
+      - DEPTH=2
+      - CLK0_PERIOD=10
+      - CLK1_PERIOD=10
+
+scripts:
+
+  #---------------------------------------
+  # pre_run hook of lint_ghdl_synth_* (cwd = work_root)
+  #---------------------------------------
+  ghdl_synth :
+    cmd : [bash, ghdl_synth.sh]
+
+  #---------------------------------------
+  # pre_run hook of syn_* (cwd = work_root)
+  #---------------------------------------
+  yosys_synth :
+    cmd : [bash, yosys_synth.sh]
+
+parameters :
+
+  TESTS_LIST :
+    description : Scenarios run in sequence, separated by ',' (names in sim/ram/tb_ram_tests_pkg.vhd), empty = build only
+    datatype    : str
+    default     : ""
+    paramtype   : generic
+
+  WIDTH :
+    description : Word width (tb_ram, tb_ram_2rw_2c, ram_1r1w, ram_2r1w, ram_1rw, ram_2rw_2c)
+    datatype    : int
+    default     : 8
+    paramtype   : generic
+
+  DEPTH :
+    description : Number of words, power of 2 (>= 16 for tb_ram, >= 2 for tb_ram_2rw_2c)
+    datatype    : int
+    default     : 16
+    paramtype   : generic
+
+  SYNC_READ :
+    description : Synchronous (registered) read, sbi_ram with one wait state
+    datatype    : bool
+    default     : false
+    paramtype   : generic
+
+  CLK0_PERIOD :
+    description : Period of the clock of port 0 (tb_ram_2rw_2c) or of the write port (tb_ram_1r1w_2c), ns
+    datatype    : int
+    default     : 10
+    paramtype   : generic
+
+  CLK1_PERIOD :
+    description : Period of the clock of port 1 (tb_ram_2rw_2c) or of the read port (tb_ram_1r1w_2c), ns
+    datatype    : int
+    default     : 13
+    paramtype   : generic
+
+# Next lines is a pragma, don't modify
+#<PROVIDER_BEGIN>
+provider  :
+  name    : github
+  user    : deuskane
+  repo    : asylum-component-ram
+  version : asylum-component-ram-1.3.0
+ #version : c435689101ba5a67ea9d10ae35b0548fbe4ce8c3
+#<PROVIDER_END>
